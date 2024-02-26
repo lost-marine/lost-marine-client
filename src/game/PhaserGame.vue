@@ -8,22 +8,16 @@ import io from 'socket.io-client';
 // Save the current scene instance
 const scene = ref();
 const game = ref();
-const emit = defineEmits(['current-active-scene']);
+const player = ref();
+const emit = defineEmits(['current-active-scene','change-scene']);
 let socket = io('http://70.12.246.252:3000');
 
+export interface BaseSocketData {
+    code: number;
+    data : undefined | object    
+}
+
 onMounted(() => {
-
-    const test = {
-        code : 1001,
-        data : {
-            nickname : "서희"
-        }
-    }
-
-    socket.emit('',test, (response: any) => {
-        console.log(response);
-    });
-
     game.value = StartGame('game-container');
     
     EventBus.on('current-scene-ready', (scene_instance: Phaser.Scene) => {
@@ -32,6 +26,23 @@ onMounted(() => {
     
         scene.value = scene_instance;
     
+    });
+
+    EventBus.on('start-game', (nickname: string) => {
+        const param = {
+            code: 1001,
+            data: {
+                nickname: nickname
+            }
+        }
+        socket.emit('',param, (response: BaseSocketData ) => {
+            console.log(response);
+            emit('change-scene');
+        });
+    })
+
+    EventBus.on('change-scene', () => {
+        emit('change-scene');
     });
 
 });

@@ -15,7 +15,7 @@ export class Game extends Scene {
     }
 
     create() {
-        this.platform = this.physics.add.staticImage(0, 1000, 'platform').setOrigin(0, 0).refreshBody();
+        this.platform = this.physics.add.staticImage(0, 0, 'platform').setOrigin(0, 0).refreshBody();
         // 스프라이트를 추가합니다.
         this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'sunfish');
 
