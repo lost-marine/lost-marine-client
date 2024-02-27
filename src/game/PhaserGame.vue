@@ -8,7 +8,6 @@ import io from 'socket.io-client';
 // Save the current scene instance
 const scene = ref();
 const game = ref();
-const player = ref();
 const emit = defineEmits(['current-active-scene','change-scene']);
 let socket = io('http://70.12.246.252:3000');
 

@@ -7,8 +7,9 @@ export class MainMenu extends Scene {
     logo: GameObjects.Image;
     logoTween: Phaser.Tweens.Tween | null;
     startButton: GameObjects.Text;
-    nameInput: Phaser.GameObjects.DOMElement | null;
+    nameInput: Phaser.GameObjects.DOMElement;
     inputElement: HTMLInputElement;
+    startGame: Function
 
     constructor ()
     {
@@ -29,29 +30,35 @@ export class MainMenu extends Scene {
 
         this.logo = this.add.image(this.cameras.main.width /2, this.cameras.main.height / 2, 'logo').setDepth(100);
 
-        // nameInput 의 type은 HTMLInputElement 가 되어야 하므로... 잘 맞춰봐요...
-        // docuement.createElement('input'); 이 안된다면 타입 가드로 타입을 맞추면 됩니다.
+        this.startGame = () => {
+            const nickname = this.inputElement.value;
+            if( nickname.length > 0 ) {
+                EventBus.emit('start-game',nickname) // src/game/PhaserGame.vue 에서  EventBus.on() 으로 emit을 수신
+            }else {
+               window.alert("이름을 입력해주세요.")
+            }
+        }
         // name form
         this.inputElement = document.createElement('input');
         this.inputElement.type = 'text';
         this.inputElement.style.fontSize = '32px';
-        this.inputElement.placeholder = 'Enter your name';
+        this.inputElement.placeholder = '닉네임을 입력해주세요.';
 
         // Phaser DOMElement로 추가
-        this.nameInput = this.add.dom(this.cameras.main.width / 2, 600, this.inputElement)
+        this.nameInput = this.add.dom(this.cameras.main.width / 2, 480, this.inputElement)
             .setOrigin(0.5, 0.5).setDepth(100);
         
-        // 입력 필드에 포커스 주기 (예시)
-        // this.nameInput!.focus(); // null check ?. => undefined 체크 !. -> null 체크,  만약 앞이 null이면 . < 이거 연산은 하지 않음
+        this.inputElement.focus(); 
 
-        // // 입력 값 읽기 (예시)
-        // this.nameInput!.addEventListener('input', () => {
-        //     const name = this.nameInput.value;
-        //     console.log(`Name: ${name}`);
-        // });
+        this.inputElement.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                // 엔터 키를 누를 때의 처리
+                this.startGame();
+            }
+        });
 
         // 게임시작 버튼 추가
-        this.startButton = this.add.text(this.cameras.main.width /2, 550, 'Start Game', {
+        this.startButton = this.add.text(this.cameras.main.width /2, 550, '게임 시작', {
             fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
             align: 'center'
@@ -78,13 +85,5 @@ export class MainMenu extends Scene {
 
         this.scene.start('Game');
     }
-
-    startGame() {
-        const nickname = "서히";
-        if( nickname.length > 0 ) {
-            EventBus.emit('start-game',nickname) // src/game/PhaserGame.vue 에서  EventBus.on() 으로 emit을 수신
-        }else {
-            window.alert("이름을 입력해주세요.")
-        }
-    }
+    
 }
