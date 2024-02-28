@@ -10,7 +10,7 @@ export class Game extends Scene {
     }
 
     preload() {
-        this.load.spritesheet("sunfish", "assets/Sunfish_move_right.png", {
+        this.load.spritesheet("sunfish", "assets/Sunfish_move.png", {
             frameWidth: 192,
             frameHeight: 192,
         });
