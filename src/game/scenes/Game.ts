@@ -59,10 +59,10 @@ export class Game extends Scene {
 
         // 대각선 이동 및 회전 각도 결정
         if (this.cursors.left.isDown && this.cursors.up.isDown) {
-            moveAngle = -135; // 왼쪽 위
+            moveAngle = 45; // 왼쪽 위
             direction = 7;
         } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
-            moveAngle = 135; // 왼쪽 아래
+            moveAngle = -45; // 왼쪽 아래
             direction = 5;
         } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
             moveAngle = -45; // 오른쪽 위
@@ -71,18 +71,18 @@ export class Game extends Scene {
             moveAngle = 45; // 오른쪽 아래
             direction = 3;
         } else if (this.cursors.left.isDown) {
-            moveAngle = 180; // 왼쪽
+            moveAngle = 0; // 왼쪽
             direction = 6;
         } else if (this.cursors.right.isDown) {
             moveAngle = 0; // 오른쪽
             direction = 2;
         } else if (this.cursors.up.isDown) {
-            this.player.scaleX = 1;
-            moveAngle = -90; // 위
+            // 위 (보고 있는 좌우방향에 따라 다른 각도를 설정합니다)
+            moveAngle = this.player.flipX ? 90 : -90;
             direction = 0;
         } else if (this.cursors.down.isDown) {
-            this.player.scaleX = 1;
-            moveAngle = 90; // 아래
+            // 아래 (보고 있는 좌우방향에 따라 다른 각도를 설정합니다)
+            moveAngle = this.player.flipX ? -90 : 90;
             direction = 4;
         }
 
@@ -91,13 +91,15 @@ export class Game extends Scene {
             this.player.angle = moveAngle;
             // 왼쪽으로 이동
             if (this.cursors.left.isDown) {
+                // this.player.scaleX = -1 보다는 flipX 프로퍼티를 활용하는 게 불필요한 계산을 피하는 방법입니다.
+                this.player.setFlipX(true); // 스프라이트를 좌우로 뒤집음
                 this.player.x -= moveSpeed; // 스프라이트를 왼쪽으로 이동
-                // this.player.scaleX = -1; // 스프라이트의 기본 방향
             }
             // 오른쪽으로 이동
             else if (this.cursors.right.isDown) {
+                // this.player.scaleX = 1 보다는 flipX 프로퍼티를 활용하는 게 불필요한 계산을 피하는 방법입니다.
+                this.player.setFlipX(false); // 스프라이트의 기본 방향
                 this.player.x += moveSpeed; // 스프라이트를 오른쪽으로 이동
-                // this.player.scaleX = -1; // 스프라이트를 좌우로 뒤집음
             }
 
             // 위로 이동
