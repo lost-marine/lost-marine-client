@@ -56,7 +56,7 @@ onMounted(() => {
                     direction,
                 },
             };
-            // socket.emit("", param);
+            socket.emit("", param);
         }
     );
 });

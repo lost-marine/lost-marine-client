@@ -5,6 +5,7 @@ export class Game extends Scene {
     player: Phaser.Physics.Arcade.Sprite;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     platform: Phaser.GameObjects.Image;
+    direction: number;
     constructor() {
         super("Game");
     }
@@ -24,8 +25,9 @@ export class Game extends Scene {
             .refreshBody();
         // 스프라이트를 추가합니다.
         this.player = this.physics.add.sprite(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY,
+            // 시작 좌표를 정수로 만듭니다.
+            Math.trunc(this.cameras.main.centerX),
+            Math.trunc(this.cameras.main.centerY),
             "sunfish"
         );
 
@@ -50,40 +52,49 @@ export class Game extends Scene {
         }
 
         EventBus.emit("current-scene-ready", this);
+
+        this.direction = 0;
+        EventBus.emit(
+            "player-moved",
+            this.player.x,
+            this.player.y,
+            this.direction
+        );
     }
 
     update() {
+        // moveSpeed는 정수여야 합니다.
         const moveSpeed = 5;
         let moveAngle = 0;
-        let direction;
+        this.direction = this.player.flipX ? 6 : 2;
 
         // 대각선 이동 및 회전 각도 결정
         if (this.cursors.left.isDown && this.cursors.up.isDown) {
             moveAngle = 45; // 왼쪽 위
-            direction = 7;
+            this.direction = 7;
         } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
             moveAngle = -45; // 왼쪽 아래
-            direction = 5;
+            this.direction = 5;
         } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
             moveAngle = -45; // 오른쪽 위
-            direction = 1;
+            this.direction = 1;
         } else if (this.cursors.right.isDown && this.cursors.down.isDown) {
             moveAngle = 45; // 오른쪽 아래
-            direction = 3;
+            this.direction = 3;
         } else if (this.cursors.left.isDown) {
             moveAngle = 0; // 왼쪽
-            direction = 6;
+            this.direction = 6;
         } else if (this.cursors.right.isDown) {
             moveAngle = 0; // 오른쪽
-            direction = 2;
+            this.direction = 2;
         } else if (this.cursors.up.isDown) {
             // 위 (보고 있는 좌우방향에 따라 다른 각도를 설정합니다)
             moveAngle = this.player.flipX ? 90 : -90;
-            direction = 0;
+            this.direction = 0;
         } else if (this.cursors.down.isDown) {
             // 아래 (보고 있는 좌우방향에 따라 다른 각도를 설정합니다)
             moveAngle = this.player.flipX ? -90 : 90;
-            direction = 4;
+            this.direction = 4;
         }
 
         // 플레이어의 움직임을 처리합니다.
@@ -110,10 +121,23 @@ export class Game extends Scene {
             else if (this.cursors.down.isDown) {
                 this.player.y += moveSpeed; // 스프라이트를 아래로 이동
             }
-        }
 
-        // 플레이어의 움직임 결과를 처리합니다.
-        EventBus.emit("player-moved", this.player.x, this.player.y, direction);
+            // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+            const isArrowKeyPressed =
+                this.cursors.left.isDown ||
+                this.cursors.right.isDown ||
+                this.cursors.up.isDown ||
+                this.cursors.down.isDown;
+
+            if (isArrowKeyPressed) {
+                EventBus.emit(
+                    "player-moved",
+                    this.player.x,
+                    this.player.y,
+                    this.direction
+                );
+            }
+        }
     }
 
     changeScene() {
