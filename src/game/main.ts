@@ -9,8 +9,14 @@ import { Preloader } from './scenes/Preloader';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 1024,
-    height: 768,
+    width: '100',
+    height: '100',
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        parent: 'game-container',
+        width: '100%',
+        height: '100%'
+    },
     physics:{
         default: "arcade",
         arcade: {
@@ -19,6 +25,9 @@ const config: Phaser.Types.Core.GameConfig = {
         }
     },
     parent: 'game-container',
+    dom: {
+        createContainer: true // DOM 요소의 컨테이너를 자동으로 생성하도록 설정
+    },
     backgroundColor: '#028af8',
     scene: [
         Boot,
