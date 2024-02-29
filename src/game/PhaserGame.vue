@@ -2,10 +2,9 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { EventBus } from "./EventBus";
 import StartGame from "./main";
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import io from "socket.io-client";
 import type { Creature } from "./types";
-import type { EnterResponse } from "./services/player/types";
 
 // Save the current scene instance
 const scene = ref();
@@ -17,9 +16,9 @@ const userInfo = ref<Creature>();
 onMounted(() => {
   game.value = StartGame("game-container");
 
-  EventBus.on("current-scene-ready", (scene_instance: Phaser.Scene) => {
-    emit("current-active-scene", scene_instance);
-    scene.value = scene_instance;
+  EventBus.on("current-scene-ready", (sceneInstance: Phaser.Scene) => {
+    emit("current-active-scene", sceneInstance);
+    scene.value = sceneInstance;
   });
 
   EventBus.on("change-scene", () => {
@@ -42,7 +41,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (game.value) {
+  if (game.value !== null) {
     game.value.destroy(true);
     game.value = null;
   }

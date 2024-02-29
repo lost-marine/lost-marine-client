@@ -1,4 +1,4 @@
-import { GameObjects, Scene } from "phaser";
+import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
 import { enterGame } from "../services/player";
 import { inputNameElement } from "../components/inputNameElement";
@@ -10,13 +10,13 @@ export class MainMenu extends Scene {
   startButton: GameObjects.Text;
   nameInput: Phaser.GameObjects.DOMElement;
   inputElement: HTMLInputElement;
-  startGame: Function;
+  startGame: () => void;
 
   constructor() {
     super("MainMenu");
   }
 
-  create() {
+  create(): void {
     this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // 이미지의 스케일을 게임의 크기에 맞추기
@@ -65,7 +65,7 @@ export class MainMenu extends Scene {
       .setInteractive()
       .setOrigin(0.5)
       .setDepth(100)
-      .on("pointerdown", () => this.startGame());
+      .on("pointerdown", this.startGame);
 
     // 버튼에 마우스 오버/아웃 효과
     this.startButton.on("pointerover", () => {
@@ -78,8 +78,8 @@ export class MainMenu extends Scene {
     EventBus.emit("current-scene-ready", this);
   }
 
-  changeScene() {
-    if (this.logoTween) {
+  changeScene(): void {
+    if (this.logoTween != null) {
       this.logoTween.stop();
       this.logoTween = null;
     }
