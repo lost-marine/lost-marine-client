@@ -1,6 +1,7 @@
-import { type GameObjects, Scene } from "phaser";
-
+import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
+import { enterGame } from "../services/player";
+import { inputNameElement } from "../components/inputNameElement";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -28,19 +29,13 @@ export class MainMenu extends Scene {
 
     this.logo = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, "logo").setDepth(100);
 
+    // name form
+    this.inputElement = inputNameElement();
+
     this.startGame = () => {
       const nickname = this.inputElement.value;
-      if (nickname.length > 0) {
-        EventBus.emit("start-game", nickname); // src/game/PhaserGame.vue 에서  EventBus.on() 으로 emit을 수신
-      } else {
-        window.alert("이름을 입력해주세요.");
-      }
+      enterGame(nickname);
     };
-    // name form
-    this.inputElement = document.createElement("input");
-    this.inputElement.type = "text";
-    this.inputElement.style.fontSize = "32px";
-    this.inputElement.placeholder = "닉네임을 입력해주세요.";
 
     // Phaser DOMElement로 추가
     this.nameInput = this.add
@@ -70,9 +65,7 @@ export class MainMenu extends Scene {
       .setInteractive()
       .setOrigin(0.5)
       .setDepth(100)
-      .on("pointerdown", () => {
-        this.startGame();
-      });
+      .on("pointerdown", this.startGame);
 
     // 버튼에 마우스 오버/아웃 효과
     this.startButton.on("pointerover", () => {
@@ -86,7 +79,7 @@ export class MainMenu extends Scene {
   }
 
   changeScene(): void {
-    if (this.logoTween !== null) {
+    if (this.logoTween != null) {
       this.logoTween.stop();
       this.logoTween = null;
     }

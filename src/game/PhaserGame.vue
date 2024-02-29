@@ -4,6 +4,7 @@ import { EventBus } from "./EventBus";
 import StartGame from "./main";
 import type Phaser from "phaser";
 import io from "socket.io-client";
+import type { Creature } from "./types";
 
 // Save the current scene instance
 const scene = ref();
@@ -12,40 +13,12 @@ const emit = defineEmits(["current-active-scene", "change-scene"]);
 const socket = io("http://70.12.246.252:3000");
 const userInfo = ref<Creature>();
 
-export interface BaseSocketData {
-  code: number;
-  data: undefined | object;
-}
-
-export interface Creature {
-  playerId: number;
-  startX: number;
-  startY: number;
-  direction: number;
-}
-export interface LoginResponse {
-  data: Creature;
-}
-
 onMounted(() => {
   game.value = StartGame("game-container");
 
   EventBus.on("current-scene-ready", (sceneInstance: Phaser.Scene) => {
     emit("current-active-scene", sceneInstance);
     scene.value = sceneInstance;
-  });
-
-  EventBus.on("start-game", (nickname: string) => {
-    const param = {
-      code: 1001,
-      data: {
-        nickname
-      }
-    };
-    socket.emit("", param, (response: LoginResponse) => {
-      userInfo.value = response.data;
-      emit("change-scene");
-    });
   });
 
   EventBus.on("change-scene", () => {
