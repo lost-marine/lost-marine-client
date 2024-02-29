@@ -17,5 +17,7 @@ module.exports = {
     extraFileExtensions: [".vue"] // .vue 파일 확장자 추가
   },
   plugins: ["vue"],
-  rules: {}
+  rules: {
+    "@typescript-eslint/consistent-type-definitions": "off"
+  }
 };

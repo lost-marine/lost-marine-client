@@ -1,4 +1,4 @@
-export const inputNameElement = () => {
+export const inputNameElement = (): HTMLInputElement => {
   const inputElement = document.createElement("input");
   inputElement.type = "text";
   inputElement.style.fontSize = "32px";

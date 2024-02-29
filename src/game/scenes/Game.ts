@@ -61,8 +61,7 @@ export class Game extends Scene {
   update(): void {
     // moveSpeed는 정수여야 합니다.
     const moveSpeed = 5;
-    let moveAngle = 0;
-    //this.direction = this.player.flipX ? DIRECTION.LEFT : DIRECTION.RIGHT;
+
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     this.direction = direction;
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);

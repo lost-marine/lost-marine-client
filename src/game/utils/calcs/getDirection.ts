@@ -21,7 +21,7 @@ export const getDirection = (isFlipX: boolean, cursors: Phaser.Types.Input.Keybo
   let directionY: AxisDirectionType = -1;
 
   // x축 방향을 계산합니다.
-  if (cursors.left.isDown == cursors.right.isDown) {
+  if (cursors.left.isDown === cursors.right.isDown) {
     // 왼쪽 키와 오른쪽 키를 같이 눌렀거나, 둘다 누르지 않았을 경우에는 X축 움직임이 없음.
     directionX = DIRECTION_X.NONE;
   } else if (cursors.left.isDown) {
@@ -31,7 +31,7 @@ export const getDirection = (isFlipX: boolean, cursors: Phaser.Types.Input.Keybo
   }
 
   // y축 방향을 계산합니다.
-  if (cursors.down.isDown == cursors.up.isDown) {
+  if (cursors.down.isDown === cursors.up.isDown) {
     // 위쪽 키와 아래쪽 키를 같이 눌렀거나, 둘다 누르지 않았을 경우에는 y축 움직임이 없음.
     directionY = DIRECTION_Y.NONE;
   } else if (cursors.down.isDown) {
