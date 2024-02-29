@@ -6,7 +6,7 @@
 current_branch=$(git branch --show-current)
 
 # 직접 push가 차단된 브랜치들
-protected_branches="developer master main"
+protected_branches="develop master main release"
 
 for branch in $protected_branches; do
   if [ "$current_branch" = "$branch" ]; then
