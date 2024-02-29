@@ -1,4 +1,5 @@
-import App from './App.vue';
-import { createApp } from 'vue';
+import App from "./App.vue";
+import { createApp, type Component, type ComputedOptions, type MethodOptions } from "vue";
 
-createApp(App).mount('#app');
+const TypedAssertedApp = App as Component<any, any, any, ComputedOptions, MethodOptions, any, any>;
+createApp(TypedAssertedApp).mount("#app");

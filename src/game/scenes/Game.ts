@@ -10,7 +10,7 @@ export class Game extends Scene {
     super("Game");
   }
 
-  preload() {
+  preload(): void {
     this.load.spritesheet("sunfish", "assets/Sunfish_move.png", {
       frameWidth: 192,
       frameHeight: 192
@@ -18,7 +18,7 @@ export class Game extends Scene {
     this.load.image("platform", "assets/bg.png");
   }
 
-  create() {
+  create(): void {
     this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
     // 스프라이트를 추가합니다.
     this.player = this.physics.add.sprite(
@@ -44,7 +44,7 @@ export class Game extends Scene {
     this.player.anims.play("swim");
 
     // 커서 키를 생성합니다.
-    if (this.input && this.input.keyboard) {
+    if (this.input?.keyboard !== null) {
       this.cursors = this.input.keyboard.createCursorKeys();
     }
 
@@ -54,7 +54,7 @@ export class Game extends Scene {
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
   }
 
-  update() {
+  update(): void {
     // moveSpeed는 정수여야 합니다.
     const moveSpeed = 5;
     let moveAngle = 0;
@@ -90,7 +90,7 @@ export class Game extends Scene {
     }
 
     // 플레이어의 움직임을 처리합니다.
-    if (this.cursors) {
+    if (this.cursors !== null) {
       this.player.angle = moveAngle;
       // 왼쪽으로 이동
       if (this.cursors.left.isDown) {
@@ -124,7 +124,7 @@ export class Game extends Scene {
     }
   }
 
-  changeScene() {
+  changeScene(): void {
     this.scene.start("GameOver");
   }
 }
