@@ -1,19 +1,11 @@
-import { DIRECTION } from "@/game/constants/direction";
-import type { DirectionType } from "@/game/types/direction";
+import { DIRECTION, DIRECTION_X, DIRECTION_Y } from "@/game/constants/direction";
+import type { AxisDirectionType, DirectionType } from "@/game/types/direction";
 
-const DIRECTION_X = {
-  NONE: -1,
-  LEFT: 0,
-  RIGHT: 1
+type getDirectionResult = {
+  direction: DirectionType;
+  directionX: AxisDirectionType;
+  directionY: AxisDirectionType;
 };
-
-const DIRECTION_Y = {
-  NONE: -1,
-  DOWN: 0,
-  UP: 1
-};
-
-type AxisDirectionType = (typeof DIRECTION_X)[keyof typeof DIRECTION_X];
 
 /**
  * 나의 direction을 구하는 함수입니다.
@@ -21,9 +13,10 @@ type AxisDirectionType = (typeof DIRECTION_X)[keyof typeof DIRECTION_X];
  * cursor가 입력된 값에 따라 direction(0~7)을 반환합니다.
  * @param isFlipX
  * @param cursors
- * @returns
+ * @direction =s
  */
-export const getDirection = (isFlipX: boolean, cursors: Phaser.Types.Input.Keyboard.CursorKeys): DirectionType => {
+export const getDirection = (isFlipX: boolean, cursors: Phaser.Types.Input.Keyboard.CursorKeys): getDirectionResult => {
+  let direction: DirectionType = DIRECTION.RIGHT;
   let directionX: AxisDirectionType = -1;
   let directionY: AxisDirectionType = -1;
 
@@ -55,38 +48,51 @@ export const getDirection = (isFlipX: boolean, cursors: Phaser.Types.Input.Keybo
         case DIRECTION_Y.NONE:
           // x축과 y축 방향 모두 없을 경우에는 기존 방향을 따라갑니다.
           if (isFlipX) {
-            return DIRECTION.LEFT;
+            direction = DIRECTION.LEFT;
+            break;
           } else {
-            return DIRECTION.RIGHT;
+            direction = DIRECTION.RIGHT;
+            break;
           }
         case DIRECTION_Y.DOWN:
-          return DIRECTION.BOTTOM;
+          direction = DIRECTION.BOTTOM;
+          break;
         case DIRECTION_Y.UP:
-          return DIRECTION.TOP;
+          direction = DIRECTION.TOP;
+          break;
       }
       break;
     case DIRECTION_X.LEFT:
       // x축이 왼쪽일 경우
       switch (directionY) {
         case DIRECTION_Y.NONE:
-          return DIRECTION.LEFT;
+          direction = DIRECTION.LEFT;
+          break;
         case DIRECTION_Y.DOWN:
-          return DIRECTION.BOTTOM_LEFT;
+          direction = DIRECTION.BOTTOM_LEFT;
+          break;
         case DIRECTION_Y.UP:
-          return DIRECTION.TOP_LEFT;
+          direction = DIRECTION.TOP_LEFT;
+          break;
       }
       break;
     case DIRECTION_X.RIGHT:
       // x축이 오쪽일 경우
       switch (directionY) {
         case DIRECTION_Y.NONE:
-          return DIRECTION.RIGHT;
+          direction = DIRECTION.RIGHT;
+          break;
         case DIRECTION_Y.DOWN:
-          return DIRECTION.BOTTOM_RIGHT;
+          direction = DIRECTION.BOTTOM_RIGHT;
+          break;
         case DIRECTION_Y.UP:
-          return DIRECTION.TOP_RIGHT;
+          direction = DIRECTION.TOP_RIGHT;
+          break;
       }
   }
-
-  return DIRECTION.RIGHT;
+  return {
+    direction,
+    directionX,
+    directionY
+  };
 };

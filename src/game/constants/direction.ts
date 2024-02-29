@@ -8,3 +8,15 @@ export const DIRECTION = {
   LEFT: 6,
   TOP_LEFT: 7
 } as const;
+
+export const DIRECTION_X = {
+  NONE: 0,
+  LEFT: -1,
+  RIGHT: 1
+};
+
+export const DIRECTION_Y = {
+  NONE: 0,
+  DOWN: 1,
+  UP: -1
+};

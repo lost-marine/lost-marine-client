@@ -54,7 +54,7 @@ export class Game extends Scene {
 
     EventBus.emit("current-scene-ready", this);
 
-    this.direction = 0;
+    this.direction = DIRECTION.RIGHT;
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
   }
 
@@ -63,45 +63,22 @@ export class Game extends Scene {
     const moveSpeed = 5;
     let moveAngle = 0;
     //this.direction = this.player.flipX ? DIRECTION.LEFT : DIRECTION.RIGHT;
-    const newDirection = getDirection(this.player.flipX, this.cursors);
-    this.direction = newDirection;
-    const { angle, shouldFlipX } = directionToAngleFlip(newDirection, this.player.flipX);
+    const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
+    this.direction = direction;
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
 
     this.player.setFlipX(shouldFlipX);
     this.player.angle = angle;
-    // 플레이어
-    // 플레이어의 움직임을 처리합니다.
-    // if (this.cursors) {
-    //   this.player.angle = moveAngle;
-    //   // 왼쪽으로 이동
-    //   if (this.cursors.left.isDown) {
-    //     this.player.setFlipX(true); // 스프라이트를 좌우로 뒤집음
-    //     this.player.x -= moveSpeed; // 스프라이트를 왼쪽으로 이동
-    //   }
-    //   // 오른쪽으로 이동
-    //   else if (this.cursors.right.isDown) {
-    //     // this.player.scaleX = 1 보다는 flipX 프로퍼티를 활용하는 게 불필요한 계산을 피하는 방법입니다.
-    //     this.player.setFlipX(false); // 스프라이트의 기본 방향
-    //     this.player.x += moveSpeed; // 스프라이트를 오른쪽으로 이동
-    //   }
+    this.player.x += moveSpeed * directionX;
+    this.player.y += moveSpeed * directionY;
 
-    //   // 위로 이동
-    //   if (this.cursors.up.isDown) {
-    //     this.player.y -= moveSpeed; // 스프라이트를 위로 이동
-    //   }
-    //   // 아래로 이동
-    //   else if (this.cursors.down.isDown) {
-    //     this.player.y += moveSpeed; // 스프라이트를 아래로 이동
-    //   }
+    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+    const isArrowKeyPressed =
+      this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
 
-    //   // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
-    //   const isArrowKeyPressed =
-    //     this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
-
-    //   if (isArrowKeyPressed) {
-    //     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
-    //   }
-    // }
+    if (isArrowKeyPressed) {
+      EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+    }
   }
 
   changeScene() {
