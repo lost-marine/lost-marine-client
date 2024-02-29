@@ -8,27 +8,62 @@ import io from "socket.io-client";
 // Save the current scene instance
 const scene = ref();
 const game = ref();
-const emit = defineEmits(["current-active-scene"]);
+const emit = defineEmits(["current-active-scene", "change-scene"]);
 const socket = io("http://70.12.246.252:3000");
+const userInfo = ref<Creature>();
+
+export interface BaseSocketData {
+  code: number;
+  data: undefined | object;
+}
+
+export interface Creature {
+  playerId: number;
+  startX: number;
+  startY: number;
+  direction: number;
+}
+export interface LoginResponse {
+  data: Creature;
+}
 
 onMounted(() => {
-  const test = {
-    code: 1001,
-    data: {
-      nickname: "서희"
-    }
-  };
-
-  socket.emit("", test, (response: any) => {
-    console.log(response);
-  });
-
   game.value = StartGame("game-container");
 
   EventBus.on("current-scene-ready", (sceneInstance: Phaser.Scene) => {
     emit("current-active-scene", sceneInstance);
-
     scene.value = sceneInstance;
+  });
+
+  EventBus.on("start-game", (nickname: string) => {
+    const param = {
+      code: 1001,
+      data: {
+        nickname
+      }
+    };
+    socket.emit("", param, (response: LoginResponse) => {
+      userInfo.value = response.data;
+      emit("change-scene");
+    });
+  });
+
+  EventBus.on("change-scene", () => {
+    emit("change-scene");
+  });
+
+  // 참가자 본인 위치 전송
+  EventBus.on("player-moved", (startX: number, startY: number, direction: number) => {
+    const param = {
+      code: 2001,
+      data: {
+        playerId: userInfo.value?.playerId,
+        startX,
+        startY,
+        direction
+      }
+    };
+    socket.emit("", param);
   });
 });
 
