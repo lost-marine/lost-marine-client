@@ -19,5 +19,6 @@ module.exports = {
   plugins: ["vue"],
   rules: {
     "@typescript-eslint/consistent-type-definitions": "off"
-  }
+  },
+  ignorePatterns: ["vite/"]
 };
