@@ -23,6 +23,7 @@
   "scripts": {
     "dev": "cd client && vite --config vite/config.dev.mjs",
     "build": "cd client && vite build --config vite/config.prod.mjs",
+    "postinstall": "husky install",
     "format": "prettier --cache --write .",
     "lint": "eslint --cache --fix --ext .ts,.vue client/src/"
   },
