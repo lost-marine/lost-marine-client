@@ -47,6 +47,12 @@ export class Game extends Scene {
     // 스프라이트 애니메이션을 재생합니다.
     this.player.anims.play("swim");
 
+    // 카메라 뷰를 관리합니다.
+    this.cameras.main.setBounds(0, 0, 2688, 1536, true);
+    this.physics.world.setBounds(0, 0, 2688, 1536);
+    // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
+    this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
+
     // 커서 키를 생성합니다.
     if (this.input?.keyboard !== null) {
       this.cursors = this.input.keyboard.createCursorKeys();
