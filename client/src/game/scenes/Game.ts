@@ -100,9 +100,6 @@ export class Game extends Scene {
     this.player.angle = angle;
     this.playerContainer.x += moveSpeed * directionX;
     this.playerContainer.y += moveSpeed * directionY;
-    // const graphics = this.add.graphics();
-    // graphics.lineStyle(2, 0xffffff); // 선 스타일 설정
-    // graphics.strokeRect(this.playerContainer.x, this.playerContainer.y, this.playerContainer.width, this.playerContainer.height);
 
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
