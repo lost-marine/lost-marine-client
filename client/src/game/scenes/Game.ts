@@ -4,6 +4,7 @@ import { DIRECTION } from "@/game/constants/direction";
 import type { DirectionType } from "@/game/types/direction";
 import { getDirection } from "../utils/calcs/getDirection";
 import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
+import global from "@/game/utils/global";
 
 export class Game extends Scene {
   player: Phaser.Physics.Arcade.Sprite;
@@ -27,8 +28,8 @@ export class Game extends Scene {
     // 스프라이트를 추가합니다.
     this.player = this.physics.add.sprite(
       // 시작 좌표를 정수로 만듭니다.
-      Math.trunc(this.cameras.main.centerX),
-      Math.trunc(this.cameras.main.centerY),
+      Math.trunc(global.userInfo?.startX ?? this.cameras.main.centerX),
+      Math.trunc(global.userInfo?.startY ?? this.cameras.main.centerY),
       "sunfish"
     );
 
