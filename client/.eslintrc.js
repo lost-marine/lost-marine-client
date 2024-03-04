@@ -13,7 +13,7 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     ecmaVersion: "latest",
     sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.app.json", "./tsconfig.node.json"],
+    project: ["./client/tsconfig.json", "./client/tsconfig.app.json", "./client/tsconfig.node.json"],
     extraFileExtensions: [".vue"] // .vue 파일 확장자 추가
   },
   plugins: ["vue"],
