@@ -44,7 +44,7 @@ export class Game extends Scene {
       g.playerList.forEach((player) => {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
-          this.player = this.addPlayer(player);
+          this.player = newPlayer;
         }
       });
     }
@@ -100,7 +100,7 @@ export class Game extends Scene {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
         case "player-entered":
-          this.addPlayer(event.data as Player);
+          this.onReceivedEnter(event.data as Player);
           break;
       }
     }
@@ -120,5 +120,11 @@ export class Game extends Scene {
     const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
     this.playerList.push(newPlayer);
     return newPlayer;
+  }
+
+  onReceivedEnter(newPlayer: Player): void {
+    if (newPlayer.playerId !== g.myInfo?.playerId) {
+      this.addPlayer(newPlayer);
+    }
   }
 }
