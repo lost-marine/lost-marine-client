@@ -44,7 +44,7 @@ export class Game extends Scene {
       g.playerList.forEach((player) => {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
-          this.player = this.addPlayer(player);
+          this.player = newPlayer;
         }
       });
     }
@@ -96,19 +96,17 @@ export class Game extends Scene {
   }
 
   handleSocketEvent(): void {
-    console.log("handleSocketEvent");
     while (g.eventQueue.length > 0) {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
         case "player-entered":
-          this.addPlayer(event.data as Player);
+          this.onReceivedEnter(event.data as Player);
           break;
       }
     }
   }
 
   setPlayersPosition(): void {
-    console.log("setPlayersPosition");
     g.playerList.forEach((player) => {
       const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
       if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
@@ -119,11 +117,16 @@ export class Game extends Scene {
   }
 
   addPlayer(playerInfo: Player): PlayerSprite {
-    console.log("addPlayer");
     const newPlayer = new PlayerSprite(this, playerInfo.startX, playerInfo.startY, "sunfish", playerInfo.playerId);
     newPlayer.setCollideWorldBounds(true);
     newPlayer.anims.play("swim");
     this.playerList.push(newPlayer);
     return newPlayer;
+  }
+
+  onReceivedEnter(newPlayer: Player): void {
+    if (newPlayer.playerId !== g.myInfo?.playerId) {
+      this.addPlayer(newPlayer);
+    }
   }
 }
