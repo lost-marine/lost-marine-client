@@ -4,12 +4,16 @@ import { DIRECTION } from "@/game/constants/direction";
 import type { DirectionType } from "@/game/types/direction";
 import { getDirection } from "../utils/calcs/getDirection";
 import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
+import g from "../utils/global";
+import { PlayerSprite } from "../services/player/classes";
+import type { Player } from "../types/player";
 
 export class Game extends Scene {
-  player: Phaser.Physics.Arcade.Sprite;
+  player: PlayerSprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
+  playerList: PlayerSprite[];
   constructor() {
     super("Game");
   }
@@ -24,16 +28,7 @@ export class Game extends Scene {
 
   create(): void {
     this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
-    // 스프라이트를 추가합니다.
-    this.player = this.physics.add.sprite(
-      // 시작 좌표를 정수로 만듭니다.
-      Math.trunc(this.cameras.main.centerX),
-      Math.trunc(this.cameras.main.centerY),
-      "sunfish"
-    );
-
-    this.player.setCollideWorldBounds(true);
-    // 스프라이트에 애니메이션을 추가합니다.
+    this.playerList = [];
     this.anims.create({
       key: "swim",
       frames: this.anims.generateFrameNumbers("sunfish", {
@@ -44,8 +39,15 @@ export class Game extends Scene {
       repeat: -1
     });
 
-    // 스프라이트 애니메이션을 재생합니다.
-    this.player.anims.play("swim");
+    // 스프라이트를 추가합니다.
+    if (g.myInfo !== null) {
+      g.playerList.forEach((player) => {
+        const newPlayer = this.addPlayer(player);
+        if (g.myInfo?.playerId === newPlayer.playerId) {
+          this.player = newPlayer;
+        }
+      });
+    }
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
@@ -66,7 +68,8 @@ export class Game extends Scene {
 
   update(): void {
     // moveSpeed는 정수여야 합니다.
-    const moveSpeed = 5;
+    this.handleSocketEvent();
+    const moveSpeed = 10;
 
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     this.direction = direction;
@@ -82,11 +85,48 @@ export class Game extends Scene {
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
 
     if (isArrowKeyPressed) {
-      EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+      // EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
     }
+
+    // this.setPlayersPosition();
   }
 
   changeScene(): void {
     this.scene.start("GameOver");
+  }
+
+  handleSocketEvent(): void {
+    while (g.eventQueue.length > 0) {
+      const event = g.eventQueue.dequeue();
+      switch (event.key) {
+        case "player-entered":
+          this.onReceivedEnter(event.data as Player);
+          break;
+      }
+    }
+  }
+
+  setPlayersPosition(): void {
+    g.playerList.forEach((player) => {
+      const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
+      if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
+        targetPlayer.x = player.startX;
+        targetPlayer.y = player.startY;
+      }
+    });
+  }
+
+  addPlayer(playerInfo: Player): PlayerSprite {
+    const newPlayer = new PlayerSprite(this, playerInfo.startX, playerInfo.startY, "sunfish", playerInfo.playerId);
+    newPlayer.setCollideWorldBounds(true);
+    newPlayer.anims.play("swim");
+    this.playerList.push(newPlayer);
+    return newPlayer;
+  }
+
+  onReceivedEnter(newPlayer: Player): void {
+    if (newPlayer.playerId !== g.myInfo?.playerId) {
+      this.addPlayer(newPlayer);
+    }
   }
 }
