@@ -2,6 +2,8 @@ import { reactive } from "vue";
 import { io } from "socket.io-client";
 import type { Player } from "../types/player";
 import { onReceviedEnter } from "../services/player";
+import type { PlayerPositionInfo } from "../services/player/types/position";
+import { onReceviedOthersPositionSync } from "../services/player/feat/movement";
 
 export const state = reactive({
   connected: false
@@ -21,5 +23,10 @@ socket.on("disconnect", () => {
 });
 
 socket.on("enter", (newPlayer: Player) => {
+  console.log(newPlayer);
   onReceviedEnter(newPlayer);
+});
+
+socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
+  onReceviedOthersPositionSync(positionsInfo);
 });

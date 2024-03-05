@@ -17,6 +17,8 @@ export const enterGame = (nickname: string): void => {
 };
 
 export const onReceviedEnter = (newPlayer: Player): void => {
+  // 서버에서 받은 newPlayer는 isFlipX가 없기 때문
+  newPlayer.isFlipX = false;
   g.playerList.push(newPlayer);
   g.eventQueue.append({
     key: "player-entered",

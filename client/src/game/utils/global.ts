@@ -7,10 +7,10 @@ type GlobalStore = {
   playerList: Player[];
   eventQueue: Queue<BaseSocketObject>;
 };
-const global: GlobalStore = {
+const g: GlobalStore = {
   myInfo: null,
   playerList: [],
   eventQueue: new Queue<BaseSocketObject>()
 };
 
-export default global;
+export default g;

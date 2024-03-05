@@ -1,9 +1,11 @@
 import type { Creature } from "./creature";
+import type { DirectionType } from "./direction";
 
 export type Player = {
   startX: number;
   startY: number;
-  direction: number;
+  isFlipX: boolean;
+  direction: DirectionType;
   health: number;
   type: number;
   power: number;
