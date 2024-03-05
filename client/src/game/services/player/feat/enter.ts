@@ -18,4 +18,8 @@ export const enterGame = (nickname: string): void => {
 
 export const onReceviedEnter = (newPlayer: Player): void => {
   g.playerList.push(newPlayer);
+  g.eventQueue.append({
+    key: "player-entered",
+    data: newPlayer
+  });
 };

@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
 import type { Player } from "../types/player";
-import g from "./global";
+import { onReceviedEnter } from "../services/player";
 
 export const state = reactive({
   connected: false
@@ -21,9 +21,5 @@ socket.on("disconnect", () => {
 });
 
 socket.on("enter", (newPlayer: Player) => {
-  g.playerList.push(newPlayer);
-  g.eventQueue.append({
-    key: "player-entered",
-    data: newPlayer
-  });
+  onReceviedEnter(newPlayer);
 });
