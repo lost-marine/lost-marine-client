@@ -1,10 +1,16 @@
-import type { Creature } from "../types";
+import { Queue } from "queue-typescript";
+import type { Player } from "../types/player";
+import type { BaseSocketObject } from "../types/socket";
 
 type GlobalStore = {
-  userInfo: null | Creature;
+  myInfo: null | Player;
+  playerList: Player[];
+  eventQueue: Queue<BaseSocketObject>;
 };
 const global: GlobalStore = {
-  userInfo: null
+  myInfo: null,
+  playerList: [],
+  eventQueue: new Queue<BaseSocketObject>()
 };
 
 export default global;

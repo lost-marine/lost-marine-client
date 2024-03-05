@@ -4,13 +4,17 @@ import { DIRECTION } from "@/game/constants/direction";
 import type { DirectionType } from "@/game/types/direction";
 import { getDirection } from "../utils/calcs/getDirection";
 import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
+import g from "../utils/global";
+import { PlayerSprite } from "../services/player/classes";
+import type { Player } from "../types/player";
 
 export class Game extends Scene {
-  player: Phaser.Physics.Arcade.Sprite;
+  player: PlayerSprite;
   playerContainer: Phaser.GameObjects.Container;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
+  playerList: PlayerSprite[];
   constructor() {
     super("Game");
   }
@@ -25,6 +29,7 @@ export class Game extends Scene {
 
   create(): void {
     this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
+    this.playerList = [];
 
     // 스프라이트를 추가합니다.
     this.player = this.physics.add.sprite(0, 0, "sunfish");
@@ -38,8 +43,15 @@ export class Game extends Scene {
       frameRate: 3,
       repeat: -1
     });
-    // 스프라이트 애니메이션을 재생합니다.
-    this.player.anims.play("swim");
+    // 스프라이트를 추가합니다.
+    if (g.myInfo !== null) {
+      g.playerList.forEach((player) => {
+        const newPlayer = this.addPlayer(player);
+        if (g.myInfo?.playerId === newPlayer.playerId) {
+          this.player = this.addPlayer(player);
+        }
+      });
+    }
 
     // 플레이어 닉네임을 설정합니다.
     this.player.name = "nickname";
@@ -90,7 +102,8 @@ export class Game extends Scene {
 
   update(): void {
     // moveSpeed는 정수여야 합니다.
-    const moveSpeed = 5;
+    this.handleSocketEvent();
+    const moveSpeed = 10;
 
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     this.direction = direction;
@@ -106,11 +119,45 @@ export class Game extends Scene {
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
 
     if (isArrowKeyPressed) {
-      EventBus.emit("player-moved", this.playerContainer.x, this.playerContainer.y, this.direction);
+      // EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
     }
+
+    // this.setPlayersPosition();
   }
 
   changeScene(): void {
     this.scene.start("GameOver");
+  }
+
+  handleSocketEvent(): void {
+    console.log("handleSocketEvent");
+    while (g.eventQueue.length > 0) {
+      const event = g.eventQueue.dequeue();
+      switch (event.key) {
+        case "player-entered":
+          this.addPlayer(event.data as Player);
+          break;
+      }
+    }
+  }
+
+  setPlayersPosition(): void {
+    console.log("setPlayersPosition");
+    g.playerList.forEach((player) => {
+      const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
+      if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
+        targetPlayer.x = player.startX;
+        targetPlayer.y = player.startY;
+      }
+    });
+  }
+
+  addPlayer(playerInfo: Player): PlayerSprite {
+    console.log("addPlayer");
+    const newPlayer = new PlayerSprite(this, playerInfo.startX, playerInfo.startY, "sunfish", playerInfo.playerId);
+    newPlayer.setCollideWorldBounds(true);
+    newPlayer.anims.play("swim");
+    this.playerList.push(newPlayer);
+    return newPlayer;
   }
 }
