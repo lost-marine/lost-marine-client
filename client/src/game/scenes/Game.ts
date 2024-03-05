@@ -44,7 +44,7 @@ export class Game extends Scene {
       g.playerList.forEach((player) => {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
-          this.player = this.addPlayer(player);
+          this.player = newPlayer;
         }
       });
     }
@@ -96,19 +96,17 @@ export class Game extends Scene {
   }
 
   handleSocketEvent(): void {
-    console.log("handleSocketEvent");
     while (g.eventQueue.length > 0) {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
         case "player-entered":
-          this.addPlayer(event.data as Player);
+          this.onReveivedEnter(event.data as Player);
           break;
       }
     }
   }
 
   setPlayersPosition(): void {
-    console.log("setPlayersPosition");
     g.playerList.forEach((player) => {
       const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
       if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
@@ -125,5 +123,12 @@ export class Game extends Scene {
     newPlayer.anims.play("swim");
     this.playerList.push(newPlayer);
     return newPlayer;
+  }
+
+  onReveivedEnter(newPlayer: Player): void {
+    console.log(newPlayer.playerId, g.myInfo?.playerId);
+    if (newPlayer.playerId !== g.myInfo?.playerId) {
+      this.addPlayer(newPlayer);
+    }
   }
 }
