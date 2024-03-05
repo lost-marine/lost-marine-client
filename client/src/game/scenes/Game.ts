@@ -100,7 +100,7 @@ export class Game extends Scene {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
         case "player-entered":
-          this.onReveivedEnter(event.data as Player);
+          this.onReceivedEnter(event.data as Player);
           break;
       }
     }
@@ -124,7 +124,7 @@ export class Game extends Scene {
     return newPlayer;
   }
 
-  onReveivedEnter(newPlayer: Player): void {
+  onReceivedEnter(newPlayer: Player): void {
     if (newPlayer.playerId !== g.myInfo?.playerId) {
       this.addPlayer(newPlayer);
     }
