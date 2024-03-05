@@ -11,6 +11,7 @@ export class Game extends Scene {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
+  layer: Phaser.Tilemaps.TilemapLayer;
   constructor() {
     super("Game");
   }
@@ -20,15 +21,18 @@ export class Game extends Scene {
       frameWidth: 192,
       frameHeight: 192
     });
-    this.load.image("platform", "assets/bg.png");
+    this.load.image("bg", "assets/bg.png");
+    this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
+    this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
+    this.load.tilemapTiledJSON("map", "assets/map.json");
   }
 
   create(): void {
-    this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
+    // 배경화면을 그립니다.
+    this.platform = this.physics.add.staticImage(0, 0, "bg").setOrigin(0, 0).refreshBody();
 
-    // 스프라이트를 추가합니다.
+    // 캐릭터를 추가합니다.
     this.player = this.physics.add.sprite(0, 0, "sunfish");
-    // 스프라이트에 애니메이션을 추가합니다.
     this.anims.create({
       key: "swim",
       frames: this.anims.generateFrameNumbers("sunfish", {
@@ -38,7 +42,6 @@ export class Game extends Scene {
       frameRate: 3,
       repeat: -1
     });
-    // 스프라이트 애니메이션을 재생합니다.
     this.player.anims.play("swim");
 
     // 플레이어 닉네임을 설정합니다.
@@ -70,6 +73,30 @@ export class Game extends Scene {
     this.physics.world.enable(this.playerContainer);
     const playerContainerBody = this.playerContainer.body as Phaser.Physics.Arcade.Body;
     playerContainerBody.setCollideWorldBounds(true);
+    playerContainerBody.setBounce(0.2);
+
+    // 맵(지형지물)을 그립니다.
+    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
+    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
+    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+
+    // 레이어 생성
+    let createLayerResult: Phaser.Tilemaps.TilemapLayer | null = null;
+    if (tilesetForest !== null && tilesetOcean !== null) {
+      createLayerResult = map.createLayer("Tile Layer 1", [tilesetForest, tilesetOcean], 0, 0);
+    } else {
+      console.error("One or more tilesets failed to load. Layer creation aborted.");
+    }
+    if (createLayerResult !== null) {
+      this.layer = createLayerResult;
+    }
+    console.assert(this.layer !== undefined, "Layer not created");
+
+    // 레이어 세팅
+    if (this.layer !== undefined && this.playerContainer !== undefined) {
+      // this.layer.setCollisionByProperty({ collides: true }, true);
+      console.log(this.physics.add.collider(this.playerContainer, this.layer));
+    }
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
