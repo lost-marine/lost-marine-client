@@ -27,10 +27,12 @@
     "format": "prettier --cache --write .",
     "lint": "eslint --cache --fix --ext .ts,.vue client/src/"
   },
-  "dependencies": {},
+  "dependencies": {
+    "queue-typescript": "^1.0.1"
+  },
   "devDependencies": {
-    "husky": "8.0.3",
     "eslint": "^8.57.0",
+    "husky": "8.0.3",
     "prettier": "^3.2.5",
     "vite": "^5.0.11"
   }

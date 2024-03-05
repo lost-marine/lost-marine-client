@@ -1,9 +1,10 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
-import g from "@/game/utils/global";
+import type { Player } from "../types/player";
+import g from "./global";
+
 export const state = reactive({
-  connected: false,
-  userInfo: g.userInfo
+  connected: false
 });
 
 // "undefined" means the URL will be computed from the `window.location` object
@@ -17,4 +18,12 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
   state.connected = false;
+});
+
+socket.on("enter", (newPlayer: Player) => {
+  g.playerList.push(newPlayer);
+  g.eventQueue.append({
+    key: "player-entered",
+    data: newPlayer
+  });
 });
