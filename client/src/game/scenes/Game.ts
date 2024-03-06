@@ -64,6 +64,16 @@ export class Game extends Scene {
 
     this.direction = DIRECTION.RIGHT;
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+
+    // 플랑크톤을 그립니다.
+    const planktonGraphics = this.add.graphics();
+
+    g.planktonList.forEach((plankton) => {
+      planktonGraphics.lineStyle(3, 0x006400, 1.0);
+      planktonGraphics.fillStyle(0x00ff00, 1.0);
+      planktonGraphics.fillCircle(plankton.startX, plankton.startY, 5);
+      planktonGraphics.strokeCircle(plankton.startX, plankton.startY, 8);
+    });
   }
 
   update(): void {
