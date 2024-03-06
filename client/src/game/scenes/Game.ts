@@ -120,9 +120,15 @@ export class Game extends Scene {
     while (g.eventQueue.length > 0) {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
-        case "player-entered":
+        // 다른 플레이어가 게임방 입장
+        case "player-enter":
           this.onReceivedEnter(event.data as Player);
           break;
+        // 다른 플레이어가 게임방 퇴장
+        case "player-quit":
+          this.onReceivedQuit(event.data as number);
+          break;
+        // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
@@ -130,12 +136,23 @@ export class Game extends Scene {
     }
   }
 
+  // 다른 플레이어가 게임방 입장
   onReceivedEnter(newPlayer: Player): void {
     if (newPlayer.playerId !== g.myInfo?.playerId) {
       this.addPlayer(newPlayer);
     }
   }
 
+  // 다른 플레이어가 게임방 퇴장
+  onReceivedQuit(playerId: number): void {
+    if (this.playerList.has(playerId)) {
+      const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.destroy();
+      this.playerList.delete(playerId);
+    }
+  }
+
+  // 다른 플레이어들의 위치 동기화 신호 수신
   onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
     positionsInfo.forEach((player) => {
       const targetPlayer = g.playerMap.get(player.playerId);

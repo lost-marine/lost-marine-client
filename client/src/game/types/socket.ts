@@ -1,4 +1,4 @@
 export type BaseSocketObject = {
   key: string;
-  data: undefined | object;
+  data: undefined | any;
 };
