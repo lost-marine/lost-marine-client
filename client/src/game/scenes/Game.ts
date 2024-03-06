@@ -43,7 +43,7 @@ export class Game extends Scene {
       repeat: -1
     });
 
-    // 스프라이트를 추가합니다.
+    // 플레이어 스프라이트를 추가합니다.
     if (g.myInfo !== null) {
       g.playerList.forEach((player) => {
         const newPlayer = this.addPlayer(player);
@@ -75,12 +75,12 @@ export class Game extends Scene {
     this.handleSocketEvent();
     const moveSpeed = 10;
 
-    const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
+    const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
     this.direction = direction;
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
 
-    this.player.setFlipX(shouldFlipX);
-    this.player.angle = angle;
+    this.player.playerSprite.setFlipX(shouldFlipX);
+    this.player.playerSprite.angle = angle;
     this.player.x += moveSpeed * directionX;
     this.player.y += moveSpeed * directionY;
 
@@ -96,9 +96,7 @@ export class Game extends Scene {
   // 플레이어 추가
 
   addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this, playerInfo.startX, playerInfo.startY, "sunfish", playerInfo.playerId);
-    newPlayer.setCollideWorldBounds(true);
-    newPlayer.anims.play("swim");
+    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
     this.playerList.push(newPlayer);
     return newPlayer;
   }
