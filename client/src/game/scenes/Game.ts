@@ -4,13 +4,16 @@ import { DIRECTION } from "@/game/constants/direction";
 import type { DirectionType } from "@/game/types/direction";
 import { getDirection } from "../utils/calcs/getDirection";
 import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
+import g from "../utils/global";
+import { PlayerSprite } from "../services/player/classes";
+import type { Player } from "../types/player";
 
 export class Game extends Scene {
-  player: Phaser.Physics.Arcade.Sprite;
-  playerContainer: Phaser.GameObjects.Container;
+  player: PlayerSprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
+  playerList: PlayerSprite[];
   layer: Phaser.Tilemaps.TilemapLayer;
   constructor() {
     super("Game");
@@ -28,11 +31,8 @@ export class Game extends Scene {
   }
 
   create(): void {
-    // 배경화면을 그립니다.
+    this.playerList = [];
     this.platform = this.physics.add.staticImage(0, 0, "bg").setOrigin(0, 0).refreshBody();
-
-    // 캐릭터를 추가합니다.
-    this.player = this.physics.add.sprite(0, 0, "sunfish");
     this.anims.create({
       key: "swim",
       frames: this.anims.generateFrameNumbers("sunfish", {
@@ -42,38 +42,16 @@ export class Game extends Scene {
       frameRate: 3,
       repeat: -1
     });
-    this.player.anims.play("swim");
 
-    // 플레이어 닉네임을 설정합니다.
-    this.player.name = "nickname";
-    const nickname: Phaser.GameObjects.Text = this.add.text(0, 0, this.player.name, {
-      fontSize: "16px",
-      fontStyle: "bold",
-      stroke: "#000",
-      strokeThickness: 1
-    });
-
-    // 플레이어 점수를 설정합니다.
-    const score: Phaser.GameObjects.Text = this.add.text(0, 0, "30", {
-      fontSize: "16px",
-      fontStyle: "bold",
-      stroke: "#000",
-      strokeThickness: 1
-    });
-
-    // 플레이어 스프라이트, 닉네임, 점수를 하나의 컨테이너로 관리합니다.
-    nickname.setPosition(this.player.x - nickname.width / 2, this.player.y - this.player.height / 2 - nickname.height * 2);
-    score.setPosition(this.player.x - score.width / 2, this.player.y - this.player.height / 2 - score.height);
-    this.playerContainer = this.add.container(Math.trunc(this.cameras.main.centerX), Math.trunc(this.cameras.main.centerY), [
-      this.player,
-      nickname,
-      score
-    ]);
-    this.playerContainer.setSize(192, 192);
-    this.physics.world.enable(this.playerContainer);
-    const playerContainerBody = this.playerContainer.body as Phaser.Physics.Arcade.Body;
-    playerContainerBody.setCollideWorldBounds(true);
-    playerContainerBody.setBounce(0.2);
+    // 플레이어 스프라이트를 추가합니다.
+    if (g.myInfo !== null) {
+      g.playerList.forEach((player) => {
+        const newPlayer = this.addPlayer(player);
+        if (g.myInfo?.playerId === newPlayer.playerId) {
+          this.player = newPlayer;
+        }
+      });
+    }
 
     // 맵(지형지물)을 그립니다.
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
@@ -90,19 +68,12 @@ export class Game extends Scene {
     if (createLayerResult !== null) {
       this.layer = createLayerResult;
     }
-    console.assert(this.layer !== undefined, "Layer not created");
-
-    // 레이어 세팅
-    if (this.layer !== undefined && this.playerContainer !== undefined) {
-      // this.layer.setCollisionByProperty({ collides: true }, true);
-      console.log(this.physics.add.collider(this.playerContainer, this.layer));
-    }
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
     this.physics.world.setBounds(0, 0, 2688, 1536);
     // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
-    this.cameras.main.startFollow(this.playerContainer, true, 0.5, 0.5);
+    this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
 
     // 커서 키를 생성합니다.
     if (this.input?.keyboard !== null) {
@@ -117,27 +88,63 @@ export class Game extends Scene {
 
   update(): void {
     // moveSpeed는 정수여야 합니다.
-    const moveSpeed = 5;
+    this.handleSocketEvent();
+    const moveSpeed = 10;
 
-    const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
+    const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
     this.direction = direction;
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
 
-    this.player.setFlipX(shouldFlipX);
-    this.player.angle = angle;
-    this.playerContainer.x += moveSpeed * directionX;
-    this.playerContainer.y += moveSpeed * directionY;
+    this.player.playerSprite.setFlipX(shouldFlipX);
+    this.player.playerSprite.angle = angle;
+    this.player.x += moveSpeed * directionX;
+    this.player.y += moveSpeed * directionY;
 
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
 
     if (isArrowKeyPressed) {
-      EventBus.emit("player-moved", this.playerContainer.x, this.playerContainer.y, this.direction);
+      // EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
     }
+
+    // this.setPlayersPosition();
   }
 
   changeScene(): void {
     this.scene.start("GameOver");
+  }
+
+  handleSocketEvent(): void {
+    while (g.eventQueue.length > 0) {
+      const event = g.eventQueue.dequeue();
+      switch (event.key) {
+        case "player-entered":
+          this.onReceivedEnter(event.data as Player);
+          break;
+      }
+    }
+  }
+
+  setPlayersPosition(): void {
+    g.playerList.forEach((player) => {
+      const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
+      if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
+        targetPlayer.x = player.startX;
+        targetPlayer.y = player.startY;
+      }
+    });
+  }
+
+  addPlayer(playerInfo: Player): PlayerSprite {
+    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
+    this.playerList.push(newPlayer);
+    return newPlayer;
+  }
+
+  onReceivedEnter(newPlayer: Player): void {
+    if (newPlayer.playerId !== g.myInfo?.playerId) {
+      this.addPlayer(newPlayer);
+    }
   }
 }

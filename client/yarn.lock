@@ -1872,6 +1872,11 @@ http-errors@2.0.0:
     statuses "2.0.1"
     toidentifier "1.0.1"
 
+husky@8.0.3:
+  version "8.0.3"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-8.0.3.tgz#4936d7212e46d1dea28fef29bb3a108872cd9184"
+  integrity sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
@@ -2118,6 +2123,11 @@ levn@^0.4.1:
   dependencies:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
+
+linked-list-typescript@^1.0.11:
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/linked-list-typescript/-/linked-list-typescript-1.0.15.tgz#faeed93cf9203f102e2158c29edcddda320abe82"
+  integrity sha512-RIyUu9lnJIyIaMe63O7/aFv/T2v3KsMFuXMBbUQCHX+cgtGro86ETDj5ed0a8gQL2+DFjzYYsgVG4I36/cUwgw==
 
 locate-path@^6.0.0:
   version "6.0.0"
@@ -2521,6 +2531,13 @@ queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+
+queue-typescript@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/queue-typescript/-/queue-typescript-1.0.1.tgz#2d7842fc3b3e0e3f33d077887a8f2a5bb0baf460"
+  integrity sha512-tkK08uPfmpPl0cX1WRSU3EoNb/T5zSoZPGkkpfGX4E8QayWvEmLS2cI3pFngNPkNTCU5pCDQ1IwlzN0L5gdFPg==
+  dependencies:
+    linked-list-typescript "^1.0.11"
 
 range-parser@~1.2.1:
   version "1.2.1"

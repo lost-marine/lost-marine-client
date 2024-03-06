@@ -1,6 +1,11 @@
 export type Creature = {
-  playerId: number;
   startX: number;
   startY: number;
+  width: number;
+  height: number;
   direction: number;
+  health: number;
+  type: number;
+  power: number;
+  status: number;
 };
