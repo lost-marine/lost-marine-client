@@ -14,7 +14,8 @@ export class Game extends Scene {
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
   playerList: PlayerSprite[];
-  layer: Phaser.Tilemaps.TilemapLayer;
+  backgroundLayer: Phaser.Tilemaps.TilemapLayer;
+  collisionLayer: Phaser.Tilemaps.TilemapLayer;
   constructor() {
     super("Game");
   }
@@ -27,7 +28,7 @@ export class Game extends Scene {
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
-    this.load.tilemapTiledJSON("map", "assets/map.json");
+    this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
   }
 
   create(): void {
@@ -53,21 +54,8 @@ export class Game extends Scene {
       });
     }
 
-    // 맵(지형지물)을 그립니다.
-    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
-    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
-    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
-
-    // 레이어 생성
-    let createLayerResult: Phaser.Tilemaps.TilemapLayer | null = null;
-    if (tilesetForest !== null && tilesetOcean !== null) {
-      createLayerResult = map.createLayer("Tile Layer 1", [tilesetForest, tilesetOcean], 0, 0);
-    } else {
-      console.error("One or more tilesets failed to load. Layer creation aborted.");
-    }
-    if (createLayerResult !== null) {
-      this.layer = createLayerResult;
-    }
+    // 타일 맵을 그립니다.
+    this.createTilemap();
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
@@ -82,6 +70,7 @@ export class Game extends Scene {
 
     EventBus.emit("current-scene-ready", this);
 
+    // 기본 방향을 설정하고 초기 생성 위치를 보낼 필요가 있을까요?
     this.direction = DIRECTION.RIGHT;
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
   }
@@ -89,16 +78,17 @@ export class Game extends Scene {
   update(): void {
     // moveSpeed는 정수여야 합니다.
     this.handleSocketEvent();
-    const moveSpeed = 10;
+    // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
+    const moveSpeed = 900;
 
-    const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
+    const { direction, directionX, directionY } = getDirection(this.player.characterSprite.flipX, this.cursors);
     this.direction = direction;
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.characterSprite.flipX);
 
-    this.player.playerSprite.setFlipX(shouldFlipX);
-    this.player.playerSprite.angle = angle;
-    this.player.x += moveSpeed * directionX;
-    this.player.y += moveSpeed * directionY;
+    this.player.characterSprite.setFlipX(shouldFlipX);
+    this.player.characterSprite.angle = angle;
+
+    this.player.move(moveSpeed * directionX, moveSpeed * directionY);
 
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
@@ -146,5 +136,28 @@ export class Game extends Scene {
     if (newPlayer.playerId !== g.myInfo?.playerId) {
       this.addPlayer(newPlayer);
     }
+  }
+
+  createTilemap(): void {
+    // 맵(지형지물)을 그립니다.
+    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
+    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
+    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+
+    let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    if (tilesetForest !== null && tilesetOcean !== null) {
+      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
+      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    } else {
+      console.error("One or more tilesets failed to load. Layer creation aborted.");
+    }
+    if (createBackgroundLayer !== null && createCollisionLayer !== null) {
+      this.backgroundLayer = createBackgroundLayer;
+      this.collisionLayer = createCollisionLayer;
+    }
+    // 충돌을 설정합니다.
+    this.collisionLayer.setCollisionByProperty({ collides: true });
+    this.physics.add.collider(this.collisionLayer, this.player);
   }
 }
