@@ -9,7 +9,6 @@ import { PlayerSprite } from "../services/player/classes";
 import type { Player } from "../types/player";
 import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
-import { getPlayerByPlayerId } from "../utils/getters/getPlayer";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 
 export class Game extends Scene {
@@ -17,7 +16,7 @@ export class Game extends Scene {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
-  playerList: PlayerSprite[];
+  playerList: Map<number, PlayerSprite>;
   isMoving: boolean;
   constructor() {
     super("Game");
@@ -33,7 +32,7 @@ export class Game extends Scene {
 
   create(): void {
     this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
-    this.playerList = [];
+    this.playerList = new Map<number, PlayerSprite>();
     this.anims.create({
       key: "swim",
       frames: this.anims.generateFrameNumbers("sunfish", {
@@ -46,7 +45,7 @@ export class Game extends Scene {
 
     // 플레이어 스프라이트를 추가합니다.
     if (g.myInfo !== null) {
-      g.playerList.forEach((player) => {
+      g.playerMap.forEach((player) => {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
           this.player = newPlayer;
@@ -103,7 +102,7 @@ export class Game extends Scene {
 
   addPlayer(playerInfo: Player): PlayerSprite {
     const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
-    this.playerList.push(newPlayer);
+    this.playerList.set(playerInfo.playerId, newPlayer);
     return newPlayer;
   }
 
@@ -139,16 +138,18 @@ export class Game extends Scene {
 
   onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
     positionsInfo.forEach((player) => {
-      const targetPlayer = getPlayerByPlayerId(player.playerId);
-      const targetPlayerSprite = this.playerList.find((target) => target.playerId === player.playerId);
-      if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
-        targetPlayerSprite.x = player.startX;
-        targetPlayerSprite.y = player.startY;
-        const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
+      const targetPlayer = g.playerMap.get(player.playerId);
+      if (targetPlayer != null && this.playerList.has(player.playerId)) {
+        const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
+        if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
+          targetPlayerSprite.x = player.startX;
+          targetPlayerSprite.y = player.startY;
+          const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
-        targetPlayer.isFlipX = shouldFlipX;
-        targetPlayerSprite.playerSprite.angle = angle;
-        targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
+          targetPlayer.isFlipX = shouldFlipX;
+          targetPlayerSprite.playerSprite.angle = angle;
+          targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
+        }
       }
     });
   }
