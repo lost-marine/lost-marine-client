@@ -1,20 +1,13 @@
 import type { Creature } from "./creature";
 
 export type Player = {
-  startX: number;
-  startY: number;
-  direction: number;
-  health: number;
-  type: number;
-  power: number;
-  status: number;
   playerId: number;
+  socketId: string;
   nickname: string;
   planktonCount: number;
   microplasticCount: number;
   playerCount: number;
   stopTime: number;
   level: number;
-  experience: number;
-  socketId: string;
+  point: number;
 } & Creature;
