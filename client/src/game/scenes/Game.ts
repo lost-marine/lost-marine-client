@@ -7,6 +7,10 @@ import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
 import g from "../utils/global";
 import { PlayerSprite } from "../services/player/classes";
 import type { Player } from "../types/player";
+import _ from "lodash";
+import { syncMyPosition } from "../services/player/feat/movement";
+import { getPlayerByPlayerId } from "../utils/getters/getPlayer";
+import type { PlayerPositionInfo } from "../services/player/types/position";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -14,6 +18,7 @@ export class Game extends Scene {
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
   playerList: PlayerSprite[];
+  isMoving: boolean;
   constructor() {
     super("Game");
   }
@@ -72,28 +77,45 @@ export class Game extends Scene {
     const moveSpeed = 10;
 
     const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
-    this.direction = direction;
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
 
+    this.direction = direction;
     this.player.playerSprite.setFlipX(shouldFlipX);
     this.player.playerSprite.angle = angle;
     this.player.x += moveSpeed * directionX;
     this.player.y += moveSpeed * directionY;
 
-    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
-
-    if (isArrowKeyPressed) {
-      // EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+    if (isArrowKeyPressed || this.isMoving) {
+      this.sendSyncPosition();
+      // 움직임 상태 여부를 동기화합니다.
+      if (isArrowKeyPressed) {
+        this.isMoving = true;
+      } else {
+        this.isMoving = false;
+      }
     }
-
-    // this.setPlayersPosition();
   }
 
-  changeScene(): void {
-    this.scene.start("GameOver");
+  // 플레이어 추가
+
+  addPlayer(playerInfo: Player): PlayerSprite {
+    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
+    this.playerList.push(newPlayer);
+    return newPlayer;
   }
+
+  sendSyncPosition = _.throttle(() => {
+    syncMyPosition({
+      playerId: this.player.playerId,
+      startX: this.player.x,
+      startY: this.player.y,
+      direction: this.direction,
+      isFlipX: this.player.playerSprite.flipX
+    });
+  }, 30);
 
   handleSocketEvent(): void {
     while (g.eventQueue.length > 0) {
@@ -102,29 +124,36 @@ export class Game extends Scene {
         case "player-entered":
           this.onReceivedEnter(event.data as Player);
           break;
+        case "others-position-sync":
+          this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
+          break;
       }
     }
-  }
-
-  setPlayersPosition(): void {
-    g.playerList.forEach((player) => {
-      const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
-      if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
-        targetPlayer.x = player.startX;
-        targetPlayer.y = player.startY;
-      }
-    });
-  }
-
-  addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
-    this.playerList.push(newPlayer);
-    return newPlayer;
   }
 
   onReceivedEnter(newPlayer: Player): void {
     if (newPlayer.playerId !== g.myInfo?.playerId) {
       this.addPlayer(newPlayer);
     }
+  }
+
+  onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
+    positionsInfo.forEach((player) => {
+      const targetPlayer = getPlayerByPlayerId(player.playerId);
+      const targetPlayerSprite = this.playerList.find((target) => target.playerId === player.playerId);
+      if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
+        targetPlayerSprite.x = player.startX;
+        targetPlayerSprite.y = player.startY;
+        const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
+
+        targetPlayer.isFlipX = shouldFlipX;
+        targetPlayerSprite.playerSprite.angle = angle;
+        targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
+      }
+    });
+  }
+
+  changeScene(): void {
+    this.scene.start("GameOver");
   }
 }
