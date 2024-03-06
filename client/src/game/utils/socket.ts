@@ -23,7 +23,6 @@ socket.on("disconnect", () => {
 });
 
 socket.on("enter", (newPlayer: Player) => {
-  console.log(newPlayer);
   onReceviedEnter(newPlayer);
 });
 

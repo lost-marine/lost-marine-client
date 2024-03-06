@@ -18,6 +18,7 @@ export class Game extends Scene {
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
   playerList: PlayerSprite[];
+  isMoving: boolean;
   constructor() {
     super("Game");
   }
@@ -76,20 +77,25 @@ export class Game extends Scene {
     const moveSpeed = 10;
 
     const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
-    this.direction = direction;
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
 
+    this.direction = direction;
     this.player.playerSprite.setFlipX(shouldFlipX);
     this.player.playerSprite.angle = angle;
     this.player.x += moveSpeed * directionX;
     this.player.y += moveSpeed * directionY;
 
-    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
-
-    if (isArrowKeyPressed) {
+    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+    if (isArrowKeyPressed || this.isMoving) {
       this.sendSyncPosition();
+      // 움직임 상태 여부를 동기화합니다.
+      if (isArrowKeyPressed) {
+        this.isMoving = true;
+      } else {
+        this.isMoving = false;
+      }
     }
   }
 
@@ -107,7 +113,7 @@ export class Game extends Scene {
       startX: this.player.x,
       startY: this.player.y,
       direction: this.direction,
-      isFlipX: this.player.flipX
+      isFlipX: this.player.playerSprite.flipX
     });
   }, 30);
 
@@ -141,8 +147,8 @@ export class Game extends Scene {
         const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
         targetPlayer.isFlipX = shouldFlipX;
-        targetPlayerSprite.angle = angle;
-        targetPlayerSprite.setFlipX(shouldFlipX);
+        targetPlayerSprite.playerSprite.angle = angle;
+        targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
       }
     });
   }
