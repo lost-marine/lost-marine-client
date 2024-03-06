@@ -2,6 +2,7 @@ import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
 import { enterGame } from "../services/player";
 import { inputNameElement } from "../components/inputNameElement";
+import { initPlanktonList } from "../services/plankton";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -33,6 +34,7 @@ export class MainMenu extends Scene {
     this.inputElement = inputNameElement();
 
     this.startGame = () => {
+      initPlanktonList();
       const nickname = this.inputElement.value;
       enterGame(nickname);
     };
