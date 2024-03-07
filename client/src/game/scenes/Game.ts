@@ -10,6 +10,7 @@ import type { Player } from "../types/player";
 import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
+import { PlanktonGraphics } from "../services/plankton/classes";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -18,6 +19,7 @@ export class Game extends Scene {
   direction: DirectionType;
   playerList: Map<number, PlayerSprite>;
   isMoving: boolean;
+  planktonList: Map<number, PlanktonGraphics>;
   constructor() {
     super("Game");
   }
@@ -68,6 +70,14 @@ export class Game extends Scene {
 
     this.direction = DIRECTION.RIGHT;
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+
+    // 플랑크톤을 그립니다.
+    this.planktonList = new Map<number, PlanktonGraphics>();
+
+    g.planktonMap.forEach((plankton) => {
+      const planktonGraphic = new PlanktonGraphics(this, plankton);
+      this.planktonList.set(plankton.planktonId, planktonGraphic);
+    });
   }
 
   update(): void {
