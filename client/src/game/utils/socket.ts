@@ -33,7 +33,6 @@ socket.on("game-start", async (response: EnterResponse) => {
     map.set(player.playerId, player);
     return map;
   }, new Map<number, Player>());
-  console.log(response);
   response.planktonList.forEach((plankton: Plankton) => {
     g.planktonMap.set(plankton.planktonId, plankton);
   });
