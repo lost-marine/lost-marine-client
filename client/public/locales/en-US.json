@@ -1,0 +1,9 @@
+{
+  "gameStart": "game start",
+  "gameOver": "game over",
+  "pleaseInputName": "Please input your name",
+  "enteringGame": "Entering the game",
+  "waitingEnteringGame": "We're entering the game. Please wait a minute.",
+  "Whoops": "Whoops!",
+  "nicknameRules": "Nicknames can only be entered in English, numbers, and special characters of not more than 2 characters and not more than 12 characters."
+}
