@@ -7,13 +7,17 @@ import { directionToAngleFlip } from "../utils/calcs/directionToAngleFlip";
 import g from "../utils/global";
 import { PlayerSprite } from "../services/player/classes";
 import type { Player } from "../types/player";
+import _ from "lodash";
+import { syncMyPosition } from "../services/player/feat/movement";
+import type { PlayerPositionInfo } from "../services/player/types/position";
 
 export class Game extends Scene {
   player: PlayerSprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
-  playerList: PlayerSprite[];
+  playerList: Map<number, PlayerSprite>;
+  isMoving: boolean;
   constructor() {
     super("Game");
   }
@@ -28,7 +32,7 @@ export class Game extends Scene {
 
   create(): void {
     this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
-    this.playerList = [];
+    this.playerList = new Map<number, PlayerSprite>();
     this.anims.create({
       key: "swim",
       frames: this.anims.generateFrameNumbers("sunfish", {
@@ -41,7 +45,7 @@ export class Game extends Scene {
 
     // 플레이어 스프라이트를 추가합니다.
     if (g.myInfo !== null) {
-      g.playerList.forEach((player) => {
+      g.playerMap.forEach((player) => {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
           this.player = newPlayer;
@@ -82,59 +86,102 @@ export class Game extends Scene {
     const moveSpeed = 10;
 
     const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
-    this.direction = direction;
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
 
+    this.direction = direction;
     this.player.playerSprite.setFlipX(shouldFlipX);
     this.player.playerSprite.angle = angle;
     this.player.x += moveSpeed * directionX;
     this.player.y += moveSpeed * directionY;
 
-    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
-
-    if (isArrowKeyPressed) {
-      // EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
+    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+    if (isArrowKeyPressed || this.isMoving) {
+      this.sendSyncPosition();
+      // 움직임 상태 여부를 동기화합니다.
+      if (isArrowKeyPressed) {
+        this.isMoving = true;
+      } else {
+        this.isMoving = false;
+      }
     }
-
-    // this.setPlayersPosition();
   }
 
-  changeScene(): void {
-    this.scene.start("GameOver");
+  // 플레이어 추가
+
+  addPlayer(playerInfo: Player): PlayerSprite {
+    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
+    this.playerList.set(playerInfo.playerId, newPlayer);
+    return newPlayer;
   }
+
+  sendSyncPosition = _.throttle(() => {
+    syncMyPosition({
+      playerId: this.player.playerId,
+      startX: this.player.x,
+      startY: this.player.y,
+      direction: this.direction,
+      isFlipX: this.player.playerSprite.flipX
+    });
+  }, 30);
 
   handleSocketEvent(): void {
     while (g.eventQueue.length > 0) {
       const event = g.eventQueue.dequeue();
       switch (event.key) {
-        case "player-entered":
+        // 다른 플레이어가 게임방 입장
+        case "player-enter":
           this.onReceivedEnter(event.data as Player);
+          break;
+        // 다른 플레이어가 게임방 퇴장
+        case "player-quit":
+          this.onReceivedQuit(event.data as number);
+          break;
+        // 다른 플레이어들의 위치 동기화 신호 수신
+        case "others-position-sync":
+          this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
       }
     }
   }
 
-  setPlayersPosition(): void {
-    g.playerList.forEach((player) => {
-      const targetPlayer = this.playerList.find((target) => target.playerId === player.playerId);
-      if (targetPlayer !== undefined && targetPlayer.playerId !== g.myInfo?.playerId) {
-        targetPlayer.x = player.startX;
-        targetPlayer.y = player.startY;
-      }
-    });
-  }
-
-  addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
-    this.playerList.push(newPlayer);
-    return newPlayer;
-  }
-
+  // 다른 플레이어가 게임방 입장
   onReceivedEnter(newPlayer: Player): void {
     if (newPlayer.playerId !== g.myInfo?.playerId) {
       this.addPlayer(newPlayer);
     }
+  }
+
+  // 다른 플레이어가 게임방 퇴장
+  onReceivedQuit(playerId: number): void {
+    if (this.playerList.has(playerId)) {
+      const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.destroy();
+      this.playerList.delete(playerId);
+    }
+  }
+
+  // 다른 플레이어들의 위치 동기화 신호 수신
+  onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
+    positionsInfo.forEach((player) => {
+      const targetPlayer = g.playerMap.get(player.playerId);
+      if (targetPlayer != null && this.playerList.has(player.playerId)) {
+        const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
+        if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
+          targetPlayerSprite.x = player.startX;
+          targetPlayerSprite.y = player.startY;
+          const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
+
+          targetPlayer.isFlipX = shouldFlipX;
+          targetPlayerSprite.playerSprite.angle = angle;
+          targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
+        }
+      }
+    });
+  }
+
+  changeScene(): void {
+    this.scene.start("GameOver");
   }
 }

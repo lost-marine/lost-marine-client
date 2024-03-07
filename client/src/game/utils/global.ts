@@ -5,15 +5,15 @@ import type { Plankton } from "../types/plankton";
 
 type GlobalStore = {
   myInfo: null | Player;
-  playerList: Player[];
+  playerMap: Map<number, Player>;
   eventQueue: Queue<BaseSocketObject>;
   planktonList: Plankton[];
 };
-const global: GlobalStore = {
+const g: GlobalStore = {
   myInfo: null,
-  playerList: [],
+  playerMap: new Map<number, Player>(),
   eventQueue: new Queue<BaseSocketObject>(),
   planktonList: []
 };
 
-export default global;
+export default g;
