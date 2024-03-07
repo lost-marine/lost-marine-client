@@ -48,18 +48,27 @@ export class Game extends Scene {
       repeat: -1
     });
 
-    // 플레이어 스프라이트를 추가합니다.
-    if (g.myInfo !== null) {
-      g.playerMap.forEach((player) => {
-        const newPlayer = this.addPlayer(player);
-        if (g.myInfo?.playerId === newPlayer.playerId) {
-          this.player = newPlayer;
-        }
-      });
+    /**
+     * 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
+     * 맵 생성 이후 플레이어를 생성하면 자동으로 플레이어가 맵에 가려지지 않습니다.
+     * this.children을 찍어보면 scene의 자식들을 배열로 관리하고, 배열에 들어온 순서대로 depth(z-index)가 관리됩니다.
+     */
+    if (this.createTilemap()) {
+      // 플레이어 스프라이트를 생성합니다.
+      if (g.myInfo !== null) {
+        g.playerMap.forEach((player) => {
+          const newPlayer = this.addPlayer(player);
+          if (g.myInfo?.playerId === newPlayer.playerId) {
+            this.player = newPlayer;
+          }
+          // 모든 플레이어가 지형과 충돌하게 만듭니다.
+          this.physics.add.collider(newPlayer, this.collisionLayer);
+        });
+      }
+    } else {
+      this.changeScene();
+      throw new Error("맵 생성 중 오류가 발생했습니다.");
     }
-
-    // 타일 맵을 그립니다.
-    this.createTilemap();
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
@@ -80,18 +89,16 @@ export class Game extends Scene {
   }
 
   update(): void {
-    // moveSpeed는 정수여야 합니다.
     this.handleSocketEvent();
+
     // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
     const moveSpeed = 900;
 
     const { direction, directionX, directionY } = getDirection(this.player.characterSprite.flipX, this.cursors);
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.characterSprite.flipX);
-
     this.direction = direction;
     this.player.characterSprite.setFlipX(shouldFlipX);
     this.player.characterSprite.angle = angle;
-
     this.player.move(moveSpeed * directionX, moveSpeed * directionY);
 
     const isArrowKeyPressed =
@@ -109,7 +116,6 @@ export class Game extends Scene {
   }
 
   // 플레이어 추가
-
   addPlayer(playerInfo: Player): PlayerSprite {
     const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
     this.playerList.set(playerInfo.playerId, newPlayer);
@@ -185,7 +191,7 @@ export class Game extends Scene {
     this.scene.start("GameOver");
   }
 
-  createTilemap(): void {
+  createTilemap(): boolean {
     // 맵(지형지물)을 그립니다.
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
     const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
@@ -197,14 +203,21 @@ export class Game extends Scene {
       createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
       createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
     } else {
-      console.error("One or more tilesets failed to load. Layer creation aborted.");
+      console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
+      return false;
     }
+
     if (createBackgroundLayer !== null && createCollisionLayer !== null) {
       this.backgroundLayer = createBackgroundLayer;
       this.collisionLayer = createCollisionLayer;
+    } else {
+      console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
+      return false;
     }
-    // 충돌을 설정합니다.
-    this.collisionLayer.setCollisionByProperty({ collides: true });
-    this.physics.add.collider(this.collisionLayer, this.player);
+
+    // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꿉니다.
+    this.collisionLayer.setCollisionByExclusion([-1]);
+
+    return true;
   }
 }

@@ -22,7 +22,6 @@ const initializeContainer = (
   // **반드시 Container의 size를 정한 후 scene에 add해야합니다.**
 
   const playerContainerBody = playerSprite.body as Phaser.Physics.Arcade.Body;
-  playerContainerBody.setCircle(100);
   playerContainerBody.setCollideWorldBounds(true);
 };
 
