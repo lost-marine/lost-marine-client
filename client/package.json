@@ -28,7 +28,9 @@
     "lint": "cd .. && eslint --cache --cache-location client/.eslintcache --fix --ext .ts,.vue client/src/"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.202",
     "@typescript-eslint/parser": "^7.1.0",
+    "lodash": "^4.17.21",
     "phaser": "^3.70.0",
     "prettier": "^3.2.5",
     "queue-typescript": "^1.0.1",

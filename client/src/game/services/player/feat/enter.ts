@@ -8,7 +8,10 @@ export const enterGame = (nickname: string): void => {
   if (nickname.length > 0) {
     socket.emit("enter", { nickname }, (response: EnterResponse) => {
       g.myInfo = response.myInfo;
-      g.playerList = response.playerList;
+      g.playerMap = response.playerList.reduce((map, player) => {
+        map.set(player.playerId, player);
+        return map;
+      }, new Map<number, Player>());
       EventBus.emit("change-scene");
     });
   } else {
@@ -17,9 +20,9 @@ export const enterGame = (nickname: string): void => {
 };
 
 export const onReceviedEnter = (newPlayer: Player): void => {
-  g.playerList.push(newPlayer);
+  g.playerMap.set(newPlayer.playerId, newPlayer);
   g.eventQueue.append({
-    key: "player-entered",
+    key: "player-enter",
     data: newPlayer
   });
 };

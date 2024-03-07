@@ -4,13 +4,13 @@ import type { BaseSocketObject } from "../types/socket";
 
 type GlobalStore = {
   myInfo: null | Player;
-  playerList: Player[];
+  playerMap: Map<number, Player>;
   eventQueue: Queue<BaseSocketObject>;
 };
-const global: GlobalStore = {
+const g: GlobalStore = {
   myInfo: null,
-  playerList: [],
+  playerMap: new Map<number, Player>(),
   eventQueue: new Queue<BaseSocketObject>()
 };
 
-export default global;
+export default g;
