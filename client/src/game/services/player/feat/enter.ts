@@ -1,25 +1,24 @@
-import type { EnterResponse } from "..";
+import type { NameCertificateResponse } from "..";
 import g from "@/game/utils/global";
-import { EventBus } from "@/game/EventBus";
+// import { EventBus } from "@/game/EventBus";
 import { socket } from "@/game/utils/socket";
 import type { Player } from "@/game/types/player";
-import type { Plankton } from "@/game/types/plankton";
+import Swal from "sweetalert2";
 
-export const enterGame = (nickname: string): void => {
-  if (nickname.length > 0) {
-    socket.emit("enter", { nickname }, (response: EnterResponse) => {
-      g.myInfo = response.myInfo;
-      g.playerMap = response.playerList.reduce((map, player) => {
-        map.set(player.playerId, player);
-        return map;
-      }, new Map<number, Player>());
-      response.planktonList.forEach((plankton: Plankton) => {
-        g.planktonMap.set(plankton.planktonId, plankton);
-      });
-      EventBus.emit("change-scene");
+export const enterGame = async (nickname: string): Promise<void> => {
+  const regexp: RegExp = /^[가-힣A-Za-z0-9]{2,12}$/;
+  const isValid: boolean = regexp.test(nickname);
+  if (isValid) {
+    socket.emit("enter", { nickname }, async (response: NameCertificateResponse) => {
+      if (response.isSuccess) {
+        // EventBus.emit("change-scene");
+        await Swal.fire("게임에 입장하는 중", "게임에 입장하고 있습니다. 잠시만 기다려주세요.", "info");
+      } else {
+        await Swal.fire("앗!", response.message, "error");
+      }
     });
   } else {
-    window.alert("이름을 입력해주세요.");
+    await Swal.fire("앗!", "닉네임은 2글자 이상 12글자 이하의 영어, 숫자, 특수문자만 입력가능합니다.", "warning");
   }
 };
 
