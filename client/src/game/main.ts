@@ -20,7 +20,7 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      debug: false
+      debug: import.meta.env.DEV
     }
   },
   parent: "game-container",

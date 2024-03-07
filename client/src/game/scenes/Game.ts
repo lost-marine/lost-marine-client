@@ -20,6 +20,8 @@ export class Game extends Scene {
   playerList: Map<number, PlayerSprite>;
   isMoving: boolean;
   planktonList: Map<number, PlanktonGraphics>;
+  backgroundLayer: Phaser.Tilemaps.TilemapLayer;
+  collisionLayer: Phaser.Tilemaps.TilemapLayer;
   constructor() {
     super("Game");
   }
@@ -29,11 +31,14 @@ export class Game extends Scene {
       frameWidth: 192,
       frameHeight: 192
     });
-    this.load.image("platform", "assets/bg.png");
+    this.load.image("bg", "assets/bg.png");
+    this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
+    this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
+    this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
   }
 
   create(): void {
-    this.platform = this.physics.add.staticImage(0, 0, "platform").setOrigin(0, 0).refreshBody();
+    this.platform = this.physics.add.staticImage(0, 0, "bg").setOrigin(0, 0).refreshBody();
     this.playerList = new Map<number, PlayerSprite>();
     this.anims.create({
       key: "swim",
@@ -45,14 +50,26 @@ export class Game extends Scene {
       repeat: -1
     });
 
-    // 플레이어 스프라이트를 추가합니다.
-    if (g.myInfo !== null) {
-      g.playerMap.forEach((player) => {
-        const newPlayer = this.addPlayer(player);
-        if (g.myInfo?.playerId === newPlayer.playerId) {
-          this.player = newPlayer;
-        }
-      });
+    /**
+     * 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
+     * 맵 생성 이후 플레이어를 생성하면 자동으로 플레이어가 맵에 가려지지 않습니다.
+     * this.children을 찍어보면 scene의 자식들을 배열로 관리하고, 배열에 들어온 순서대로 depth(z-index)가 관리됩니다.
+     */
+    if (this.createTilemap()) {
+      // 플레이어 스프라이트를 생성합니다.
+      if (g.myInfo !== null) {
+        g.playerMap.forEach((player) => {
+          const newPlayer = this.addPlayer(player);
+          if (g.myInfo?.playerId === newPlayer.playerId) {
+            this.player = newPlayer;
+          }
+          // 모든 플레이어가 지형과 충돌하게 만듭니다.
+          this.physics.add.collider(newPlayer, this.collisionLayer);
+        });
+      }
+    } else {
+      this.changeScene();
+      throw new Error("맵 생성 중 오류가 발생했습니다.");
     }
 
     // 카메라 뷰를 관리합니다.
@@ -68,6 +85,7 @@ export class Game extends Scene {
 
     EventBus.emit("current-scene-ready", this);
 
+    // 기본 방향을 설정하고 초기 생성 위치를 보낼 필요가 있을까요?
     this.direction = DIRECTION.RIGHT;
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
 
@@ -81,18 +99,17 @@ export class Game extends Scene {
   }
 
   update(): void {
-    // moveSpeed는 정수여야 합니다.
     this.handleSocketEvent();
-    const moveSpeed = 10;
 
-    const { direction, directionX, directionY } = getDirection(this.player.playerSprite.flipX, this.cursors);
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.playerSprite.flipX);
+    // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
+    const moveSpeed = 900;
 
+    const { direction, directionX, directionY } = getDirection(this.player.characterSprite.flipX, this.cursors);
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.characterSprite.flipX);
     this.direction = direction;
-    this.player.playerSprite.setFlipX(shouldFlipX);
-    this.player.playerSprite.angle = angle;
-    this.player.x += moveSpeed * directionX;
-    this.player.y += moveSpeed * directionY;
+    this.player.characterSprite.setFlipX(shouldFlipX);
+    this.player.characterSprite.angle = angle;
+    this.player.move(moveSpeed * directionX, moveSpeed * directionY);
 
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
@@ -109,7 +126,6 @@ export class Game extends Scene {
   }
 
   // 플레이어 추가
-
   addPlayer(playerInfo: Player): PlayerSprite {
     const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
     this.playerList.set(playerInfo.playerId, newPlayer);
@@ -122,7 +138,7 @@ export class Game extends Scene {
       startX: this.player.x,
       startY: this.player.y,
       direction: this.direction,
-      isFlipX: this.player.playerSprite.flipX
+      isFlipX: this.player.characterSprite.flipX
     });
   }, 30);
 
@@ -174,8 +190,8 @@ export class Game extends Scene {
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.playerSprite.angle = angle;
-          targetPlayerSprite.playerSprite.setFlipX(shouldFlipX);
+          targetPlayerSprite.characterSprite.angle = angle;
+          targetPlayerSprite.characterSprite.setFlipX(shouldFlipX);
         }
       }
     });
@@ -183,5 +199,35 @@ export class Game extends Scene {
 
   changeScene(): void {
     this.scene.start("GameOver");
+  }
+
+  createTilemap(): boolean {
+    // 맵(지형지물)을 그립니다.
+    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
+    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
+    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+
+    let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    if (tilesetForest !== null && tilesetOcean !== null) {
+      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
+      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    } else {
+      console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
+      return false;
+    }
+
+    if (createBackgroundLayer !== null && createCollisionLayer !== null) {
+      this.backgroundLayer = createBackgroundLayer;
+      this.collisionLayer = createCollisionLayer;
+    } else {
+      console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
+      return false;
+    }
+
+    // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꿉니다.
+    this.collisionLayer.setCollisionByExclusion([-1]);
+
+    return true;
   }
 }
