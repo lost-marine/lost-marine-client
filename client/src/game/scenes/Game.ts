@@ -11,6 +11,7 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import type { Plankton } from "../types/plankton";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -77,6 +78,13 @@ export class Game extends Scene {
     g.planktonMap.forEach((plankton) => {
       const planktonGraphic = new PlanktonGraphics(this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
+
+      // 플랑크톤과 플레이어 간 충돌을 감지합니다.
+      this.playerList.forEach((playerSprite) => {
+        this.physics.add.collider(planktonGraphic.invisibleSprite, playerSprite, () => {
+          this.eatPlankton(plankton, playerSprite.playerId);
+        });
+      });
     });
   }
 
@@ -183,5 +191,9 @@ export class Game extends Scene {
 
   changeScene(): void {
     this.scene.start("GameOver");
+  }
+
+  eatPlankton(plankton: Plankton, playerId: number): void {
+    console.log("충돌발생 !!!!");
   }
 }
