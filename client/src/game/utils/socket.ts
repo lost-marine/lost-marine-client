@@ -1,10 +1,14 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
 import type { Player } from "../types/player";
-import { onReceviedEnter } from "../services/player";
+import { onReceviedEnter, type EnterResponse } from "../services/player";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { onReceviedOthersPositionSync } from "../services/player/feat/movement";
 import { onReceviedQuit } from "../services/player/feat/quit";
+import g from "./global";
+import type { Plankton } from "../types/plankton";
+import Swal from "sweetalert2";
+import { EventBus } from "../EventBus";
 
 export const state = reactive({
   connected: false
@@ -21,6 +25,20 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
   state.connected = false;
+});
+
+socket.on("game-start", async (response: EnterResponse) => {
+  g.myInfo = response.myInfo;
+  g.playerMap = response.playerList.reduce((map, player) => {
+    map.set(player.playerId, player);
+    return map;
+  }, new Map<number, Player>());
+  console.log(response);
+  response.planktonList.forEach((plankton: Plankton) => {
+    g.planktonMap.set(plankton.planktonId, plankton);
+  });
+  Swal.close();
+  EventBus.emit("game-start");
 });
 
 // 다른 플레이어가 게임방 입장

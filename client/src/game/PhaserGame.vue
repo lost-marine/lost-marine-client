@@ -4,6 +4,8 @@ import { EventBus } from "./EventBus";
 import StartGame from "./main";
 import type Phaser from "phaser";
 import { socket } from "./utils/socket";
+import g from "./utils/global";
+import { SCENE } from "./constants/scene";
 // Save the current scene instance
 const scene = ref();
 const game = ref();
@@ -15,6 +17,13 @@ onMounted(() => {
   EventBus.on("current-scene-ready", (sceneInstance: Phaser.Scene) => {
     emit("current-active-scene", sceneInstance);
     scene.value = sceneInstance;
+  });
+
+  EventBus.on("game-start", () => {
+    if (g.currentScene === SCENE.MAIN_MENU) {
+      g.currentScene = SCENE.GAME;
+      emit("change-scene");
+    }
   });
 
   EventBus.on("change-scene", () => {

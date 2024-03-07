@@ -10,8 +10,6 @@ export class MainMenu extends Scene {
   startButton: GameObjects.Text;
   nameInput: Phaser.GameObjects.DOMElement;
   inputElement: HTMLInputElement;
-  startGame: () => void;
-
   constructor() {
     super("MainMenu");
   }
@@ -32,11 +30,6 @@ export class MainMenu extends Scene {
     // name form
     this.inputElement = inputNameElement();
 
-    this.startGame = () => {
-      const nickname = this.inputElement.value;
-      enterGame(nickname);
-    };
-
     // Phaser DOMElement로 추가
     this.nameInput = this.add
       .dom(this.cameras.main.width / 2, 480, this.inputElement)
@@ -48,7 +41,7 @@ export class MainMenu extends Scene {
     this.inputElement.addEventListener("keypress", (event) => {
       if (event.key === "Enter") {
         // 엔터 키를 누를 때의 처리
-        this.startGame();
+        void this.startGame();
       }
     });
 
@@ -65,11 +58,13 @@ export class MainMenu extends Scene {
       .setInteractive()
       .setOrigin(0.5)
       .setDepth(100)
-      .on("pointerdown", this.startGame);
+      .on("pointerdown", async () => {
+        await this.startGame();
+      });
 
     // 버튼에 마우스 오버/아웃 효과
     this.startButton.on("pointerover", () => {
-      this.startButton.setScale(1.1); // 마우스 오버 시 버튼 확대
+      this.startButton.setScale(1.1); // 마우스 오버 시 버튼 확대`
     });
     this.startButton.on("pointerout", () => {
       this.startButton.setScale(1.0); // 마우스 아웃 시 버튼 원래 크기로
@@ -78,12 +73,13 @@ export class MainMenu extends Scene {
     EventBus.emit("current-scene-ready", this);
   }
 
-  changeScene(): void {
-    if (this.logoTween != null) {
-      this.logoTween.stop();
-      this.logoTween = null;
-    }
+  async startGame(): Promise<void> {
+    const nickname = this.inputElement.value;
 
+    await enterGame(nickname);
+  }
+
+  changeScene(): void {
     this.scene.start("Game");
   }
 }
