@@ -7,13 +7,13 @@ type GlobalStore = {
   myInfo: null | Player;
   playerMap: Map<number, Player>;
   eventQueue: Queue<BaseSocketObject>;
-  planktonList: Plankton[];
+  planktonMap: Map<number, Plankton>;
 };
 const g: GlobalStore = {
   myInfo: null,
   playerMap: new Map<number, Player>(),
   eventQueue: new Queue<BaseSocketObject>(),
-  planktonList: []
+  planktonMap: new Map<number, Plankton>()
 };
 
 export default g;

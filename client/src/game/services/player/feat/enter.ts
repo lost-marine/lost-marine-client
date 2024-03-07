@@ -3,6 +3,7 @@ import g from "@/game/utils/global";
 import { EventBus } from "@/game/EventBus";
 import { socket } from "@/game/utils/socket";
 import type { Player } from "@/game/types/player";
+import type { Plankton } from "@/game/types/plankton";
 
 export const enterGame = (nickname: string): void => {
   if (nickname.length > 0) {
@@ -12,6 +13,9 @@ export const enterGame = (nickname: string): void => {
         map.set(player.playerId, player);
         return map;
       }, new Map<number, Player>());
+      response.planktonList.forEach((plankton: Plankton) => {
+        g.planktonMap.set(plankton.planktonId, plankton);
+      });
       EventBus.emit("change-scene");
     });
   } else {

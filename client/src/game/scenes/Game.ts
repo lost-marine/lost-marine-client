@@ -72,7 +72,7 @@ export class Game extends Scene {
     // 플랑크톤을 그립니다.
     const planktonGraphics = this.add.graphics();
 
-    g.planktonList.forEach((plankton) => {
+    g.planktonMap.forEach((plankton) => {
       planktonGraphics.lineStyle(3, 0x006400, 1.0);
       planktonGraphics.fillStyle(0x00ff00, 1.0);
       planktonGraphics.fillCircle(plankton.startX, plankton.startY, 5);
