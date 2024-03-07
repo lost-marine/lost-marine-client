@@ -1,7 +1,7 @@
 import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
 import { enterGame } from "../services/player";
-import { inputNameElement } from "../components/inputNameElement";
+import { inputNameElement } from "@/game/components/inputNameElement";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
