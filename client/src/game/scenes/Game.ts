@@ -256,7 +256,6 @@ export class Game extends Scene {
           this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
-          this.player.point = response.player.point;
         }
       }
     );
