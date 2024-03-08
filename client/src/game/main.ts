@@ -18,9 +18,11 @@ const config: Phaser.Types.Core.GameConfig = {
     height: "100%"
   },
   physics: {
-    default: "arcade",
-    arcade: {
-      debug: import.meta.env.DEV
+    default: "matter",
+    matter: {
+      debug: import.meta.env.DEV,
+      enableSleeping: true,
+      gravity: { x: 0, y: 0 }
     }
   },
   parent: "game-container",
