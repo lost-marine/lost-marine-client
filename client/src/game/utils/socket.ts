@@ -63,3 +63,11 @@ socket.on("plankton-delete", (planktonId: number) => {
     data: planktonId
   });
 });
+
+// 플랑크톤 리스폰
+socket.on("plankton-respawn", (newPlanktonList: Plankton[]) => {
+  g.eventQueue.append({
+    key: "plankton-respawn",
+    data: newPlanktonList
+  });
+});

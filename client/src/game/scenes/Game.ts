@@ -171,6 +171,8 @@ export class Game extends Scene {
           this.planktonList.get(event.data as number)?.destroy();
           this.planktonList.delete(event.data as number);
           break;
+        case "plankton-respawn":
+          this.onReceivedNewPlanktonList(event.data as Plankton[]);
       }
     }
   }
@@ -207,6 +209,20 @@ export class Game extends Scene {
           targetPlayerSprite.characterSprite.setFlipX(shouldFlipX);
         }
       }
+    });
+  }
+
+  onReceivedNewPlanktonList(newPlanktonList: Plankton[]): void {
+    newPlanktonList.forEach((plankton: Plankton) => {
+      g.planktonMap.set(plankton.planktonId, plankton);
+
+      const planktonGraphic = new PlanktonGraphics(this, plankton);
+      this.planktonList.set(plankton.planktonId, planktonGraphic);
+
+      // 플랑크톤과 플레이어 간 충돌을 감지합니다.
+      this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
+        this.eatPlankton(plankton.planktonId, this.player.playerId);
+      });
     });
   }
 
