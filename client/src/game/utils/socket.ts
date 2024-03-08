@@ -56,10 +56,10 @@ socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
 });
 
 // 다른 플레이어가 플랑크톤 섭취
-socket.on("plankton-sync", (planktonId: number) => {
+socket.on("plankton-delete", (planktonId: number) => {
   g.planktonMap.delete(planktonId);
   g.eventQueue.append({
-    key: "plankton-sync",
+    key: "plankton-delete",
     data: planktonId
   });
 });

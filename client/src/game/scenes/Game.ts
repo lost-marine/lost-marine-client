@@ -166,7 +166,7 @@ export class Game extends Scene {
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
         // 다른 플레이어가 플랑크톤 섭취
-        case "plankton-sync":
+        case "plankton-delete":
           this.planktonList.get(event.data as number)?.destroy();
           this.planktonList.delete(event.data as number);
           break;
