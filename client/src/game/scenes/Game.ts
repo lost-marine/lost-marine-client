@@ -13,6 +13,7 @@ import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
 import type { Plankton } from "../types/plankton";
 import { socket } from "../utils/socket";
+import type { eatPlanktonResponse } from "../services/plankton";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -250,11 +251,12 @@ export class Game extends Scene {
         playerId,
         planktonId
       },
-      (isSuccess: boolean) => {
-        if (isSuccess) {
+      (response: eatPlanktonResponse) => {
+        if (response.isSuccess) {
           this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
+          this.player.point = response.player.point;
         }
       }
     );
