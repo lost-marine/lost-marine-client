@@ -38,7 +38,7 @@ export class Game extends Scene {
   }
 
   create(): void {
-    this.platform = this.physics.add.staticImage(0, 0, "bg").setOrigin(0, 0).refreshBody();
+    this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
     this.anims.create({
       key: "swim",
@@ -64,7 +64,7 @@ export class Game extends Scene {
             this.player = newPlayer;
           }
           // 모든 플레이어가 지형과 충돌하게 만듭니다.
-          this.physics.add.collider(newPlayer, this.collisionLayer);
+          // this.physics.add.collider(newPlayer, this.collisionLayer);
         });
       }
     } else {
@@ -74,7 +74,7 @@ export class Game extends Scene {
 
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 2688, 1536, true);
-    this.physics.world.setBounds(0, 0, 2688, 1536);
+    this.matter.world.setBounds(0, 0, 2688, 1536);
     // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
     this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
 
@@ -102,19 +102,19 @@ export class Game extends Scene {
     this.handleSocketEvent();
 
     // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
-    const moveSpeed = 900;
+    const moveSpeed = 10;
 
-    const { direction, directionX, directionY } = getDirection(this.player.characterSprite.flipX, this.cursors);
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.characterSprite.flipX);
+    const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
+    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
     this.direction = direction;
-    this.player.characterSprite.setFlipX(shouldFlipX);
-    this.player.characterSprite.angle = angle;
-    this.player.move(moveSpeed * directionX, moveSpeed * directionY);
+    this.player.setFlipX(shouldFlipX);
+    this.player.angle = angle;
 
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     if (isArrowKeyPressed || this.isMoving) {
+      this.player.move(moveSpeed * directionX, moveSpeed * directionY);
       this.sendSyncPosition();
       // 움직임 상태 여부를 동기화합니다.
       if (isArrowKeyPressed) {
@@ -127,7 +127,7 @@ export class Game extends Scene {
 
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this, "sunfish", playerInfo);
+    const newPlayer = new PlayerSprite(this.matter.world, this, "sunfish", playerInfo);
     this.playerList.set(playerInfo.playerId, newPlayer);
     return newPlayer;
   }
@@ -138,7 +138,7 @@ export class Game extends Scene {
       startX: this.player.x,
       startY: this.player.y,
       direction: this.direction,
-      isFlipX: this.player.characterSprite.flipX
+      isFlipX: this.player.flipX
     });
   }, 30);
 
@@ -190,8 +190,8 @@ export class Game extends Scene {
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.characterSprite.angle = angle;
-          targetPlayerSprite.characterSprite.setFlipX(shouldFlipX);
+          targetPlayerSprite.angle = angle;
+          targetPlayerSprite.setFlipX(shouldFlipX);
         }
       }
     });
@@ -203,30 +203,30 @@ export class Game extends Scene {
 
   createTilemap(): boolean {
     // 맵(지형지물)을 그립니다.
-    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
-    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
-    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+    // const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
+    // const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
+    // const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
 
-    let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
-    let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
-    if (tilesetForest !== null && tilesetOcean !== null) {
-      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
-      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
-    } else {
-      console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
-      return false;
-    }
+    // let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    // let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    // if (tilesetForest !== null && tilesetOcean !== null) {
+    //   createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    //   createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    // } else {
+    //   console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
+    //   return false;
+    // }
 
-    if (createBackgroundLayer !== null && createCollisionLayer !== null) {
-      this.backgroundLayer = createBackgroundLayer;
-      this.collisionLayer = createCollisionLayer;
-    } else {
-      console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
-      return false;
-    }
+    // if (createBackgroundLayer !== null && createCollisionLayer !== null) {
+    //   this.backgroundLayer = createBackgroundLayer;
+    //   this.collisionLayer = createCollisionLayer;
+    // } else {
+    //   console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
+    //   return false;
+    // }
 
-    // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꿉니다.
-    this.collisionLayer.setCollisionByExclusion([-1]);
+    // // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꿉니다.
+    // this.collisionLayer.setCollisionByExclusion([-1]);
 
     return true;
   }
