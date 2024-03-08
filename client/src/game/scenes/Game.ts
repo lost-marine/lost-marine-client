@@ -96,13 +96,7 @@ export class Game extends Scene {
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
-      const planktonGraphic = new PlanktonGraphics(this, plankton);
-      this.planktonList.set(plankton.planktonId, planktonGraphic);
-
-      // 플랑크톤과 플레이어 간 충돌을 감지합니다.
-      this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
-        this.eatPlankton(plankton.planktonId, this.player.playerId);
-      });
+      this.createPlanktonGraphics(plankton);
     });
   }
 
@@ -215,14 +209,7 @@ export class Game extends Scene {
   onReceivedNewPlanktonList(newPlanktonList: Plankton[]): void {
     newPlanktonList.forEach((plankton: Plankton) => {
       g.planktonMap.set(plankton.planktonId, plankton);
-
-      const planktonGraphic = new PlanktonGraphics(this, plankton);
-      this.planktonList.set(plankton.planktonId, planktonGraphic);
-
-      // 플랑크톤과 플레이어 간 충돌을 감지합니다.
-      this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
-        this.eatPlankton(plankton.planktonId, this.player.playerId);
-      });
+      this.createPlanktonGraphics(plankton);
     });
   }
 
@@ -258,6 +245,16 @@ export class Game extends Scene {
     this.collisionLayer.setCollisionByExclusion([-1]);
 
     return true;
+  }
+
+  createPlanktonGraphics(plankton: Plankton): void {
+    const planktonGraphic = new PlanktonGraphics(this, plankton);
+    this.planktonList.set(plankton.planktonId, planktonGraphic);
+
+    // 플랑크톤과 플레이어 간 충돌을 감지합니다.
+    this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
+      this.eatPlankton(plankton.planktonId, this.player.playerId);
+    });
   }
 
   eatPlankton(planktonId: number, playerId: number): void {
