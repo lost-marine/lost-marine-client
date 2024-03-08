@@ -8,6 +8,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "types": ["node"],
+    "resolveJsonModule": true, // JSON 파일 포함 허용
     "allowJs": true // JavaScript 파일 포함 허용
   }
 }

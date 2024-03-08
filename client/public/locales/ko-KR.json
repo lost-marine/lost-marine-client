@@ -2,7 +2,8 @@
   "gameStart": "게임 시작",
   "gameOver": "게임 종료",
   "pleaseInputName": "이름을 입력해주세요.",
+  "enteringGame": "게임에 입장중",
   "waitingEnteringGame": "게임에 입장하고 있습니다. 잠시만 기다려주세요.",
-  "Whoops!": "앗!",
+  "Whoops": "앗!",
   "nicknameRules": "닉네임은 2글자 이상 12글자 이하의 영어, 숫자, 특수문자만 입력가능합니다."
 }
