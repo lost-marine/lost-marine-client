@@ -21,4 +21,13 @@ export class PlanktonGraphics extends Phaser.GameObjects.Graphics {
     this.fillCircle(plankton.startX, plankton.startY, 5);
     this.strokeCircle(plankton.startX, plankton.startY, 8);
   }
+
+  destroy(): void {
+    super.destroy();
+
+    // 보이지 않는 스프라이트도 함께 제거
+    if (this.invisibleSprite !== null) {
+      this.invisibleSprite.destroy();
+    }
+  }
 }
