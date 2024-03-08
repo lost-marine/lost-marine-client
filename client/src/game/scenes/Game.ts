@@ -165,6 +165,11 @@ export class Game extends Scene {
         case "others-position-sync":
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
+        // 다른 플레이어가 플랑크톤 섭취
+        case "plankton-sync":
+          this.planktonList.get(event.data as number)?.destroy();
+          this.planktonList.delete(event.data as number);
+          break;
       }
     }
   }
