@@ -12,6 +12,7 @@ import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
 import type { Plankton } from "../types/plankton";
+import { socket } from "../utils/socket";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -93,15 +94,13 @@ export class Game extends Scene {
     // 플랑크톤을 그립니다.
     this.planktonList = new Map<number, PlanktonGraphics>();
 
-    g.planktonMap.forEach((plankton) => {
+    g.planktonMap.forEach((plankton: Plankton) => {
       const planktonGraphic = new PlanktonGraphics(this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
 
       // 플랑크톤과 플레이어 간 충돌을 감지합니다.
-      this.playerList.forEach((playerSprite) => {
-        this.physics.add.collider(planktonGraphic.invisibleSprite, playerSprite, () => {
-          this.eatPlankton(plankton, playerSprite.playerId);
-        });
+      this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
+        this.eatPlankton(plankton.planktonId, this.player.playerId);
       });
     });
   }
@@ -239,7 +238,20 @@ export class Game extends Scene {
     return true;
   }
 
-  eatPlankton(plankton: Plankton, playerId: number): void {
-    console.log("충돌발생 !!!!");
+  eatPlankton(planktonId: number, playerId: number): void {
+    socket.emit(
+      "plankton-eat",
+      {
+        playerId,
+        planktonId
+      },
+      (isSuccess: boolean) => {
+        if (isSuccess) {
+          this.planktonList.get(planktonId)?.destroy();
+          this.planktonList.delete(planktonId);
+          g.planktonMap.delete(planktonId);
+        }
+      }
+    );
   }
 }
