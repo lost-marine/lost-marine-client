@@ -35,6 +35,7 @@ export class Game extends Scene {
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
+    this.load.json("shapes", "assets/shapes/sunfish-shapes.json");
   }
 
   create(): void {
@@ -198,6 +199,7 @@ export class Game extends Scene {
   }
 
   changeScene(): void {
+    this.player.point = 5;
     this.scene.start("GameOver");
   }
 

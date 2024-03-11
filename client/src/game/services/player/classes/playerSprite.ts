@@ -10,39 +10,30 @@ import type { Player } from "@/game/types/player";
  * @param {Phaser.Scene} scene 타겟 `Scene`
  * @returns {void}
  */
-// const initializeContainer = (
-//   playerSprite: PlayerSprite,
-//   speciesWidth: number,
-//   speciesHeight: number,
-//   scene: Phaser.Scene
-// ): void => {
-//   // **반드시 Container의 size를 정한 후 scene에 add해야합니다.**
-//   playerSprite.setSize(speciesWidth, speciesHeight);
-//   addPlayerSpriteToScene(playerSprite, scene);
-//   // **반드시 Container의 size를 정한 후 scene에 add해야합니다.**
-// };
-
-// const addPlayerSpriteToScene = (playerSprite: PlayerSprite, scene: Phaser.Scene): void => {
-//   scene.add.existing(playerSprite);
-// };
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
   _point: number;
-  characterSprite: Phaser.Physics.Matter.Sprite;
   pointSprite: Phaser.GameObjects.Text;
   playerContainer: Phaser.GameObjects.Container;
+  shapes: {
+    default: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
+    flipped: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
+  };
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
-    super(world, player.startX, player.startY, texture);
+    const shapes = scene.cache.json.get("shapes");
 
+    super(world, player.startX, player.startY, texture, 0, { shape: shapes.sunfish });
+    this.shapes = {
+      default: shapes.sunfish,
+      flipped: shapes.sunfishFlipped
+    };
     this.playerId = player.playerId;
     this.name = player.nickname;
     // 현재는 undefined를 반환하기 때문에 임시로 0을 넣어두었습니다.
     this.point = player.point ?? 0;
-
     // 초기화된 컨테이너에 캐릭터 스프라이트, 닉네임, 포인트를 추가합니다.
-    scene.matter.add.sprite(0, 0, texture);
     this.anims.play("swim");
 
     const nickname: Phaser.GameObjects.Text = scene.add.text(0, 0, this.name, {
@@ -80,6 +71,25 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     this.setAwake(); // 잠자는 상태일 때 객체를 깨워줍니다.
     this.setVelocity(x, y);
     this.playerContainer.setPosition(this.x, this.y);
+  }
+
+  setFlipX(isFlipX: boolean): this {
+    if (this.body !== null) {
+      // 현재 속도와 위치 저장
+      const currentVelocity = this.body.velocity;
+      const currentPosition = { x: this.x, y: this.y };
+
+      // 바디 교체
+      super.setFlipX(isFlipX);
+      const bodyData = isFlipX ? this.shapes.flipped : this.shapes.default;
+      this.setBody(bodyData);
+
+      // 저장된 속도와 위치를 새 바디에 적용
+      this.setVelocity(currentVelocity.x, currentVelocity.y);
+      this.setPosition(currentPosition.x, currentPosition.y);
+    }
+
+    return this;
   }
 
   get point(): number {
