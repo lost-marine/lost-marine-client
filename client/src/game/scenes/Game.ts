@@ -11,6 +11,9 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import type { Plankton } from "../types/plankton";
+import { socket } from "../utils/socket";
+import type { eatPlanktonResponse } from "../services/plankton";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -92,9 +95,14 @@ export class Game extends Scene {
     // 플랑크톤을 그립니다.
     this.planktonList = new Map<number, PlanktonGraphics>();
 
-    g.planktonMap.forEach((plankton) => {
+    g.planktonMap.forEach((plankton: Plankton) => {
       const planktonGraphic = new PlanktonGraphics(this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
+
+      // 플랑크톤과 플레이어 간 충돌을 감지합니다.
+      this.physics.add.collider(planktonGraphic.invisibleSprite, this.player, () => {
+        this.eatPlankton(plankton.planktonId, this.player.playerId);
+      });
     });
   }
 
@@ -157,6 +165,11 @@ export class Game extends Scene {
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
+          break;
+        // 다른 플레이어가 플랑크톤 섭취
+        case "plankton-delete":
+          this.planktonList.get(event.data as number)?.destroy();
+          this.planktonList.delete(event.data as number);
           break;
       }
     }
@@ -229,5 +242,22 @@ export class Game extends Scene {
     // this.collisionLayer.setCollisionByExclusion([-1]);
 
     return true;
+  }
+
+  eatPlankton(planktonId: number, playerId: number): void {
+    socket.emit(
+      "plankton-eat",
+      {
+        playerId,
+        planktonId
+      },
+      (response: eatPlanktonResponse) => {
+        if (response.isSuccess) {
+          this.planktonList.get(planktonId)?.destroy();
+          this.planktonList.delete(planktonId);
+          g.planktonMap.delete(planktonId);
+        }
+      }
+    );
   }
 }
