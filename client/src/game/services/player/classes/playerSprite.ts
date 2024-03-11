@@ -77,6 +77,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   move(x: number, y: number): void {
     //   const playerContainerBody = this.body as Phaser.Physics.Arcade.Body;
     //   playerContainerBody.setVelocity(x, y);
+    this.setAwake(); // 잠자는 상태일 때 객체를 깨워줍니다.
     this.setVelocity(x, y);
     this.playerContainer.setPosition(this.x, this.y);
   }
