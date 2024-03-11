@@ -123,6 +123,12 @@ export class Game extends Scene {
         this.isMoving = false;
       }
     }
+
+    // 캐릭터의 닉네임 위치를 관리합니다.
+    const playerBody = this.player.body as MatterJS.BodyType;
+    if (!playerBody.isSleeping) {
+      this.player.updateNicknamePosition();
+    }
   }
 
   // 플레이어 추가
