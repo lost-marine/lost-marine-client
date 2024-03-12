@@ -38,6 +38,7 @@ export class Game extends Scene {
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
+    this.load.json("shapes", "assets/shapes/sunfish-shapes.json");
   }
 
   create(): void {
@@ -53,11 +54,7 @@ export class Game extends Scene {
       repeat: -1
     });
 
-    /**
-     * 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
-     * 맵 생성 이후 플레이어를 생성하면 자동으로 플레이어가 맵에 가려지지 않습니다.
-     * this.children을 찍어보면 scene의 자식들을 배열로 관리하고, 배열에 들어온 순서대로 depth(z-index)가 관리됩니다.
-     */
+    // 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
     if (this.createTilemap()) {
       // 플레이어 스프라이트를 생성합니다.
       if (g.myInfo !== null) {
@@ -66,8 +63,6 @@ export class Game extends Scene {
           if (g.myInfo?.playerId === newPlayer.playerId) {
             this.player = newPlayer;
           }
-          // 모든 플레이어가 지형과 충돌하게 만듭니다.
-          // this.physics.add.collider(newPlayer, this.collisionLayer);
         });
       }
     } else {
@@ -104,9 +99,6 @@ export class Game extends Scene {
   update(): void {
     this.handleSocketEvent();
 
-    // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
-    const moveSpeed = 10;
-
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
     this.direction = direction;
@@ -117,7 +109,7 @@ export class Game extends Scene {
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     if (isArrowKeyPressed || this.isMoving) {
-      this.player.move(moveSpeed * directionX, moveSpeed * directionY);
+      this.player.move(directionX, directionY);
       this.sendSyncPosition();
       // 움직임 상태 여부를 동기화합니다.
       if (isArrowKeyPressed) {
@@ -125,6 +117,12 @@ export class Game extends Scene {
       } else {
         this.isMoving = false;
       }
+    }
+
+    // 캐릭터의 닉네임 위치를 관리합니다.
+    const playerBody = this.player.body as MatterJS.BodyType;
+    if (!playerBody.isSleeping) {
+      this.player.updateNicknamePosition();
     }
   }
 
@@ -198,13 +196,13 @@ export class Game extends Scene {
       const targetPlayer = g.playerMap.get(player.playerId);
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
         const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
-        if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
+        if (targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
           targetPlayerSprite.x = player.startX;
           targetPlayerSprite.y = player.startY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.angle = angle;
+          targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
         }
       }
@@ -217,30 +215,31 @@ export class Game extends Scene {
 
   createTilemap(): boolean {
     // 맵(지형지물)을 그립니다.
-    // const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
-    // const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
-    // const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+    const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
+    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
+    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
 
-    // let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
-    // let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
-    // if (tilesetForest !== null && tilesetOcean !== null) {
-    //   createBackgroundLayer = map.createLayer("Background_Layer", [tilesetForest, tilesetOcean], 0, 0);
-    //   createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
-    // } else {
-    //   console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
-    //   return false;
-    // }
+    let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+    if (tilesetForest !== null && tilesetOcean !== null) {
+      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetOcean], 0, 0);
+      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    } else {
+      console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
+      return false;
+    }
 
-    // if (createBackgroundLayer !== null && createCollisionLayer !== null) {
-    //   this.backgroundLayer = createBackgroundLayer;
-    //   this.collisionLayer = createCollisionLayer;
-    // } else {
-    //   console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
-    //   return false;
-    // }
+    if (createBackgroundLayer !== null && createCollisionLayer !== null) {
+      this.backgroundLayer = createBackgroundLayer;
+      this.collisionLayer = createCollisionLayer;
+    } else {
+      console.error("하나 이상의 레이어를 생성하는 데 실패했습니다. 레이어의 이름을 확인해주세요.");
+      return false;
+    }
 
-    // // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꿉니다.
-    // this.collisionLayer.setCollisionByExclusion([-1]);
+    // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꾸고, matter 물리학을 적용합니다.
+    this.collisionLayer.setCollisionByProperty({ collides: true });
+    this.matter.world.convertTilemapLayer(this.collisionLayer);
 
     return true;
   }
