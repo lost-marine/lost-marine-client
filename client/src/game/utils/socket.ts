@@ -42,7 +42,7 @@ socket.on("game-start", async (response: EnterResponse) => {
 });
 
 // 다른 플레이어가 게임방 입장
-socket.on("enter", (newPlayer: Player) => {
+socket.on("player-enter", (newPlayer: Player) => {
   enterService.onReceviedEnter(newPlayer);
 });
 

@@ -12,7 +12,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
     const shapes = scene.cache.json.get("shapes");
 
-    super(world, player.startX, player.startY, texture, 0, { shape: shapes.sunfish });
+    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes.sunfish });
     this.shapes = {
       default: shapes.sunfish,
       flipped: shapes.sunfishFlipped
@@ -32,7 +32,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
     // 인스턴스의 초기 스폰 위치를 설정합니다.
     scene.add.existing(this);
-    this.setPosition(Math.trunc(scene.cameras.main.centerX), Math.trunc(scene.cameras.main.centerY));
+    this.setPosition(2000, 1300);
     this.updateNicknamePosition();
   }
 

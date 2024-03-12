@@ -133,8 +133,8 @@ export class Game extends Scene {
   sendSyncPosition = _.throttle(() => {
     syncMyPosition({
       playerId: this.player.playerId,
-      startX: this.player.x,
-      startY: this.player.y,
+      centerX: this.player.x,
+      centerY: this.player.y,
       direction: this.direction,
       isFlipX: this.player.flipX
     });
@@ -183,8 +183,8 @@ export class Game extends Scene {
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
         const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
         if (targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
-          targetPlayerSprite.x = player.startX;
-          targetPlayerSprite.y = player.startY;
+          targetPlayerSprite.x = player.centerX;
+          targetPlayerSprite.y = player.centerY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
