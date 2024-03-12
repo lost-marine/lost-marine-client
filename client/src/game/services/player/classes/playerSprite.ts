@@ -3,6 +3,7 @@ import type { Player } from "@/game/types/player";
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
   nicknameSprite: Phaser.GameObjects.Text;
+  moveSpeed: number;
   shapes: {
     default: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
     flipped: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
@@ -18,6 +19,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     };
     this.playerId = player.playerId;
     this.name = player.nickname;
+    this.moveSpeed = 10;
 
     this.anims.play("swim");
 
@@ -34,9 +36,9 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     this.updateNicknamePosition();
   }
 
-  move(x: number, y: number): void {
+  move(directionX: number, directionY: number): void {
     this.setAwake(); // 잠자는 상태일 때 객체를 깨워줍니다.
-    this.setVelocity(x, y);
+    this.setVelocity(this.moveSpeed * directionX, this.moveSpeed * directionY);
   }
 
   setFlipX(isFlipX: boolean): this {

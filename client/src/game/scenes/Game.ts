@@ -96,9 +96,6 @@ export class Game extends Scene {
   update(): void {
     this.handleSocketEvent();
 
-    // moveSpeed가 1,000 이상이면 벽을 뚫는 기이한 현상이 벌어집니다.
-    const moveSpeed = 10;
-
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
     this.direction = direction;
@@ -109,7 +106,7 @@ export class Game extends Scene {
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     if (isArrowKeyPressed || this.isMoving) {
-      this.player.move(moveSpeed * directionX, moveSpeed * directionY);
+      this.player.move(directionX, directionY);
       this.sendSyncPosition();
       // 움직임 상태 여부를 동기화합니다.
       if (isArrowKeyPressed) {
@@ -185,13 +182,13 @@ export class Game extends Scene {
       const targetPlayer = g.playerMap.get(player.playerId);
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
         const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
-        if (targetPlayer !== null && targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
+        if (targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
           targetPlayerSprite.x = player.startX;
           targetPlayerSprite.y = player.startY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.angle = angle;
+          targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
         }
       }
