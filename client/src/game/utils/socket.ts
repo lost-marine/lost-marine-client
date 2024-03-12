@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
 import type { Player } from "../types/player";
-import { onReceviedEnter, type EnterResponse } from "../services/player";
+import { type EnterResponse } from "../services/player";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { onReceviedOthersPositionSync } from "../services/player/feat/movement";
 import { onReceviedQuit } from "../services/player/feat/quit";
@@ -9,6 +9,7 @@ import g from "./global";
 import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
+import enterService from "./../services/player/feat/enter";
 
 export const state = reactive({
   connected: false
@@ -42,7 +43,7 @@ socket.on("game-start", async (response: EnterResponse) => {
 
 // 다른 플레이어가 게임방 입장
 socket.on("enter", (newPlayer: Player) => {
-  onReceviedEnter(newPlayer);
+  enterService.onReceviedEnter(newPlayer);
 });
 
 // 다른 플레이어가 게임방 퇴장

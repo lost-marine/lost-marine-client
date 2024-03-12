@@ -1,7 +1,7 @@
 import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
-import { enterGame } from "../services/player";
 import { inputNameElement } from "../components/inputNameElement";
+import enterService from "../services/player/feat/enter";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -76,7 +76,7 @@ export class MainMenu extends Scene {
   async startGame(): Promise<void> {
     const nickname = this.inputElement.value;
 
-    await enterGame(nickname);
+    await enterService.enterGame(nickname);
   }
 
   changeScene(): void {
