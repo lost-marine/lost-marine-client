@@ -1,33 +1,39 @@
 import type { Plankton } from "@/game/types/plankton";
+import type { PlayerSprite } from "../../player/classes";
 
-export class PlanktonGraphics extends Phaser.GameObjects.Graphics {
-  invisibleSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+export class PlanktonGraphics extends Phaser.GameObjects.GameObject {
+  circleBody: MatterJS.BodyType; // 원형 스프라이트의 물리적 바디를 저장할 속성
 
-  constructor(scene: Phaser.Scene, plankton: Plankton) {
-    super(scene);
-    this.scene = scene;
-    this.scene.add.existing(this);
-    this.drawPlankton(plankton);
+  constructor(scene: Phaser.Scene, plankton: Plankton, player: PlayerSprite) {
+    super(scene, "PlanktonGraphics");
 
-    // 충돌 이벤트 감지를 위해 보이지 않는 스프라이트를 정의합니다.
-    this.invisibleSprite = scene.physics.add.sprite(plankton.startX, plankton.startY, "").setVisible(false);
-    this.invisibleSprite.setSize(8, 8);
-    scene.physics.world.enable(this.invisibleSprite);
+    this.circleBody = scene.matter.add.circle(
+      plankton.startX,
+      plankton.startY,
+      10,
+      {
+        restitution: 0.3,
+        isStatic: true,
+        render: {
+          fillColor: 0x00ff00,
+          lineColor: 0x006400,
+          lineThickness: 1
+        }
+      },
+      1
+    );
+
+    this.setPlayerCollisionEvent(scene, player);
   }
 
-  drawPlankton(plankton: Plankton): void {
-    this.lineStyle(3, 0x006400, 1.0);
-    this.fillStyle(0x00ff00, 1.0);
-    this.fillCircle(plankton.startX, plankton.startY, 5);
-    this.strokeCircle(plankton.startX, plankton.startY, 8);
-  }
-
-  destroy(): void {
-    super.destroy();
-
-    // 보이지 않는 스프라이트도 함께 제거
-    if (this.invisibleSprite !== null) {
-      this.invisibleSprite.destroy();
-    }
+  setPlayerCollisionEvent(scene: Phaser.Scene, player: PlayerSprite): void {
+    scene.matter.world.on(
+      "collisionstart",
+      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: unknown, bodyB: unknown) => {
+        if ((bodyA === this.circleBody && bodyB === player.body) || (bodyA === player.body && bodyB === this.circleBody)) {
+          console.log("Sprite and Circle have collided");
+        }
+      }
+    );
   }
 }
