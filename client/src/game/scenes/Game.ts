@@ -170,6 +170,9 @@ export class Game extends Scene {
           this.planktonList.get(event.data as number)?.destroy();
           this.planktonList.delete(event.data as number);
           break;
+        // 플랑크톤 리스폰
+        case "plankton-respawn":
+          this.onReceivedNewPlanktonList(event.data as Plankton[]);
       }
     }
   }
@@ -206,6 +209,14 @@ export class Game extends Scene {
           targetPlayerSprite.setFlipX(shouldFlipX);
         }
       }
+    });
+  }
+
+  onReceivedNewPlanktonList(newPlanktonList: Plankton[]): void {
+    newPlanktonList.forEach((plankton: Plankton) => {
+      g.planktonMap.set(plankton.planktonId, plankton);
+      const planktonGraphic = new PlanktonGraphics(this, plankton, this.player);
+      this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
   }
 
