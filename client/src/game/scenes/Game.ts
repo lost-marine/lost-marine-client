@@ -159,20 +159,19 @@ export class Game extends Scene {
           break;
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
-          this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
+          this.onReceivedPositionSync(event.data as PlayerPositionInfo[]);
           break;
         // 내 플레이어가 플랑크톤 섭취
         case "plankton-eat":
-          this.eatPlankton(event.data as number, this.player.playerId);
+          this.onReceivedPlanktonEat(event.data as number, this.player.playerId);
           break;
         // 다른 플레이어가 플랑크톤 섭취
         case "plankton-delete":
-          this.planktonList.get(event.data as number)?.destroy();
-          this.planktonList.delete(event.data as number);
+          this.onReceivedPlanktonDelete(event.data as number);
           break;
         // 플랑크톤 리스폰
         case "plankton-respawn":
-          this.onReceivedNewPlanktonList(event.data as Plankton[]);
+          this.onReceivedPlanktonRespawn(event.data as Plankton[]);
       }
     }
   }
@@ -194,7 +193,7 @@ export class Game extends Scene {
   }
 
   // 다른 플레이어들의 위치 동기화 신호 수신
-  onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
+  onReceivedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
     positionsInfo.forEach((player) => {
       const targetPlayer = g.playerMap.get(player.playerId);
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
@@ -209,14 +208,6 @@ export class Game extends Scene {
           targetPlayerSprite.setFlipX(shouldFlipX);
         }
       }
-    });
-  }
-
-  onReceivedNewPlanktonList(newPlanktonList: Plankton[]): void {
-    newPlanktonList.forEach((plankton: Plankton) => {
-      g.planktonMap.set(plankton.planktonId, plankton);
-      const planktonGraphic = new PlanktonGraphics(this, plankton, this.player);
-      this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
   }
 
@@ -254,7 +245,14 @@ export class Game extends Scene {
     return true;
   }
 
-  eatPlankton(planktonId: number, playerId: number): void {
+  /**
+   * Description placeholder
+   * @date 3/12/2024 - 11:35:52 AM
+   * @author 김은진
+   *
+   * 플랑크톤 메서드
+   */
+  onReceivedPlanktonEat(planktonId: number, playerId: number): void {
     socket.emit(
       "plankton-eat",
       {
@@ -269,5 +267,18 @@ export class Game extends Scene {
         }
       }
     );
+  }
+
+  onReceivedPlanktonDelete(planktonId: number): void {
+    this.planktonList.get(planktonId)?.destroy();
+    this.planktonList.delete(planktonId);
+  }
+
+  onReceivedPlanktonRespawn(newPlanktonList: Plankton[]): void {
+    newPlanktonList.forEach((plankton: Plankton) => {
+      g.planktonMap.set(plankton.planktonId, plankton);
+      const planktonGraphic = new PlanktonGraphics(this, plankton, this.player);
+      this.planktonList.set(plankton.planktonId, planktonGraphic);
+    });
   }
 }
