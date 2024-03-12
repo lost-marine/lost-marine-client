@@ -2,7 +2,6 @@ import type { Player } from "@/game/types/player";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
-  characterSprite: Phaser.Physics.Matter.Sprite;
   nicknameSprite: Phaser.GameObjects.Text;
   shapes: {
     default: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
