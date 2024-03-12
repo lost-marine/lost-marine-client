@@ -13,8 +13,8 @@ export class PlanktonGraphics {
 
     this.plankton = plankton;
     this.circleBody = scene.matter.add.circle(
-      plankton.startX,
-      plankton.startY,
+      plankton.centerX,
+      plankton.centerY,
       10,
       {
         restitution: 0,
@@ -37,8 +37,8 @@ export class PlanktonGraphics {
   drawPlankton(): void {
     this.graphics.lineStyle(3, 0x006400, 1.0);
     this.graphics.fillStyle(0x00ff00, 1.0);
-    this.graphics.fillCircle(this.plankton.startX, this.plankton.startY, 5);
-    this.graphics.strokeCircle(this.plankton.startX, this.plankton.startY, 8);
+    this.graphics.fillCircle(this.plankton.centerX, this.plankton.centerY, 5);
+    this.graphics.strokeCircle(this.plankton.centerX, this.plankton.centerY, 8);
   }
 
   setPlayerCollisionEvent(player: PlayerSprite): void {

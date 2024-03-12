@@ -2,8 +2,8 @@ import type { DirectionType } from "../../../types/direction";
 
 export type PlayerPositionInfo = {
   playerId: number;
-  startX: number;
-  startY: number;
+  centerX: number;
+  centerY: number;
   direction: DirectionType;
   isFlipX: boolean;
 };

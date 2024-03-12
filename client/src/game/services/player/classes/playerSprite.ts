@@ -12,7 +12,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
     const shapes = scene.cache.json.get("shapes");
 
-    super(world, player.startX, player.startY, texture, 0, { shape: shapes.sunfish });
+    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes.sunfish });
     this.shapes = {
       default: shapes.sunfish,
       flipped: shapes.sunfishFlipped
