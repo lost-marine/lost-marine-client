@@ -1,0 +1,33 @@
+{
+  "generator_info": "Shape definitions generated with PhysicsEditor. Visit https://www.codeandweb.com/physicseditor",
+  "Nemo": {
+    "type": "fromPhysicsEditor",
+    "label": "Nemo",
+    "isStatic": false,
+    "density": 0.10000000149011612,
+    "restitution": 0,
+    "friction": 0.10000000149011612,
+    "frictionAir": 0.009999999776482582,
+    "frictionStatic": 0.5,
+    "collisionFilter": {
+      "group": 0,
+      "category": 1,
+      "mask": 255
+    },
+    "fixtures": [
+      {
+        "label": "",
+        "isSensor": false,
+        "vertices": [
+          [
+            { "x": -1, "y": 34 },
+            { "x": 37, "y": 53 },
+            { "x": 58, "y": 40 },
+            { "x": 63, "y": 28 },
+            { "x": 33, "y": 12 }
+          ]
+        ]
+      }
+    ]
+  }
+}
