@@ -1,34 +1,15 @@
 import type { Plankton } from "@/game/types/plankton";
-import type { PlayerSprite } from "../../player/classes";
+import { type PlayerSprite } from "../../player/classes";
 import g from "@/game/utils/global";
-
-export class PlanktonGraphics {
-  circleBody: MatterJS.BodyType; // 원형 스프라이트의 물리적 바디를 저장할 속성
+export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
   plankton: Plankton;
   graphics: Phaser.GameObjects.Graphics;
-  scene: Phaser.Scene;
 
-  constructor(scene: Phaser.Scene, plankton: Plankton, player: PlayerSprite) {
-    this.scene = scene;
-
+  constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, plankton: Plankton, player: PlayerSprite) {
+    super(world, plankton.centerX, plankton.centerY, "planktonGraphics");
     this.plankton = plankton;
-    this.circleBody = scene.matter.add.circle(
-      plankton.centerX,
-      plankton.centerY,
-      10,
-      {
-        restitution: 0,
-        isStatic: true,
-        render: {
-          fillColor: 0x00ff00,
-          lineColor: 0x006400,
-          lineThickness: 1
-        }
-      },
-      1
-    );
 
-    this.graphics = this.scene.add.graphics();
+    this.graphics = scene.add.graphics();
     this.drawPlankton();
 
     this.setPlayerCollisionEvent(player);
@@ -44,8 +25,10 @@ export class PlanktonGraphics {
   setPlayerCollisionEvent(player: PlayerSprite): void {
     this.scene.matter.world.on(
       "collisionstart",
-      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: unknown, bodyB: unknown) => {
-        if ((bodyA === this.circleBody && bodyB === player.body) || (bodyA === player.body && bodyB === this.circleBody)) {
+      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
+        if (bodyA.gameObject === this && bodyB.gameObject?.playerId === player.playerId) {
+          // console.log("충돌");
+          // console.log(bodyA.gameObject, bodyB);
           this.onTriggerPlanktonEat();
         }
       }
@@ -60,12 +43,7 @@ export class PlanktonGraphics {
   }
 
   destroy(): void {
-    // Matter 월드에서 바디를 제거
-    if (this.circleBody !== null) {
-      this.scene.matter.world.remove(this.circleBody);
-    }
-    if (this.graphics !== null) {
-      this.graphics.destroy();
-    }
+    super.destroy();
+    this.graphics.destroy();
   }
 }

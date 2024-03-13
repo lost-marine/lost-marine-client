@@ -91,7 +91,7 @@ export class Game extends Scene {
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
-      const planktonGraphic = new PlanktonGraphics(this, plankton, this.player);
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
   }
@@ -276,7 +276,7 @@ export class Game extends Scene {
   onReceivedPlanktonRespawn(newPlanktonList: Plankton[]): void {
     newPlanktonList.forEach((plankton: Plankton) => {
       g.planktonMap.set(plankton.planktonId, plankton);
-      const planktonGraphic = new PlanktonGraphics(this, plankton, this.player);
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
   }
