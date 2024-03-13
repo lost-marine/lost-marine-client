@@ -11,6 +11,7 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import { speciesMap } from "../utils/species";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -27,15 +28,21 @@ export class Game extends Scene {
   }
 
   preload(): void {
-    this.load.spritesheet("sunfish", "assets/Sunfish_move.png", {
-      frameWidth: 192,
-      frameHeight: 192
-    });
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
-    this.load.json("shapes", "assets/shapes/sunfish-shapes.json");
+    this.load.json("shapes", "assets/shapes/shapes.json");
+    speciesMap.forEach((value) => {
+      try {
+        this.load.spritesheet(value.key, value.spritesheetUrl, {
+          frameWidth: value.width,
+          frameHeight: value.height
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
   create(): void {
@@ -125,7 +132,12 @@ export class Game extends Scene {
 
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this.matter.world, this, "sunfish", playerInfo);
+    const newPlayer = new PlayerSprite(
+      this.matter.world,
+      this,
+      speciesMap.get(g.myInfo?.speciesId ?? 1)?.key ?? "nemo",
+      playerInfo
+    );
     this.playerList.set(playerInfo.playerId, newPlayer);
     return newPlayer;
   }

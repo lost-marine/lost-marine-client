@@ -8,4 +8,6 @@ export type Species = {
   health: number;
   evolutionSet: Set<number>;
   tierCode: number;
+  spritesheetUrl: string;
+  shapesUrl: string;
 };

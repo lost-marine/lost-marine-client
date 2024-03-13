@@ -12,7 +12,9 @@ export const speciesMap: Map<number, Species> = new Map<number, Species>([
       power: 10,
       health: 100,
       evolutionSet: new Set([3, 4]),
-      tierCode: 1
+      tierCode: 1,
+      spritesheetUrl: "assets/sprites/Nemo.png",
+      shapesUrl: "assets/shapes/nemo-shapes.json"
     }
   ],
   [
@@ -26,7 +28,9 @@ export const speciesMap: Map<number, Species> = new Map<number, Species>([
       power: 10,
       health: 100,
       evolutionSet: new Set([3, 4]),
-      tierCode: 1
+      tierCode: 1,
+      spritesheetUrl: "assets/sprites/Mackerel.png",
+      shapesUrl: "assets/shapes/mackerel-shapes.json"
     }
   ],
   [
@@ -35,12 +39,14 @@ export const speciesMap: Map<number, Species> = new Map<number, Species>([
       speciesId: 3,
       name: "개복치",
       key: "sunfish",
-      width: 200,
-      height: 300,
+      width: 192,
+      height: 192,
       power: 10,
       health: 100,
       evolutionSet: new Set([5]),
-      tierCode: 2
+      tierCode: 2,
+      spritesheetUrl: "assets/sprites/Sunfish.png",
+      shapesUrl: "assets/shapes/sunfish-shapes.json"
     }
   ],
   [
@@ -54,7 +60,9 @@ export const speciesMap: Map<number, Species> = new Map<number, Species>([
       power: 10,
       health: 100,
       evolutionSet: new Set([6]),
-      tierCode: 2
+      tierCode: 2,
+      spritesheetUrl: "assets/sprites/Nemo.png",
+      shapesUrl: "assets/shapes/nemo-shapes.json"
     }
   ]
 ]);
