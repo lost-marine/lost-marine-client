@@ -11,6 +11,7 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import crashService from "../services/player/feat/crash";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -90,6 +91,17 @@ export class Game extends Scene {
     g.planktonMap.forEach((plankton) => {
       const planktonGraphic = new PlanktonGraphics(this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
+    });
+
+    // 플레이어의 충돌(플레이어 간, 플랑크톤)을 구현합니다.
+    this.player.setOnCollide((collisionData: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+      const bodyA: MatterJS.BodyType = collisionData.bodyA;
+      const bodyB: MatterJS.BodyType = collisionData.bodyB;
+
+      // 플레이어간 충돌
+      if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
+        crashService.crash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+      }
     });
   }
 
@@ -190,6 +202,7 @@ export class Game extends Scene {
           targetPlayer.isFlipX = shouldFlipX;
           targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
+          targetPlayerSprite.updateNicknamePosition();
         }
       }
     });
@@ -200,7 +213,6 @@ export class Game extends Scene {
   }
 
   createTilemap(): boolean {
-    // 맵(지형지물)을 그립니다.
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
     const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
     const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);

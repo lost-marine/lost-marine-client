@@ -12,7 +12,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
     const shapes = scene.cache.json.get("shapes");
 
-    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes.sunfish });
+    super(world, player.centerX, player.centerY, texture);
     this.shapes = {
       default: shapes.sunfish,
       flipped: shapes.sunfishFlipped
@@ -34,6 +34,9 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     scene.add.existing(this);
     this.setPosition(2000, 1300);
     this.updateNicknamePosition();
+
+    // 플레이어의 충돌 카테고리를 세팅합니다.
+    // this.setCollisionCategory(playerCollisionCategory);
   }
 
   move(directionX: number, directionY: number): void {
@@ -41,24 +44,24 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     this.setVelocity(this.moveSpeed * directionX, this.moveSpeed * directionY);
   }
 
-  setFlipX(isFlipX: boolean): this {
-    if (this.body !== null) {
-      // 현재 속도와 위치 저장
-      const currentVelocity = this.body.velocity;
-      const currentPosition = { x: this.x, y: this.y };
+  // setFlipX(isFlipX: boolean): this {
+  //   if (this.body !== null) {
+  //     // 현재 속도와 위치 저장
+  //     const currentVelocity = this.body.velocity;
+  //     const currentPosition = { x: this.x, y: this.y };
 
-      // 바디 교체
-      super.setFlipX(isFlipX);
-      const bodyData = isFlipX ? this.shapes.flipped : this.shapes.default;
-      this.setBody(bodyData);
+  //     // 바디 교체
+  //     super.setFlipX(isFlipX);
+  //     const bodyData = isFlipX ? this.shapes.flipped : this.shapes.default;
+  //     this.setBody(bodyData);
 
-      // 저장된 속도와 위치를 새 바디에 적용
-      this.setVelocity(currentVelocity.x, currentVelocity.y);
-      this.setPosition(currentPosition.x, currentPosition.y);
-    }
+  //     // 저장된 속도와 위치를 새 바디에 적용
+  //     this.setVelocity(currentVelocity.x, currentVelocity.y);
+  //     this.setPosition(currentPosition.x, currentPosition.y);
+  //   }
 
-    return this;
-  }
+  //   return this;
+  // }
 
   updateNicknamePosition(): void {
     this.nicknameSprite.setPosition(
