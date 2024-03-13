@@ -8,6 +8,17 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, plankton: Plankton, player: PlayerSprite) {
     super(world, plankton.centerX, plankton.centerY, "planktonGraphics", "", { isStatic: true });
 
+    this.setBody(
+      {
+        type: "circle",
+        sides: 5,
+        radius: 10
+      },
+      {
+        isStatic: true // 정적 바디로 설정
+      }
+    );
+
     this.plankton = plankton;
 
     this.graphics = scene.add.graphics();
