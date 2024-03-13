@@ -6,7 +6,8 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
   graphics: Phaser.GameObjects.Graphics;
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, plankton: Plankton, player: PlayerSprite) {
-    super(world, plankton.centerX, plankton.centerY, "planktonGraphics");
+    super(world, plankton.centerX, plankton.centerY, "planktonGraphics", "", { isStatic: true });
+
     this.plankton = plankton;
 
     this.graphics = scene.add.graphics();
@@ -27,8 +28,6 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
       "collisionstart",
       (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
         if (bodyA.gameObject === this && bodyB.gameObject?.playerId === player.playerId) {
-          // console.log("충돌");
-          // console.log(bodyA.gameObject, bodyB);
           this.onTriggerPlanktonEat();
         }
       }
