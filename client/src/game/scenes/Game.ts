@@ -11,6 +11,7 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import { speciesMap } from "../utils/species";
 import crashService from "../services/player/feat/crash";
 
 export class Game extends Scene {
@@ -28,28 +29,51 @@ export class Game extends Scene {
   }
 
   preload(): void {
-    this.load.spritesheet("sunfish", "assets/Sunfish_move.png", {
-      frameWidth: 192,
-      frameHeight: 192
-    });
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
-    this.load.json("shapes", "assets/shapes/sunfish-shapes.json");
+    this.load.json("shapes", "assets/shapes/shapes.json");
+    speciesMap.forEach((value) => {
+      try {
+        // 동적으로
+        this.load.spritesheet(value.key, value.spritesheetUrl, {
+          frameWidth: value.width,
+          frameHeight: value.height
+        });
+        this.anims.create({
+          key: value.key,
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
   create(): void {
     this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
-    this.anims.create({
-      key: "swim",
-      frames: this.anims.generateFrameNumbers("sunfish", {
-        start: 0,
-        end: 1
-      }),
-      frameRate: 3,
-      repeat: -1
+    // 모든 개체의 애니메이션 전부 등록
+    speciesMap.forEach((value) => {
+      try {
+        this.anims.create({
+          key: value.key + "_anims",
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     // 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
@@ -136,7 +160,12 @@ export class Game extends Scene {
 
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this.matter.world, this, "sunfish", playerInfo);
+    const newPlayer = new PlayerSprite(
+      this.matter.world,
+      this,
+      speciesMap.get(g.myInfo?.speciesId ?? 1)?.key ?? "nemo",
+      playerInfo
+    );
     this.playerList.set(playerInfo.playerId, newPlayer);
     return newPlayer;
   }

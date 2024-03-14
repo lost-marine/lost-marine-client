@@ -11,4 +11,5 @@ export type Player = {
   stopTime: number;
   level: number;
   point: number;
+  speciesId: number;
 } & Creature;
