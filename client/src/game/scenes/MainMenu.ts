@@ -14,7 +14,12 @@ export class MainMenu extends Scene {
     super("MainMenu");
   }
 
+  preload(): void {
+    this.load.audio("bgm", "assets/sounds/background.mp3");
+  }
+
   create(): void {
+    this.sound.add("bgm", { loop: true }).play();
     this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // 이미지의 스케일을 게임의 크기에 맞추기
