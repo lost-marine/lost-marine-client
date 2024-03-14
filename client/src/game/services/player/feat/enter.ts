@@ -11,7 +11,7 @@ type EnterService = {
 };
 
 const nemoUrl = "https://static-image-buckets.s3.ap-northeast-2.amazonaws.com/Nemo.gif";
-const nomalUrl = "https://static-image-buckets.s3.ap-northeast-2.amazonaws.com/NormalFish.gif";
+const mackerelUrl = "https://static-image-buckets.s3.ap-northeast-2.amazonaws.com/NormalFish.gif";
 
 const enterService: EnterService = {
   enterGame: async (nickname: string): Promise<void> => {
@@ -31,7 +31,7 @@ const enterService: EnterService = {
                 <h2>흰동가리</h2>
               </div>
               <div type="submit" onclick="speciesId=2; console.log(speciesId);">
-                <img height=192 src=${nomalUrl} />
+                <img height=192 src=${mackerelUrl} />
                 <h2>고등어</h2>
               </div>
             </div>
