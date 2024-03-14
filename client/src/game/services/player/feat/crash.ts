@@ -4,13 +4,13 @@ import type { PlayerCrashResponse, PlayerStatusInfo } from "../types/crash";
 import { EventBus } from "@/game/EventBus";
 
 type CrashService = {
-  crash: (playerId: number, attackedPlayerId: number) => void;
+  crash: (playerAId: number, playerBId: number) => void;
   onReceivedCrash: (playerStatusInfo: PlayerStatusInfo) => void;
 };
 
 const crashService: CrashService = {
-  crash: (playerId, attackedPlayerId) => {
-    socket.emit("player-crash", { playerId, attackedPlayerId }, ({ isSuccess, msg }: PlayerCrashResponse): void => {
+  crash: (playerAId, playerBId) => {
+    socket.emit("player-crash", { playerAId, playerBId }, ({ isSuccess, msg }: PlayerCrashResponse): void => {
       if (!isSuccess) {
         console.log(msg);
       }

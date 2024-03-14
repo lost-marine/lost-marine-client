@@ -93,16 +93,15 @@ export class Game extends Scene {
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
 
-    // 플레이어의 충돌(플레이어 간, 플랑크톤)을 구현합니다.
-    this.player.setOnCollide((collisionData: Phaser.Types.Physics.Matter.MatterCollisionData) => {
-      const bodyA: MatterJS.BodyType = collisionData.bodyA;
-      const bodyB: MatterJS.BodyType = collisionData.bodyB;
-
-      // 플레이어간 충돌
-      if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
-        crashService.crash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+    this.matter.world.on(
+      "collisionstart",
+      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
+        // 플레이어간 충돌
+        if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
+          crashService.crash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+        }
       }
-    });
+    );
   }
 
   update(): void {
