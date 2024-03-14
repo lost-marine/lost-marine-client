@@ -35,9 +35,19 @@ export class Game extends Scene {
     this.load.json("shapes", "assets/shapes/shapes.json");
     speciesMap.forEach((value) => {
       try {
+        // 동적으로
         this.load.spritesheet(value.key, value.spritesheetUrl, {
           frameWidth: value.width,
           frameHeight: value.height
+        });
+        this.anims.create({
+          key: value.key,
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
         });
       } catch (e) {
         console.error(e);
@@ -48,14 +58,21 @@ export class Game extends Scene {
   create(): void {
     this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
-    this.anims.create({
-      key: "swim",
-      frames: this.anims.generateFrameNumbers("sunfish", {
-        start: 0,
-        end: 1
-      }),
-      frameRate: 3,
-      repeat: -1
+    // 모든 개체의 애니메이션 전부 등록
+    speciesMap.forEach((value) => {
+      try {
+        this.anims.create({
+          key: value.key + "_anims",
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     // 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.

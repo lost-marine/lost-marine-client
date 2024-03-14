@@ -23,7 +23,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     this.name = player.nickname;
     this.moveSpeed = 10;
 
-    // this.anims.play("swim");
+    // 현재 개체에 맞는 애니메이션 재생
+    this.anims.play(speciesKey + "_anims");
 
     this.nicknameSprite = scene.add.text(0, 0, this.name, {
       fontSize: "16px",

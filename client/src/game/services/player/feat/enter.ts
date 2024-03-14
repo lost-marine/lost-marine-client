@@ -38,9 +38,9 @@ const enterService: EnterService = {
             `,
             icon: "question",
             allowEnterKey: false,
-            showCancelButton: true,
+            showDenyButton: true,
             confirmButtonText: "흰동가리",
-            cancelButtonText: `고등어`
+            denyButtonText: "고등어"
           }).then((result) => {
             if (result.isDismissed) {
               return;

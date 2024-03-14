@@ -9,5 +9,6 @@ export type Species = {
   evolutionSet: Set<number>;
   tierCode: number;
   spritesheetUrl: string;
-  shapesUrl: string;
+  frameStart: number;
+  frameEnd: number;
 };
