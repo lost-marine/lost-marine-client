@@ -14,7 +14,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     const shapes = scene.cache.json.get("shapes");
     const speciesKey = speciesMap.get(player.speciesId ?? 1)?.key ?? "nemo";
 
-    super(world, player.startX, player.startY, texture, 0, { shape: shapes[speciesKey] });
+    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes[speciesKey] });
     this.shapes = {
       default: shapes[speciesKey],
       flipped: shapes[speciesKey + "Flipped"]
@@ -35,7 +35,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
     // 인스턴스의 초기 스폰 위치를 설정합니다.
     scene.add.existing(this);
-    this.setPosition(Math.trunc(scene.cameras.main.centerX), Math.trunc(scene.cameras.main.centerY));
+    this.setPosition(player.centerX, player.centerY);
     this.updateNicknamePosition();
   }
 
@@ -45,7 +45,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   }
 
   setFlipX(isFlipX: boolean): this {
-    if (this.body !== null) {
+    // TODO: this.body가 가끔 undefined인 문제가 있습니다.
+    if (this.body !== null && this.body !== undefined) {
       // 현재 속도와 위치 저장
       const currentVelocity = this.body.velocity;
       const currentPosition = { x: this.x, y: this.y };

@@ -10,6 +10,8 @@ import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
+import type { PlayerStatusInfo } from "../services/player/types/crash";
+import crashService from "../services/player/feat/crash";
 
 export const state = reactive({
   connected: false
@@ -54,4 +56,9 @@ socket.on("quit", (playerId: number) => {
 // 다른 플레이어들의 위치 동기화 신호 수신
 socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
   onReceviedOthersPositionSync(positionsInfo);
+});
+
+// 플레이어 충돌 후 상태 수정
+socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
+  crashService.onReceivedCrash(playerStatusInfo);
 });

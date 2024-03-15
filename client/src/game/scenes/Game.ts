@@ -12,6 +12,7 @@ import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
 import { speciesMap } from "../utils/species";
+import crashService from "../services/player/feat/crash";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -115,6 +116,16 @@ export class Game extends Scene {
       const planktonGraphic = new PlanktonGraphics(this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
+
+    this.matter.world.on(
+      "collisionstart",
+      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
+        // 플레이어간 충돌
+        if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
+          this.sendPlayerCrash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+        }
+      }
+    );
   }
 
   update(): void {
@@ -162,8 +173,8 @@ export class Game extends Scene {
   sendSyncPosition = _.throttle(() => {
     syncMyPosition({
       playerId: this.player.playerId,
-      startX: this.player.x,
-      startY: this.player.y,
+      centerX: this.player.x,
+      centerY: this.player.y,
       direction: this.direction,
       isFlipX: this.player.flipX
     });
@@ -212,24 +223,28 @@ export class Game extends Scene {
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
         const targetPlayerSprite = this.playerList.get(targetPlayer.playerId);
         if (targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
-          targetPlayerSprite.x = player.startX;
-          targetPlayerSprite.y = player.startY;
+          targetPlayerSprite.x = player.centerX;
+          targetPlayerSprite.y = player.centerY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
           targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
+          targetPlayerSprite.updateNicknamePosition();
         }
       }
     });
   }
+
+  sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
+    crashService.crash(playerAId, playerBId);
+  }, 30);
 
   changeScene(): void {
     this.scene.start("GameOver");
   }
 
   createTilemap(): boolean {
-    // 맵(지형지물)을 그립니다.
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
     const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
     const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
