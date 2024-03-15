@@ -2,6 +2,7 @@ import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
 import { inputNameElement } from "../components/inputNameElement";
 import enterService from "../services/player/feat/enter";
+import type { SceneType } from "../types/scene";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -84,7 +85,7 @@ export class MainMenu extends Scene {
     await enterService.enterGame(nickname);
   }
 
-  changeScene(): void {
-    this.scene.start("Game");
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }

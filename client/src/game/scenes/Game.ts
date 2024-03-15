@@ -13,6 +13,9 @@ import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
 import { speciesMap } from "../utils/species";
 import crashService from "../services/player/feat/crash";
+import { SCENE } from "../constants/scene";
+import Swal from "sweetalert2";
+import type { SceneType } from "../types/scene";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -57,10 +60,11 @@ export class Game extends Scene {
     });
   }
 
-  create(): void {
+  async create(): Promise<void> {
     this.sound.add("bgm", { loop: true }).play();
     this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
+
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
       try {
@@ -90,8 +94,10 @@ export class Game extends Scene {
         });
       }
     } else {
-      this.changeScene();
-      throw new Error("맵 생성 중 오류가 발생했습니다.");
+      await Swal.fire("error", "맵 생성 중 오류가 발생했습니다.", "error").then(() => {
+        EventBus.emit("change-scene", SCENE.MAIN_MENU);
+        throw new Error("맵 생성 중 오류가 발생했습니다.");
+      });
     }
 
     // 카메라 뷰를 관리합니다.
@@ -198,6 +204,9 @@ export class Game extends Scene {
         case "others-position-sync":
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
+        case "game-over":
+          this.onReceivedGameOver();
+          break;
       }
     }
   }
@@ -238,13 +247,13 @@ export class Game extends Scene {
     });
   }
 
+  onReceivedGameOver(): void {
+    EventBus.emit("change-scene", SCENE.GAME_OVER);
+  }
+
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
     crashService.crash(playerAId, playerBId);
   }, 30);
-
-  changeScene(): void {
-    this.scene.start("GameOver");
-  }
 
   createTilemap(): boolean {
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
@@ -274,5 +283,9 @@ export class Game extends Scene {
     this.matter.world.convertTilemapLayer(this.collisionLayer);
 
     return true;
+  }
+
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }

@@ -7,6 +7,8 @@ import StartGame from "./main";
 import g from "./utils/global";
 import { socket } from "./utils/socket";
 import PlayerStatus from "./components/PlayerStatus.vue";
+import type { SceneType } from "./types/scene";
+
 // Save the current scene instance
 const scene = ref();
 const game = ref();
@@ -25,12 +27,12 @@ onMounted(() => {
     if (g.currentScene === SCENE.MAIN_MENU) {
       g.currentScene = SCENE.GAME;
       showGamePanel.value = true;
-      emit("change-scene");
+      emit("change-scene", SCENE.GAME);
     }
   });
 
-  EventBus.on("change-scene", () => {
-    emit("change-scene");
+  EventBus.on("change-scene", (newScene: SceneType) => {
+    emit("change-scene", newScene);
   });
 
   socket.connect();

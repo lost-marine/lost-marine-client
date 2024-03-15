@@ -4,7 +4,6 @@ import type { Player } from "../types/player";
 import { type EnterResponse } from "../services/player";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { onReceviedOthersPositionSync } from "../services/player/feat/movement";
-import { onReceviedQuit } from "../services/player/feat/quit";
 import g from "./global";
 import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
@@ -12,6 +11,8 @@ import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
+import quitService from "../services/player/feat/quit";
+import type { GameOverResponse } from "../services/player/types/quit";
 
 export const state = reactive({
   connected: false
@@ -50,7 +51,11 @@ socket.on("player-enter", (newPlayer: Player) => {
 
 // 다른 플레이어가 게임방 퇴장
 socket.on("quit", (playerId: number) => {
-  onReceviedQuit(playerId);
+  quitService.onReceviedQuit(playerId);
+});
+
+socket.on("game-over", async (gameOverResponse: GameOverResponse) => {
+  quitService.onReceviedGameOver(gameOverResponse);
 });
 
 // 다른 플레이어들의 위치 동기화 신호 수신

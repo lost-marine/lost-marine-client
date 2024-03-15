@@ -1,5 +1,6 @@
 import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
+import type { SceneType } from "../types/scene";
 
 export class GameOver extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
@@ -32,7 +33,7 @@ export class GameOver extends Scene {
     EventBus.emit("current-scene-ready", this);
   }
 
-  changeScene(): void {
-    this.scene.start("MainMenu");
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }
