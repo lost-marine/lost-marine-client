@@ -29,6 +29,7 @@ export class Game extends Scene {
   }
 
   preload(): void {
+    this.load.audio("bgm", "assets/sounds/background.mp3");
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
     this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
@@ -57,6 +58,7 @@ export class Game extends Scene {
   }
 
   create(): void {
+    this.sound.add("bgm", { loop: true }).play();
     this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
     // 모든 개체의 애니메이션 전부 등록
