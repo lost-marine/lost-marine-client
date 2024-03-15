@@ -1,33 +1,33 @@
 <script setup lang="ts">
 import { ref, type Ref } from "vue";
+import g from "../utils/global";
+import { socket } from "../utils/socket";
 
-interface Message {
+export type ChatMessage = {
   playerId: number;
-  speciesName: string;
+  speciesname: string;
   nickname: string;
   msg: string;
   timeStamp: number;
-}
+};
 
-interface NewMessage {
+export type NewChatMessage = {
   playerId: number;
   msg: string;
-}
+};
 
 const toggleChatPanel: Ref<boolean> = ref(false);
-const messages: Ref<Message[]> = ref([]);
 const newMessage: Ref<string> = ref("");
 
-// 소켓 통신 on
-
 function sendMessage(): void {
-  if (newMessage.value.trim() !== "") {
-    const message: NewMessage = {
-      playerId: 1,
+  if (newMessage.value !== "" && g.myInfo !== null) {
+    const message: NewChatMessage = {
+      playerId: g.myInfo?.playerId,
       msg: newMessage.value
     };
+
     // 소켓 통신 emit
-    message.msg = message.msg.trim();
+    socket.emit("chat-message-send", message);
     newMessage.value = ""; // 입력 필드를 비웁니다
   }
 }
@@ -38,9 +38,8 @@ function sendMessage(): void {
     <div class="chat-container" v-if="toggleChatPanel">
       <span class="close-button" @click="toggleChatPanel = false">✖</span>
       <div class="chat-message">
-        메시지목록
-        <div v-for="(message, idx) in messages" :key="idx">
-          {{ message.msg }}
+        <div v-for="(message, idx) in g.chatMessageList.value" :key="idx">
+          [{{ message.speciesname }}] {{ message.nickname }} 💬 {{ message.msg }}
         </div>
       </div>
     </div>
@@ -100,11 +99,6 @@ function sendMessage(): void {
 
     .input-area:focus {
       outline: none;
-      border: none;
-    }
-
-    .input-area::placeholder {
-      color: rgba(255, 255, 255, 0.752);
     }
 
     .send-button {

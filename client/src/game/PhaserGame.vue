@@ -11,7 +11,7 @@ import ChatPanel from "./components/ChatPanel.vue";
 const scene = ref();
 const game = ref();
 const emit = defineEmits(["current-active-scene", "change-scene"]);
-const showGamePanel: Ref<boolean> = ref<boolean>(true);
+const showGamePanel: Ref<boolean> = ref<boolean>(false);
 
 onMounted(() => {
   game.value = StartGame("game-container");

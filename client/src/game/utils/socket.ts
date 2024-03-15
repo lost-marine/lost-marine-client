@@ -10,6 +10,7 @@ import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
+import type { ChatMessage } from "../components/ChatPanel.vue";
 
 export const state = reactive({
   connected: false
@@ -54,4 +55,9 @@ socket.on("quit", (playerId: number) => {
 // 다른 플레이어들의 위치 동기화 신호 수신
 socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
   onReceviedOthersPositionSync(positionsInfo);
+});
+
+// 플레이어가 입력한 채팅 메시지 수신
+socket.on("chat-message-receive", (message: ChatMessage) => {
+  g.chatMessageList.value.push(message);
 });
