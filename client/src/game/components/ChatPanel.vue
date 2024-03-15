@@ -2,19 +2,7 @@
 import { ref, type Ref } from "vue";
 import g from "../utils/global";
 import { socket } from "../utils/socket";
-
-export type ChatMessage = {
-  playerId: number;
-  speciesname: string;
-  nickname: string;
-  msg: string;
-  timeStamp: number;
-};
-
-export type NewChatMessage = {
-  playerId: number;
-  msg: string;
-};
+import type { NewChatMessage } from "../types/chatMessage";
 
 const toggleChatPanel: Ref<boolean> = ref(false);
 const newMessage: Ref<string> = ref("");
@@ -107,6 +95,10 @@ function sendMessage(): void {
       border-radius: 10px;
       height: 2rem;
       font-size: larger;
+    }
+
+    .send-button:focus {
+      outline: none;
     }
   }
 }

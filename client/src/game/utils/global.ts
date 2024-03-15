@@ -4,8 +4,8 @@ import type { BaseSocketObject } from "../types/socket";
 import type { Plankton } from "../types/plankton";
 import type { SceneType } from "../types/scene";
 import { SCENE } from "../constants/scene";
-import type { ChatMessage } from "../components/ChatPanel.vue";
 import { ref, type Ref } from "vue";
+import type { ChatMessage } from "../types/chatMessage";
 
 type GlobalStore = {
   myInfo: null | Player;
