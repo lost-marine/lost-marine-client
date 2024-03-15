@@ -122,7 +122,7 @@ export class Game extends Scene {
       (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
         // 플레이어간 충돌
         if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
-          crashService.crash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+          this.sendPlayerCrash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
         }
       }
     );
@@ -235,6 +235,10 @@ export class Game extends Scene {
       }
     });
   }
+
+  sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
+    crashService.crash(playerAId, playerBId);
+  }, 30);
 
   changeScene(): void {
     this.scene.start("GameOver");

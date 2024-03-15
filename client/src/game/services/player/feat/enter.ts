@@ -52,7 +52,6 @@ const enterService: EnterService = {
               speciesId = 2;
             }
             if (speciesId !== 0) {
-              console.log(speciesId);
               socket.emit("player-enter", { nickname, speciesId }, async (response: NameCertificateResponse) => {
                 if (response.isSuccess) {
                   await Swal.fire("게임에 입장하는 중", "게임에 입장하고 있습니다. 잠시만 기다려주세요.", "info");

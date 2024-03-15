@@ -45,7 +45,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   }
 
   setFlipX(isFlipX: boolean): this {
-    if (this.body !== null) {
+    // TODO: this.body가 가끔 undefined인 문제가 있습니다.
+    if (this.body !== null && this.body !== undefined) {
       // 현재 속도와 위치 저장
       const currentVelocity = this.body.velocity;
       const currentPosition = { x: this.x, y: this.y };
