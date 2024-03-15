@@ -30,14 +30,14 @@ export class MainMenu extends Scene {
     // 계산된 스케일로 이미지 스케일 설정
     this.background.setScale(scale).setScrollFactor(0);
 
-    this.logo = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, "logo").setDepth(100);
-
+    this.logo = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 3, "logo").setDepth(100);
+    this.logo.setScale(1.3);
     // name form
     this.inputElement = inputNameElement();
 
     // Phaser DOMElement로 추가
     this.nameInput = this.add
-      .dom(this.cameras.main.width / 2, 480, this.inputElement)
+      .dom(this.cameras.main.width / 2, this.cameras.main.height / 2, this.inputElement)
       .setOrigin(0.5, 0.5)
       .setDepth(100);
 
@@ -52,7 +52,7 @@ export class MainMenu extends Scene {
 
     // 게임시작 버튼 추가
     this.startButton = this.add
-      .text(this.cameras.main.width / 2, 550, "게임 시작", {
+      .text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 100, "게임 시작", {
         fontFamily: "Arial Black",
         fontSize: 38,
         color: "#ffffff",
