@@ -27,7 +27,7 @@ function sendMessage(): void {
       <span class="close-button" @click="toggleChatPanel = false">✖</span>
       <div class="chat-message">
         <div v-for="(message, idx) in g.chatMessageList.value" :key="idx">
-          [{{ message.speciesname }}] {{ message.nickname }} 💬 {{ message.msg }}
+          [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
         </div>
       </div>
     </div>
@@ -59,6 +59,7 @@ function sendMessage(): void {
   .chat-container {
     display: flex;
     flex-direction: column;
+    margin-bottom: 0.5rem;
 
     .close-button {
       cursor: pointer;
@@ -67,6 +68,23 @@ function sendMessage(): void {
 
     .chat-message {
       height: 15rem;
+      overflow-y: scroll;
+    }
+
+    .chat-message::-webkit-scrollbar {
+      width: 16px;
+      height: 16px;
+    }
+
+    .chat-message::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-message::-webkit-scrollbar-thumb {
+      border: 6px solid rgba(255, 255, 255, 0);
+      background-clip: padding-box;
+      border-radius: 8px;
+      background-color: white;
     }
   }
 
