@@ -248,6 +248,7 @@ export class Game extends Scene {
   }
 
   onReceivedGameOver(): void {
+    g.myInfo = null;
     EventBus.emit("change-scene", SCENE.GAME_OVER);
   }
 

@@ -54,6 +54,7 @@ socket.on("quit", (playerId: number) => {
   quitService.onReceviedQuit(playerId);
 });
 
+// 플레이어가 게임 오버 당함
 socket.on("game-over", async (gameOverResponse: GameOverResponse) => {
   quitService.onReceviedGameOver(gameOverResponse);
 });

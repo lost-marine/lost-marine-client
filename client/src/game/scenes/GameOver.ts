@@ -11,7 +11,12 @@ export class GameOver extends Scene {
     super("GameOver");
   }
 
+  preload(): void {
+    this.load.audio("bgm", "assets/sounds/background.mp3");
+  }
+
   create(): void {
+    this.sound.add("bgm", { loop: true }).play();
     this.camera = this.cameras.main;
     this.camera.setBackgroundColor(0xff0000);
 

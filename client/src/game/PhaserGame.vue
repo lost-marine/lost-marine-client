@@ -32,6 +32,7 @@ onMounted(() => {
   });
 
   EventBus.on("change-scene", (newScene: SceneType) => {
+    g.currentScene = newScene;
     emit("change-scene", newScene);
   });
 
