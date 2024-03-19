@@ -13,6 +13,7 @@ import type { PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
+import { SCENE } from "../constants/scene";
 
 export const state = reactive({
   connected: false
@@ -41,7 +42,7 @@ socket.on("game-start", async (response: EnterResponse) => {
     g.planktonMap.set(plankton.planktonId, plankton);
   });
   Swal.close();
-  EventBus.emit("game-start");
+  EventBus.emit("change-scene", SCENE.GAME);
 });
 
 // 다른 플레이어가 게임방 입장

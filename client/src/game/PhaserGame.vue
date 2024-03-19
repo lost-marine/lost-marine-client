@@ -23,16 +23,9 @@ onMounted(() => {
     scene.value = sceneInstance;
   });
 
-  EventBus.on("game-start", () => {
-    if (g.currentScene === SCENE.MAIN_MENU) {
-      g.currentScene = SCENE.GAME;
-      showGamePanel.value = true;
-      emit("change-scene", SCENE.GAME);
-    }
-  });
-
   EventBus.on("change-scene", (newScene: SceneType) => {
     g.currentScene = newScene;
+    showGamePanel.value = newScene === SCENE.GAME;
     emit("change-scene", newScene);
   });
 
