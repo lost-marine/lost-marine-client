@@ -95,7 +95,7 @@ function closeChatPanel(): void {
   width: 100%;
 
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--semi-transparent-black);
   bottom: 2rem;
   left: 1rem;
 
@@ -127,7 +127,7 @@ function closeChatPanel(): void {
     }
 
     .chat-list::-webkit-scrollbar-thumb {
-      border: 6px solid rgba(255, 255, 255, 0);
+      border: 6px solid transparent;
       background-clip: padding-box;
       border-radius: 8px;
       background-color: white;
