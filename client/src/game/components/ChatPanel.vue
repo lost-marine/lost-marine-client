@@ -95,6 +95,9 @@ function closeChatPanel(): void {
 
 <style scoped lang="scss">
 .container {
+  max-width: 25rem;
+  width: 100%;
+
   position: absolute;
   background-color: rgba(0, 0, 0, 0.5);
   bottom: 2rem;
@@ -138,9 +141,10 @@ function closeChatPanel(): void {
   .input-group {
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
     .input-area {
-      width: 20rem;
+      width: 100%;
       background-color: black;
       color: white;
 
