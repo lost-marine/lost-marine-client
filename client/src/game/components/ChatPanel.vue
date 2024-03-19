@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, type Ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 import g from "../utils/global";
 import { socket } from "../utils/socket";
 import type { NewChatMessage } from "../types/chatMessage";
 
 const toggleChatPanel: Ref<boolean> = ref(false);
 const newMessage: Ref<string> = ref("");
+const focusInput: Ref<boolean> = ref(false);
 
 function sendMessage(): void {
   if (newMessage.value !== "" && g.myInfo !== null) {
@@ -14,17 +15,61 @@ function sendMessage(): void {
       msg: newMessage.value
     };
 
-    // 소켓 통신 emit
     socket.emit("chat-message-send", message);
-    newMessage.value = ""; // 입력 필드를 비웁니다
+    newMessage.value = "";
   }
+}
+
+watch(
+  () => g.chatMessageList.value,
+  () => {
+    window.setTimeout(autoScrollDown, 1);
+  },
+  { deep: true }
+);
+
+function autoScrollDown(): void {
+  const chatElement: HTMLInputElement | null = document.querySelector(".chat-message");
+  if (chatElement !== null) {
+    chatElement.scrollTop = chatElement.scrollHeight;
+    chatElement.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+addEventListener("keydown", (event: KeyboardEvent) => {
+  const inputElement: HTMLInputElement | null = document.querySelector(".input-area");
+
+  // 채팅창에 포커스되어있을 때, 공백 입력을 받습니다.
+  if (focusInput.value && event.key === " ") {
+    newMessage.value += " ";
+  }
+  // Enter를 입력하면, 채팅창에 포커스됩니다.
+  else if (event.key === "Enter" && !toggleChatPanel.value) {
+    inputElement?.focus();
+    openChatPanel();
+  }
+  // Escape를 입력하면, 채팅창 포커스가 해제됩니다.
+  else if (event.key === "Escape" && toggleChatPanel.value) {
+    inputElement?.blur();
+    closeChatPanel();
+  }
+});
+
+function openChatPanel(): void {
+  toggleChatPanel.value = true;
+  newMessage.value = "";
+  window.setTimeout(autoScrollDown, 1);
+}
+
+function closeChatPanel(): void {
+  toggleChatPanel.value = false;
 }
 </script>
 
 <template>
   <div class="container">
     <div class="chat-container" v-if="toggleChatPanel">
-      <span class="close-button" @click="toggleChatPanel = false">✖</span>
+      <span class="close-button" @click="closeChatPanel()">✖</span>
       <div class="chat-message">
         <div v-for="(message, idx) in g.chatMessageList.value" :key="idx">
           [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
@@ -38,10 +83,12 @@ function sendMessage(): void {
         type="text"
         v-model="newMessage"
         placeholder="텍스트 입력..."
-        @mousedown="toggleChatPanel = true"
-        @keyup.enter="sendMessage"
+        @mousedown="openChatPanel()"
+        @keyup.enter="sendMessage()"
+        @focus="focusInput = true"
+        @blur="focusInput = false"
       />
-      <button class="send-button" @click="sendMessage">💌</button>
+      <button class="send-button" @click="sendMessage()">💌</button>
     </div>
   </div>
 </template>
