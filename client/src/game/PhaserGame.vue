@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import type Phaser from "phaser";
 import { onMounted, onUnmounted, ref, type Ref } from "vue";
+import { SCENE } from "./constants/scene";
 import { EventBus } from "./EventBus";
 import StartGame from "./main";
-import type Phaser from "phaser";
-import { socket } from "./utils/socket";
 import g from "./utils/global";
-import { SCENE } from "./constants/scene";
 import ChatPanel from "./components/ChatPanel.vue";
+import { socket } from "./utils/socket";
+import PlayerStatus from "./components/PlayerStatus.vue";
 // Save the current scene instance
 const scene = ref();
 const game = ref();
@@ -51,5 +52,6 @@ defineExpose({ scene, game });
 <template>
   <div id="game-container">
     <ChatPanel v-if="showGamePanel" />
+    <PlayerStatus v-if="showGamePanel" />
   </div>
 </template>

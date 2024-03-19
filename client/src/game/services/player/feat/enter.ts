@@ -23,24 +23,13 @@ const enterService: EnterService = {
         if (response.isSuccess) {
           await Swal.fire({
             title: "새로 탄생할 생명을 선택해주세요.",
-            input: "radio",
-            html: `
-            <div style='display : flex; justify-content: space-around'>
-               <div type="submit" onclick="console.log(setSpeciesId); setSpeciesId(1); ">
-                <img src=${nemoUrl} />
-                <h2>흰동가리</h2>
-              </div>
-              <div type="submit" onclick="speciesId=2; console.log(speciesId);">
-                <img height=192 src=${mackerelUrl} />
-                <h2>고등어</h2>
-              </div>
-            </div>
-            `,
             icon: "question",
-            allowEnterKey: false,
             showDenyButton: true,
-            confirmButtonText: "흰동가리",
-            denyButtonText: "고등어"
+            confirmButtonText: `<img src=${nemoUrl} />
+                <h2>흰동가리</h2>`,
+            denyButtonText: `<img height=192 src=${mackerelUrl} />
+                <h2>고등어</h2>`,
+            denyButtonColor: "#76ABE8"
           }).then((result) => {
             if (result.isDismissed) {
               return;
@@ -52,7 +41,6 @@ const enterService: EnterService = {
               speciesId = 2;
             }
             if (speciesId !== 0) {
-              console.log(speciesId);
               socket.emit("player-enter", { nickname, speciesId }, async (response: NameCertificateResponse) => {
                 if (response.isSuccess) {
                   await Swal.fire("게임에 입장하는 중", "게임에 입장하고 있습니다. 잠시만 기다려주세요.", "info");

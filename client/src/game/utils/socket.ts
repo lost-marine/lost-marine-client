@@ -10,7 +10,9 @@ import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
-import type { ChatMessage } from "../components/ChatPanel.vue";
+import type { PlayerStatusInfo } from "../services/player/types/crash";
+import crashService from "../services/player/feat/crash";
+import type { ChatMessage } from "../types/chatMessage";
 
 export const state = reactive({
   connected: false
@@ -60,4 +62,9 @@ socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
 // 플레이어가 입력한 채팅 메시지 수신
 socket.on("chat-message-receive", (message: ChatMessage) => {
   g.chatMessageList.value.push(message);
+});
+
+// 플레이어 충돌 후 상태 수정
+socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
+  crashService.onReceivedCrash(playerStatusInfo);
 });
