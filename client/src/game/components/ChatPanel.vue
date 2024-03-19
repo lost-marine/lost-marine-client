@@ -2,46 +2,42 @@
 import { ref, watch, type Ref } from "vue";
 import g from "../utils/global";
 import { socket } from "../utils/socket";
-import type { NewChatMessage } from "../types/chatMessage";
+import type { InputChat } from "../types/chat";
 
 const toggleChatPanel: Ref<boolean> = ref(false);
-const newMessage: Ref<string> = ref("");
+const inputMessage: Ref<string> = ref("");
 const focusInput: Ref<boolean> = ref(false);
 
 function sendMessage(): void {
-  if (newMessage.value !== "" && g.myInfo !== null) {
-    const message: NewChatMessage = {
+  if (inputMessage.value !== "" && g.myInfo !== null) {
+    const message: InputChat = {
       playerId: g.myInfo?.playerId,
-      msg: newMessage.value
+      msg: inputMessage.value
     };
 
     socket.emit("chat-message-send", message);
-    newMessage.value = "";
+    inputMessage.value = "";
   }
 }
 
 watch(
-  () => g.chatMessageList.value,
+  () => g.chatList.value,
   () => {
-    window.setTimeout(autoScrollDown, 1);
+    const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
+    if (chatElement !== null) {
+      chatElement.scrollTop = chatElement.scrollHeight;
+      chatElement.scrollIntoView({ behavior: "smooth" });
+    }
   },
-  { deep: true }
+  { deep: true, flush: "post" }
 );
 
-function autoScrollDown(): void {
-  const chatElement: HTMLInputElement | null = document.querySelector(".chat-message");
-  if (chatElement !== null) {
-    chatElement.scrollTop = chatElement.scrollHeight;
-    chatElement.scrollIntoView({ behavior: "smooth" });
-  }
-}
-
 addEventListener("keydown", (event: KeyboardEvent) => {
-  const inputElement: HTMLInputElement | null = document.querySelector(".input-area");
+  const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
 
   // 채팅창에 포커스되어있을 때, 공백 입력을 받습니다.
   if (focusInput.value && event.key === " ") {
-    newMessage.value += " ";
+    inputMessage.value += " ";
   }
   // Enter를 입력하면, 채팅창에 포커스됩니다.
   else if (event.key === "Enter" && !toggleChatPanel.value) {
@@ -57,8 +53,8 @@ addEventListener("keydown", (event: KeyboardEvent) => {
 
 function openChatPanel(): void {
   toggleChatPanel.value = true;
-  newMessage.value = "";
-  window.setTimeout(autoScrollDown, 1);
+  inputMessage.value = "";
+  // 자동으로 스크롤을 아래로 내리는 코드 추가
 }
 
 function closeChatPanel(): void {
@@ -70,8 +66,8 @@ function closeChatPanel(): void {
   <div class="container">
     <div class="chat-container" v-if="toggleChatPanel">
       <span class="close-button" @click="closeChatPanel()">✖</span>
-      <div class="chat-message">
-        <div v-for="(message, idx) in g.chatMessageList.value" :key="idx">
+      <div class="chat-list">
+        <div v-for="(message, idx) in g.chatList.value" :key="idx">
           [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
         </div>
       </div>
@@ -79,9 +75,9 @@ function closeChatPanel(): void {
 
     <div class="input-group">
       <input
-        class="input-area"
+        class="input-field"
         type="text"
-        v-model="newMessage"
+        v-model="inputMessage"
         placeholder="텍스트 입력..."
         @mousedown="openChatPanel()"
         @keyup.enter="sendMessage()"
@@ -116,21 +112,21 @@ function closeChatPanel(): void {
       align-self: flex-end;
     }
 
-    .chat-message {
+    .chat-list {
       height: 15rem;
       overflow-y: scroll;
     }
 
-    .chat-message::-webkit-scrollbar {
+    .chat-list::-webkit-scrollbar {
       width: 16px;
       height: 16px;
     }
 
-    .chat-message::-webkit-scrollbar-track {
+    .chat-list::-webkit-scrollbar-track {
       background: transparent;
     }
 
-    .chat-message::-webkit-scrollbar-thumb {
+    .chat-list::-webkit-scrollbar-thumb {
       border: 6px solid rgba(255, 255, 255, 0);
       background-clip: padding-box;
       border-radius: 8px;
@@ -143,7 +139,7 @@ function closeChatPanel(): void {
     align-items: center;
     justify-content: space-between;
 
-    .input-area {
+    .input-field {
       width: 100%;
       background-color: black;
       color: white;
@@ -154,7 +150,7 @@ function closeChatPanel(): void {
       border: none;
     }
 
-    .input-area:focus {
+    .input-field:focus {
       outline: none;
     }
 
@@ -172,3 +168,4 @@ function closeChatPanel(): void {
   }
 }
 </style>
+../types/chat

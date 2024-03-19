@@ -1,4 +1,4 @@
-export type ChatMessage = {
+export type Chat = {
   playerId: number;
   speciesname: string;
   nickname: string;
@@ -6,7 +6,7 @@ export type ChatMessage = {
   timeStamp: number;
 };
 
-export type NewChatMessage = {
+export type InputChat = {
   playerId: number;
   msg: string;
 };

@@ -5,7 +5,7 @@ import type { Plankton } from "../types/plankton";
 import type { SceneType } from "../types/scene";
 import { SCENE } from "../constants/scene";
 import { ref, type Ref } from "vue";
-import type { ChatMessage } from "../types/chatMessage";
+import type { Chat } from "../types/chat";
 
 type GlobalStore = {
   myInfo: null | Player;
@@ -13,7 +13,7 @@ type GlobalStore = {
   eventQueue: Queue<BaseSocketObject>;
   planktonMap: Map<number, Plankton>;
   currentScene: SceneType;
-  chatMessageList: Ref<ChatMessage[]>;
+  chatList: Ref<Chat[]>;
 };
 const g: GlobalStore = {
   myInfo: null,
@@ -21,7 +21,7 @@ const g: GlobalStore = {
   eventQueue: new Queue<BaseSocketObject>(),
   planktonMap: new Map<number, Plankton>(),
   currentScene: SCENE.MAIN_MENU,
-  chatMessageList: ref<ChatMessage[]>([])
+  chatList: ref<Chat[]>([])
 };
 
 export default g;
