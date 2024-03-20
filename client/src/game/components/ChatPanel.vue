@@ -3,6 +3,7 @@ import { ref, watch, type Ref } from "vue";
 import g from "../utils/global";
 import { socket } from "../utils/socket";
 import type { InputChat } from "../types/chat";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 const toggleChatPanel: Ref<boolean> = ref(false);
 const inputMessage: Ref<string> = ref("");
@@ -20,17 +21,17 @@ function sendMessage(): void {
   }
 }
 
-watch(
-  () => g.chatList.value,
-  () => {
-    const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
-    if (chatElement !== null) {
-      chatElement.scrollTop = chatElement.scrollHeight;
-      chatElement.scrollIntoView({ behavior: "smooth" });
-    }
-  },
-  { deep: true, flush: "post" }
-);
+// watch(
+//   () => g.chatList.value,
+//   () => {
+//     const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
+//     if (chatElement !== null) {
+//       chatElement.scrollTop = chatElement.scrollHeight;
+//       chatElement.scrollIntoView({ behavior: "smooth" });
+//     }
+//   },
+//   { deep: true, flush: "post" }
+// );
 
 addEventListener("keydown", (event: KeyboardEvent) => {
   const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
@@ -60,17 +61,36 @@ function openChatPanel(): void {
 function closeChatPanel(): void {
   toggleChatPanel.value = false;
 }
+
+// for (let i = 0; i < 100; i++) {
+//   g.chatList.value.push({
+//     playerId: i,
+//     speciesname: "고등어",
+//     nickname: "테스트",
+//     msg: "채팅테스트" + i,
+//     timeStamp: i
+//   });
+// }
 </script>
 
 <template>
   <div class="container">
     <div class="chat-container" v-if="toggleChatPanel">
       <span class="close-button" @click="closeChatPanel()">✖</span>
-      <div class="chat-list">
+      <!-- <div class="chat-list">
         <div v-for="(message, idx) in g.chatList.value" :key="idx">
           [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
         </div>
-      </div>
+      </div> -->
+      <DynamicScroller :items="g.chatList.value" :min-item-size="50" class="chat-list" key-field="timeStamp">
+        <template v-slot="{ item, active }">
+          <DynamicScrollerItem :item="item" :active="active" :size-dependencies="[item.speciesname, item.nickname]">
+            <div class="scroller-item">
+              [{{ item.speciesname }}] <strong>{{ item.nickname }}</strong> 💬 {{ item.msg }}
+            </div>
+          </DynamicScrollerItem>
+        </template>
+      </DynamicScroller>
     </div>
 
     <div class="input-group">
