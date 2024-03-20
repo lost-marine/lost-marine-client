@@ -24,8 +24,7 @@ onMounted(() => {
   });
 
   EventBus.on("change-scene", (newScene: SceneType) => {
-    g.currentScene = newScene === SCENE.GAME ? SCENE.GAME_OVER : newScene;
-    // g.currentScene = newScene;
+    g.currentScene = newScene;
     showGamePanel.value = g.currentScene === SCENE.GAME;
     emit("change-scene", g.currentScene);
   });

@@ -4,12 +4,16 @@ import type { SceneType } from "../types/scene";
 import g from "../utils/global";
 import { speciesMap } from "../constants/species";
 import type { Species } from "../types/species";
+import type { GameOverResponse } from "../services/player/types/quit";
+import { SCENE } from "../constants/scene";
 
 export class GameOver extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
-  speciesInfo: null | Species;
+  mySpeciesInfo: null | Species;
+  attackerSpeciesInfo: null | Species;
   newGameButton: Phaser.GameObjects.Image;
+  gameOverResult: GameOverResponse;
 
   constructor() {
     super("GameOver");
@@ -17,17 +21,45 @@ export class GameOver extends Scene {
 
   preload(): void {
     this.load.audio("bgm", "assets/sounds/background.mp3");
-    if (g.myInfo != null) this.speciesInfo = speciesMap.get(g.myInfo?.speciesId) ?? null;
-    if (this.speciesInfo != null) {
-      this.load.spritesheet(this.speciesInfo.key, this.speciesInfo.spritesheetUrl, {
-        frameWidth: this.speciesInfo.width,
-        frameHeight: this.speciesInfo.height
+    if (g.gameOverResult != null) {
+      if (g.gameOverResult.playerId === g.myInfo?.playerId) {
+        if (g.myInfo != null) this.mySpeciesInfo = speciesMap.get(g.myInfo?.speciesId) ?? null;
+        this.attackerSpeciesInfo = speciesMap.get(g.gameOverResult.attackerSpeciesId) ?? null;
+        this.gameOverResult = g.gameOverResult;
+      } else {
+        this.restartGame();
+      }
+    } else {
+      this.restartGame();
+    }
+    // 내 캐릭터 이미지 로드
+    if (this.mySpeciesInfo != null) {
+      this.load.spritesheet(this.mySpeciesInfo.key, this.mySpeciesInfo.spritesheetUrl, {
+        frameWidth: this.mySpeciesInfo.width,
+        frameHeight: this.mySpeciesInfo.height
       });
       this.anims.create({
-        key: this.speciesInfo.key,
-        frames: this.anims.generateFrameNumbers(this.speciesInfo.key, {
-          start: this.speciesInfo.frameStart,
-          end: this.speciesInfo.frameEnd
+        key: this.mySpeciesInfo.key,
+        frames: this.anims.generateFrameNumbers(this.mySpeciesInfo.key, {
+          start: this.mySpeciesInfo.frameStart,
+          end: this.mySpeciesInfo.frameEnd
+        }),
+        frameRate: 3,
+        repeat: -1
+      });
+    }
+
+    // 날 먹은 캐릭터 이미지 로드
+    if (this.attackerSpeciesInfo != null) {
+      this.load.spritesheet(this.attackerSpeciesInfo.key, this.attackerSpeciesInfo.spritesheetUrl, {
+        frameWidth: this.attackerSpeciesInfo.width,
+        frameHeight: this.attackerSpeciesInfo.height
+      });
+      this.anims.create({
+        key: this.attackerSpeciesInfo.key,
+        frames: this.anims.generateFrameNumbers(this.attackerSpeciesInfo.key, {
+          start: this.attackerSpeciesInfo.frameStart,
+          end: this.attackerSpeciesInfo.frameEnd
         }),
         frameRate: 3,
         repeat: -1
@@ -59,51 +91,50 @@ export class GameOver extends Scene {
       RED: "#DB4A4A"
     };
 
-    if (g.myInfo != null && this.speciesInfo != null) {
+    if (g.myInfo != null && this.mySpeciesInfo != null && this.attackerSpeciesInfo != null) {
+      // 본인 이름
       this.add.text(100, 50, g.myInfo?.nickname, {
         fontFamily: "Arial Black",
         fontSize: 25,
         color: "#ffffff"
       });
-
-      this.add.text(100, 90, `당신의 안일함이\n${this.speciesInfo.name}의 개체수를 줄였습니다.`, {
+      // 죽었을 때 보이는 멘트
+      this.add.text(100, 90, `당신의 안일함이\n${this.mySpeciesInfo.name}의 개체수를 줄였습니다.`, {
         fontFamily: "Arial Black",
         fontSize: 25,
         color: "#FDE790"
       });
 
+      // 점수 정보
       this.add.text(100, 170, "킬", baseTextStyle);
-
-      this.add.text(100, 200, "0", baseTextStyle);
-
+      this.add.text(100, 200, `${this.gameOverResult.playerCount}`, baseTextStyle);
       this.add.text(150, 170, "경험치", baseTextStyle);
-
-      this.add.text(150, 200, "0", baseTextStyle);
-
+      this.add.text(150, 200, `${this.gameOverResult.point}`, baseTextStyle);
       this.add.text(250, 170, "플랑크톤", baseTextStyle);
-
-      this.add.text(250, 200, "0", baseTextStyle);
+      this.add.text(250, 200, `${this.gameOverResult.planktonCount}`, baseTextStyle);
       this.add.text(380, 170, "미세 플라스틱", baseTextStyle);
+      this.add.text(380, 200, `${this.gameOverResult.microplasticCount}`, baseTextStyle);
+      this.add.image(150, 330, this.mySpeciesInfo.key);
+      this.add.text(90, 420, `${this.mySpeciesInfo.name} (${this.mySpeciesInfo.englishName})`, baseTextStyle);
+      this.add.text(90, 450, `멸종위기 등급 : ${this.mySpeciesInfo.IUCNGrade}`, baseTextStyle);
+      this.add.text(90, 500, `${this.mySpeciesInfo.info}`, { wordWrap: { width: 400 }, ...baseTextStyle, align: "left" });
 
-      this.add.text(380, 200, "0", baseTextStyle);
-
-      this.add.image(150, 330, this.speciesInfo.key);
-      this.add.text(90, 420, `${this.speciesInfo.name} (${this.speciesInfo.englishName})`, baseTextStyle);
-      this.add.text(90, 450, `멸종위기 등급 : ${this.speciesInfo.IUCNGrade}`, baseTextStyle);
-      this.add.text(90, 500, `${this.speciesInfo.info}`, { wordWrap: { width: 400 }, ...baseTextStyle, align: "left" });
-
+      // 오른쪽 아래 게임 시작 부분
       this.add
-        .text(this.camera.width - 200, this.camera.height - 140, "박연서의 지느러미", { ...baseTextStyle, align: "right" })
+        .text(this.camera.width - 200, this.camera.height - 140, `${this.gameOverResult.attackerNickname}`, {
+          ...baseTextStyle,
+          align: "right"
+        })
         .setOrigin(1, 0.5);
       this.add
-        .text(this.camera.width - 200, this.camera.height - 100, "당신은 나의 비늘에 불과하지", {
+        .text(this.camera.width - 200, this.camera.height - 100, `${this.gameOverResult.message}`, {
           ...baseTextStyle,
           ...titleTextStyle,
           align: "right",
           color: COLORS.RED
         })
         .setOrigin(1, 0.5);
-      this.add.image(this.camera.width - 100, this.camera.height - 120, this.speciesInfo.key);
+      this.add.image(this.camera.width - 100, this.camera.height - 120, this.attackerSpeciesInfo.key);
 
       // 게임시작 버튼 추가
       this.newGameButton = this.add
@@ -113,7 +144,7 @@ export class GameOver extends Scene {
         .setOrigin(0.5)
         .setDepth(100)
         .on("pointerdown", async () => {
-          console.log("click");
+          this.restartGame();
         });
 
       // 버튼에 마우스 오버/아웃 효과
@@ -123,6 +154,8 @@ export class GameOver extends Scene {
       this.newGameButton.on("pointerout", () => {
         this.newGameButton.setScale(0.7); // 마우스 아웃 시 버튼 원래 크기로
       });
+    } else {
+      this.restartGame();
     }
 
     EventBus.emit("current-scene-ready", this);
@@ -130,5 +163,10 @@ export class GameOver extends Scene {
 
   changeScene(target: SceneType): void {
     this.scene.start(target);
+  }
+
+  restartGame(): void {
+    this.changeScene(SCENE.MAIN_MENU);
+    g.gameOverResult = null;
   }
 }
