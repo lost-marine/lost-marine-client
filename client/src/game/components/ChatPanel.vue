@@ -21,17 +21,13 @@ function sendMessage(): void {
   }
 }
 
-// watch(
-//   () => g.chatList.value,
-//   () => {
-//     const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
-//     if (chatElement !== null) {
-//       chatElement.scrollTop = chatElement.scrollHeight;
-//       chatElement.scrollIntoView({ behavior: "smooth" });
-//     }
-//   },
-//   { deep: true, flush: "post" }
-// );
+watch(
+  () => g.chatList.value,
+  () => {
+    scrollEnd();
+  },
+  { deep: true, flush: "post" }
+);
 
 addEventListener("keydown", (event: KeyboardEvent) => {
   const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
@@ -52,6 +48,13 @@ addEventListener("keydown", (event: KeyboardEvent) => {
   }
 });
 
+function scrollEnd(): void {
+  const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
+  if (chatElement !== null) {
+    chatElement.scrollTop = chatElement.scrollHeight;
+  }
+}
+
 function openChatPanel(): void {
   toggleChatPanel.value = true;
   inputMessage.value = "";
@@ -62,15 +65,15 @@ function closeChatPanel(): void {
   toggleChatPanel.value = false;
 }
 
-// for (let i = 0; i < 100; i++) {
-//   g.chatList.value.push({
-//     playerId: i,
-//     speciesname: "고등어",
-//     nickname: "테스트",
-//     msg: "채팅테스트" + i,
-//     timeStamp: i
-//   });
-// }
+for (let i = 0; i < 100; i++) {
+  g.chatList.value.push({
+    playerId: i,
+    speciesname: "고등어",
+    nickname: "테스트",
+    msg: "채팅테스트" + i,
+    timeStamp: i
+  });
+}
 </script>
 
 <template>
@@ -82,7 +85,17 @@ function closeChatPanel(): void {
           [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
         </div>
       </div> -->
-      <DynamicScroller :items="g.chatList.value" :min-item-size="50" class="chat-list" key-field="timeStamp">
+      <DynamicScroller
+        :items="g.chatList.value"
+        :min-item-size="100"
+        class="chat-list"
+        key-field="timeStamp"
+        :emitUpdate="true"
+        @scroll-start="console.log(`scroll-start`)"
+        @scroll-end="console.log(`scroll-end`)"
+        @update="console.log(`update`)"
+        @resize="console.log(`resize`)"
+      >
         <template v-slot="{ item, active }">
           <DynamicScrollerItem :item="item" :active="active" :size-dependencies="[item.speciesname, item.nickname]">
             <div class="scroller-item">
@@ -92,6 +105,8 @@ function closeChatPanel(): void {
         </template>
       </DynamicScroller>
     </div>
+
+    <div class="scroll-end-float-button" @click="scrollEnd()">new</div>
 
     <div class="input-group">
       <input
@@ -122,6 +137,13 @@ function closeChatPanel(): void {
   padding: 10px;
   border-radius: 10px;
 
+  .scroll-end-float-button {
+    position: absolute;
+    bottom: 3rem;
+    right: 3rem;
+    cursor: pointer;
+  }
+
   .chat-container {
     display: flex;
     flex-direction: column;
@@ -135,6 +157,7 @@ function closeChatPanel(): void {
     .chat-list {
       height: 15rem;
       overflow-y: scroll;
+      scroll-behavior: smooth;
     }
 
     .chat-list::-webkit-scrollbar {
