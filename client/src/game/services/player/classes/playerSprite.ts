@@ -1,5 +1,5 @@
 import type { Player } from "@/game/types/player";
-import { speciesMap } from "@/game/utils/species";
+import { speciesMap } from "@/game/constants/species";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;

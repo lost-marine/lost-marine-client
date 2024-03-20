@@ -11,7 +11,7 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
-import { speciesMap } from "../utils/species";
+import { speciesMap } from "../constants/species";
 import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
@@ -248,7 +248,6 @@ export class Game extends Scene {
   }
 
   onReceivedGameOver(): void {
-    g.myInfo = null;
     EventBus.emit("change-scene", SCENE.GAME_OVER);
   }
 

@@ -24,9 +24,10 @@ onMounted(() => {
   });
 
   EventBus.on("change-scene", (newScene: SceneType) => {
-    g.currentScene = newScene;
-    showGamePanel.value = newScene === SCENE.GAME;
-    emit("change-scene", newScene);
+    g.currentScene = newScene === SCENE.GAME ? SCENE.GAME_OVER : newScene;
+    // g.currentScene = newScene;
+    showGamePanel.value = g.currentScene === SCENE.GAME;
+    emit("change-scene", g.currentScene);
   });
 
   socket.connect();
@@ -49,3 +50,4 @@ defineExpose({ scene, game });
     <PlayerStatus v-if="showGamePanel" />
   </div>
 </template>
+./constants/species

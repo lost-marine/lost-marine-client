@@ -5,7 +5,6 @@ import PhaserGame from "./game/PhaserGame.vue";
 import type { SceneType } from "./game/types/scene";
 
 // The sprite can only be moved in the MainMenu Scene
-const canMoveSprite = ref();
 
 //  References to the PhaserGame component (game and scene are exposed)
 const phaserRef = ref();
@@ -18,15 +17,10 @@ const changeScene = (newScene: SceneType): void => {
     scene.changeScene(newScene);
   }
 };
-
-// Event emitted from the PhaserGame component
-const currentScene = (scene: MainMenu): void => {
-  canMoveSprite.value = scene.scene.key !== "MainMenu";
-};
 </script>
 
 <template>
-  <PhaserGame ref="phaserRef" @current-active-scene="currentScene" @change-scene="changeScene" />
+  <PhaserGame ref="phaserRef" @change-scene="changeScene" />
 </template>
 
 <style>
