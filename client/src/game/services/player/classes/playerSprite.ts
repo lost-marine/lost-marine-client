@@ -1,6 +1,5 @@
 import type { Player } from "@/game/types/player";
 import { speciesMap } from "@/game/constants/species";
-import { PlanktonGraphics } from "../../plankton/classes";
 import g from "@/game/utils/global";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {

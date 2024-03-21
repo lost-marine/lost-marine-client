@@ -36,6 +36,7 @@ export class Game extends Scene {
 
   preload(): void {
     this.load.audio("bgm", "assets/sounds/background.mp3");
+    this.load.audio("eat_plankton", "assets/sounds/eatPlankton.wav");
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_deep_water", "assets/tileset/DeepWater/Tiles/tileset.png");
     this.load.image("tile_deep_water_object", "assets/tileset/DeepWater/Objects/tileset.png");
@@ -332,6 +333,8 @@ export class Game extends Scene {
           this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
+
+          this.sound.add("eat_plankton").play({ volume: 0.2 });
         }
       }
     );
