@@ -23,11 +23,29 @@ function sendMessage(): void {
 
 watch(
   () => g.chatList.value,
-  () => {
-    scrollEnd();
+  (newValue) => {
+    if (newValue.length > 0) {
+      if (newValue[newValue.length - 1].playerId === g.myInfo?.playerId) {
+        scrollToBottom();
+      } else if (endIndex.value === newValue.length) {
+        scrollToBottom();
+      }
+    }
   },
   { deep: true, flush: "post" }
 );
+
+const endIndex: Ref<number> = ref(0);
+function onUpdate(viewStartIndex: number, viewEndIndex: number, visibleStartIndex: number, visibleEndIndex: number): void {
+  endIndex.value = visibleEndIndex;
+}
+
+const scroller: Ref<any> = ref(null);
+function scrollToBottom(): void {
+  if (scroller.value !== null) {
+    scroller.value.scrollToBottom();
+  }
+}
 
 addEventListener("keydown", (event: KeyboardEvent) => {
   const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
@@ -36,68 +54,53 @@ addEventListener("keydown", (event: KeyboardEvent) => {
   if (focusInput.value && event.key === " ") {
     inputMessage.value += " ";
   }
-  // Enter를 입력하면, 채팅창에 포커스됩니다.
+  // Enter를 입력하면, 채팅창이 열립니다.
   else if (event.key === "Enter" && !toggleChatPanel.value) {
     inputElement?.focus();
     openChatPanel();
   }
-  // Escape를 입력하면, 채팅창 포커스가 해제됩니다.
+  // Enter를 입력하면, 채팅창에 포커스됩니다.
+  else if (!focusInput.value && event.key === "Enter") {
+    inputElement?.focus();
+  }
+  // Escape를 입력하면, 채팅창이 닫힙니다.
   else if (event.key === "Escape" && toggleChatPanel.value) {
     inputElement?.blur();
     closeChatPanel();
   }
 });
 
-function scrollEnd(): void {
-  const chatElement: HTMLInputElement | null = document.querySelector(".chat-list");
-  if (chatElement !== null) {
-    chatElement.scrollTop = chatElement.scrollHeight;
-  }
-}
-
 function openChatPanel(): void {
   toggleChatPanel.value = true;
   inputMessage.value = "";
-  // 자동으로 스크롤을 아래로 내리는 코드 추가
 }
 
 function closeChatPanel(): void {
   toggleChatPanel.value = false;
 }
-
-for (let i = 0; i < 100; i++) {
-  g.chatList.value.push({
-    playerId: i,
-    speciesname: "고등어",
-    nickname: "테스트",
-    msg: "채팅테스트" + i,
-    timeStamp: i
-  });
-}
 </script>
 
 <template>
   <div class="container">
-    <div class="chat-container" v-if="toggleChatPanel">
+    <div class="chat-container" v-show="toggleChatPanel">
       <span class="close-button" @click="closeChatPanel()">✖</span>
-      <!-- <div class="chat-list">
-        <div v-for="(message, idx) in g.chatList.value" :key="idx">
-          [{{ message.speciesname }}] <strong>{{ message.nickname }}</strong> 💬 {{ message.msg }}
-        </div>
-      </div> -->
       <DynamicScroller
+        ref="scroller"
+        @resize="scrollToBottom()"
         :items="g.chatList.value"
-        :min-item-size="100"
+        :min-item-size="3"
         class="chat-list"
         key-field="timeStamp"
-        :emitUpdate="true"
-        @scroll-start="console.log(`scroll-start`)"
-        @scroll-end="console.log(`scroll-end`)"
-        @update="console.log(`update`)"
-        @resize="console.log(`resize`)"
+        :emit-update="true"
+        @update="onUpdate"
       >
-        <template v-slot="{ item, active }">
-          <DynamicScrollerItem :item="item" :active="active" :size-dependencies="[item.speciesname, item.nickname]">
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            :item="item"
+            :data-index="index"
+            :active="active"
+            :size-dependencies="[item.speciesname, item.nickname]"
+          >
             <div class="scroller-item">
               [{{ item.speciesname }}] <strong>{{ item.nickname }}</strong> 💬 {{ item.msg }}
             </div>
@@ -105,8 +108,6 @@ for (let i = 0; i < 100; i++) {
         </template>
       </DynamicScroller>
     </div>
-
-    <div class="scroll-end-float-button" @click="scrollEnd()">new</div>
 
     <div class="input-group">
       <input
@@ -155,9 +156,8 @@ for (let i = 0; i < 100; i++) {
     }
 
     .chat-list {
-      height: 15rem;
+      height: 20rem;
       overflow-y: scroll;
-      scroll-behavior: smooth;
     }
 
     .chat-list::-webkit-scrollbar {
