@@ -1,4 +1,5 @@
 import type { Player } from "@/game/types/player";
+import { speciesMap } from "@/game/constants/species";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
@@ -11,17 +12,19 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
     const shapes = scene.cache.json.get("shapes");
+    const speciesKey = speciesMap.get(player.speciesId ?? 1)?.key ?? "nemo";
 
-    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes.sunfish });
+    super(world, player.centerX, player.centerY, texture, 0, { shape: shapes[speciesKey] });
     this.shapes = {
-      default: shapes.sunfish,
-      flipped: shapes.sunfishFlipped
+      default: shapes[speciesKey],
+      flipped: shapes[speciesKey + "Flipped"]
     };
     this.playerId = player.playerId;
     this.name = player.nickname;
     this.moveSpeed = 10;
 
-    this.anims.play("swim");
+    // 현재 개체에 맞는 애니메이션 재생
+    this.anims.play(speciesKey + "_anims");
 
     this.nicknameSprite = scene.add.text(0, 0, this.name, {
       fontSize: "16px",
@@ -32,7 +35,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
     // 인스턴스의 초기 스폰 위치를 설정합니다.
     scene.add.existing(this);
-    this.setPosition(Math.trunc(scene.cameras.main.centerX), Math.trunc(scene.cameras.main.centerY));
+    this.setPosition(player.centerX, player.centerY);
     this.updateNicknamePosition();
   }
 
@@ -42,7 +45,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   }
 
   setFlipX(isFlipX: boolean): this {
-    if (this.body !== null) {
+    // TODO: this.body가 가끔 undefined인 문제가 있습니다.
+    if (this.body !== null && this.body !== undefined) {
       // 현재 속도와 위치 저장
       const currentVelocity = this.body.velocity;
       const currentPosition = { x: this.x, y: this.y };

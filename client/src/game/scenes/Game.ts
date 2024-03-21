@@ -14,6 +14,11 @@ import { PlanktonGraphics } from "../services/plankton/classes";
 import type { Plankton } from "../types/plankton";
 import { socket } from "../utils/socket";
 import type { eatPlanktonResponse } from "../services/plankton";
+import { speciesMap } from "../constants/species";
+import crashService from "../services/player/feat/crash";
+import { SCENE } from "../constants/scene";
+import Swal from "sweetalert2";
+import type { SceneType } from "../types/scene";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -30,28 +35,56 @@ export class Game extends Scene {
   }
 
   preload(): void {
-    this.load.spritesheet("sunfish", "assets/Sunfish_move.png", {
-      frameWidth: 192,
-      frameHeight: 192
-    });
+    this.load.audio("bgm", "assets/sounds/background.mp3");
     this.load.image("bg", "assets/bg.png");
-    this.load.image("tile_forest", "assets/tileset/Forest/BG_1/BG_1.png");
-    this.load.image("tile_ocean_day", "assets/tileset/Ocean/Layers/Day/Tile.png");
+    this.load.image("tile_deep_water", "assets/tileset/DeepWater/Tiles/tileset.png");
+    this.load.image("tile_deep_water_object", "assets/tileset/DeepWater/Objects/tileset.png");
+    this.load.image("tile_deep_water_green", "assets/tileset/DeepWater_Green/Tiles/tileset.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
-    this.load.json("shapes", "assets/shapes/sunfish-shapes.json");
+    this.load.json("shapes", "assets/shapes/shapes.json");
+    speciesMap.forEach((value) => {
+      try {
+        // 동적으로
+        this.load.spritesheet(value.key, value.spritesheetUrl, {
+          frameWidth: value.width,
+          frameHeight: value.height
+        });
+        this.anims.create({
+          key: value.key,
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
-  create(): void {
-    this.platform = this.add.image(0, 0, "bg").setOrigin(0, 0);
+  async create(): Promise<void> {
+    this.sound.add("bgm", { loop: true }).play();
+    // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
+    this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
-    this.anims.create({
-      key: "swim",
-      frames: this.anims.generateFrameNumbers("sunfish", {
-        start: 0,
-        end: 1
-      }),
-      frameRate: 3,
-      repeat: -1
+
+    // 모든 개체의 애니메이션 전부 등록
+    speciesMap.forEach((value) => {
+      try {
+        this.anims.create({
+          key: value.key + "_anims",
+          frames: this.anims.generateFrameNumbers(value.key, {
+            start: value.frameStart,
+            end: value.frameEnd
+          }),
+          frameRate: 3,
+          repeat: -1
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     // 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
@@ -66,13 +99,15 @@ export class Game extends Scene {
         });
       }
     } else {
-      this.changeScene();
-      throw new Error("맵 생성 중 오류가 발생했습니다.");
+      await Swal.fire("error", "맵 생성 중 오류가 발생했습니다.", "error").then(() => {
+        EventBus.emit("change-scene", SCENE.MAIN_MENU);
+        throw new Error("맵 생성 중 오류가 발생했습니다.");
+      });
     }
 
     // 카메라 뷰를 관리합니다.
-    this.cameras.main.setBounds(0, 0, 2688, 1536, true);
-    this.matter.world.setBounds(0, 0, 2688, 1536);
+    this.cameras.main.setBounds(0, 0, 6400, 6400, true);
+    this.matter.world.setBounds(0, 0, 6400, 6400);
     // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
     this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
 
@@ -94,6 +129,16 @@ export class Game extends Scene {
       const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
+
+    this.matter.world.on(
+      "collisionstart",
+      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
+        // 플레이어간 충돌
+        if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
+          this.sendPlayerCrash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+        }
+      }
+    );
   }
 
   update(): void {
@@ -128,7 +173,12 @@ export class Game extends Scene {
 
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {
-    const newPlayer = new PlayerSprite(this.matter.world, this, "sunfish", playerInfo);
+    const newPlayer = new PlayerSprite(
+      this.matter.world,
+      this,
+      speciesMap.get(g.myInfo?.speciesId ?? 1)?.key ?? "nemo",
+      playerInfo
+    );
     this.playerList.set(playerInfo.playerId, newPlayer);
     return newPlayer;
   }
@@ -170,6 +220,10 @@ export class Game extends Scene {
         // 플랑크톤 리스폰
         case "plankton-respawn":
           this.onReceivedPlanktonRespawn(event.data as Plankton[]);
+          break;
+        case "game-over":
+          this.onReceivedGameOver();
+          break;
       }
     }
   }
@@ -204,28 +258,49 @@ export class Game extends Scene {
           targetPlayer.isFlipX = shouldFlipX;
           targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
+          targetPlayerSprite.updateNicknamePosition();
         }
       }
     });
   }
 
-  changeScene(): void {
-    this.scene.start("GameOver");
+  onReceivedGameOver(): void {
+    EventBus.emit("change-scene", SCENE.GAME_OVER);
   }
 
+  sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
+    crashService.crash(playerAId, playerBId);
+  }, 30);
+
   createTilemap(): boolean {
-    // 맵(지형지물)을 그립니다.
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
-    const tilesetForest: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("forest_bg_1", "tile_forest", 16, 16, 0, 0);
-    const tilesetOcean: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("ocean_day", "tile_ocean_day", 16, 16, 0, 0);
+    const tilesetDeepWater: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("DeepWater", "tile_deep_water", 128, 128, 0, 0);
+    const tilesetDeepWaterObject: Phaser.Tilemaps.Tileset | null = map.addTilesetImage(
+      "DeepWater_Object",
+      "tile_deep_water_object",
+      128,
+      128,
+      0,
+      0
+    );
+    const tilesetDeepWaterGreen: Phaser.Tilemaps.Tileset | null = map.addTilesetImage(
+      "DeepWater_Green",
+      "tile_deep_water_green",
+      128,
+      128,
+      0,
+      0
+    );
 
     let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
     let createCollisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
-    if (tilesetForest !== null && tilesetOcean !== null) {
-      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetOcean], 0, 0);
-      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetForest, tilesetOcean], 0, 0);
+    if (tilesetDeepWater !== null && tilesetDeepWaterGreen !== null && tilesetDeepWaterObject !== null) {
+      createBackgroundLayer = map.createLayer("Background_Layer", [tilesetDeepWaterObject], 0, 0);
+      createCollisionLayer = map.createLayer("Collision_Layer", [tilesetDeepWater, tilesetDeepWaterGreen], 0, 0);
     } else {
-      console.error("하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요.");
+      console.error(
+        "하나 이상의 타일셋을 로드하는 데 실패했습니다. 타일셋의 이름이나 경로를 확인해주세요. Tiled 에디터에서 사용한 것과 일치하는지도 확인해주세요."
+      );
       return false;
     }
 
@@ -238,19 +313,13 @@ export class Game extends Scene {
     }
 
     // collisionLayer의 모든 타일을 충돌이 가능한 상태로 바꾸고, matter 물리학을 적용합니다.
-    this.collisionLayer.setCollisionByProperty({ collides: true });
+    this.collisionLayer.setCollisionByExclusion([-1]);
+    this.matter.world.convertTilemapLayer(this.backgroundLayer);
     this.matter.world.convertTilemapLayer(this.collisionLayer);
 
     return true;
   }
 
-  /**
-   * Description placeholder
-   * @date 3/12/2024 - 11:35:52 AM
-   * @author 김은진
-   *
-   * 플랑크톤 메서드
-   */
   onReceivedPlanktonEat(planktonId: number, playerId: number): void {
     socket.emit(
       "plankton-eat",
@@ -279,5 +348,9 @@ export class Game extends Scene {
       const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
+  }
+
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }

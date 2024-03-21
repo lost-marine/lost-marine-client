@@ -4,7 +4,7 @@ import type { BaseSocketObject } from "@/game/types/socket";
 
 export type NameCertificateResponse = {
   isSuccess: boolean;
-  message: string;
+  msg: string;
 };
 export type EnterResponse = {
   myInfo: Player;
