@@ -145,7 +145,7 @@ export class Game extends Scene {
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
     this.direction = direction;
     this.player.setFlipX(shouldFlipX);
-    this.player.angle = angle;
+    this.player.setAngle(angle);
 
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
@@ -239,11 +239,10 @@ export class Game extends Scene {
           targetPlayerSprite.x = player.centerX;
           targetPlayerSprite.y = player.centerY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, player.isFlipX ?? false);
-
           targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.setAngle(angle);
           targetPlayerSprite.setFlipX(shouldFlipX);
           targetPlayerSprite.updateNicknamePosition();
+          targetPlayerSprite.setAngle(angle);
         }
       }
     });
