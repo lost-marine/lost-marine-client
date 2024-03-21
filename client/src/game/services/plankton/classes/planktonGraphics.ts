@@ -24,7 +24,7 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
     this.graphics = scene.add.graphics();
     this.drawPlankton();
 
-    this.setPlayerCollisionEvent(player);
+    // this.setPlayerCollisionEvent(player);
   }
 
   drawPlankton(): void {
@@ -34,23 +34,23 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
     this.graphics.strokeCircle(this.plankton.centerX, this.plankton.centerY, 8);
   }
 
-  setPlayerCollisionEvent(player: PlayerSprite): void {
-    this.scene.matter.world.on(
-      "collisionstart",
-      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
-        if (bodyA.gameObject === this && bodyB.gameObject?.playerId === player.playerId) {
-          this.onTriggerPlanktonEat();
-        }
-      }
-    );
-  }
+  // setPlayerCollisionEvent(player: PlayerSprite): void {
+  //   this.scene.matter.world.on(
+  //     "collisionstart",
+  //     (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
+  //       if (bodyA.gameObject === this && bodyB.gameObject?.playerId === player.playerId) {
+  //         this.onTriggerPlanktonEat();
+  //       }
+  //     }
+  //   );
+  // }
 
-  onTriggerPlanktonEat(): void {
-    g.eventQueue.append({
-      key: "plankton-eat",
-      data: this.plankton.planktonId
-    });
-  }
+  // onTriggerPlanktonEat(): void {
+  //   g.eventQueue.append({
+  //     key: "plankton-eat",
+  //     data: this.plankton.planktonId
+  //   });
+  // }
 
   destroy(): void {
     super.destroy();
