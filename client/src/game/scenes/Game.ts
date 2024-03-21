@@ -238,7 +238,7 @@ export class Game extends Scene {
         if (targetPlayerSprite !== undefined && targetPlayerSprite.playerId !== g.myInfo?.playerId) {
           targetPlayerSprite.x = player.centerX;
           targetPlayerSprite.y = player.centerY;
-          const { angle, shouldFlipX } = directionToAngleFlip(player.direction, targetPlayer.isFlipX ?? false);
+          const { angle, shouldFlipX } = directionToAngleFlip(player.direction, player.isFlipX ?? false);
 
           targetPlayer.isFlipX = shouldFlipX;
           targetPlayerSprite.setAngle(angle);
