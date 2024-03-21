@@ -52,7 +52,7 @@ socket.on("player-enter", (newPlayer: Player) => {
 });
 
 // 다른 플레이어가 게임방 퇴장
-socket.on("quit", (playerId: number) => {
+socket.on("player-quit", (playerId: number) => {
   quitService.onReceviedQuit(playerId);
 });
 

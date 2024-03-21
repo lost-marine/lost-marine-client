@@ -224,6 +224,7 @@ export class Game extends Scene {
   onReceivedQuit(playerId: number): void {
     if (this.playerList.has(playerId)) {
       const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.nicknameSprite.destroy();
       targetPlayer?.destroy();
       this.playerList.delete(playerId);
     }
