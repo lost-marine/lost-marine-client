@@ -2,6 +2,8 @@ import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
 import { inputNameElement } from "../components/inputNameElement";
 import enterService from "../services/player/feat/enter";
+import type { SceneType } from "../types/scene";
+import Swal from "sweetalert2";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -79,12 +81,13 @@ export class MainMenu extends Scene {
   }
 
   async startGame(): Promise<void> {
-    const nickname = this.inputElement.value;
-
-    await enterService.enterGame(nickname);
+    if (Swal.getContainer() == null) {
+      const nickname = this.inputElement.value;
+      await enterService.enterGame(nickname);
+    }
   }
 
-  changeScene(): void {
-    this.scene.start("Game");
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }

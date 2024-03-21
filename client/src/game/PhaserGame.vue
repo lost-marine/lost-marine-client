@@ -8,6 +8,8 @@ import g from "./utils/global";
 import ChatPanel from "./components/ChatPanel.vue";
 import { socket } from "./utils/socket";
 import PlayerStatus from "./components/PlayerStatus.vue";
+import type { SceneType } from "./types/scene";
+
 // Save the current scene instance
 const scene = ref();
 const game = ref();
@@ -22,16 +24,10 @@ onMounted(() => {
     scene.value = sceneInstance;
   });
 
-  EventBus.on("game-start", () => {
-    if (g.currentScene === SCENE.MAIN_MENU) {
-      g.currentScene = SCENE.GAME;
-      showGamePanel.value = true;
-      emit("change-scene");
-    }
-  });
-
-  EventBus.on("change-scene", () => {
-    emit("change-scene");
+  EventBus.on("change-scene", (newScene: SceneType) => {
+    g.currentScene = newScene;
+    showGamePanel.value = g.currentScene === SCENE.GAME;
+    emit("change-scene", g.currentScene);
   });
 
   socket.connect();
@@ -55,3 +51,4 @@ defineExpose({ scene, game });
     <PlayerStatus v-if="showGamePanel" />
   </div>
 </template>
+./constants/species

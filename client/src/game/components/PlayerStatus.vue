@@ -9,11 +9,6 @@ const fadeinout = ref<boolean>(false);
 
 onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
-    // if (playerStatusInfo.isGameOver && g.currentScene === SCENE.GAME) {
-    //   g.currentScene = SCENE.GAME_OVER;
-    //   showGamePanel.value = false;
-    //   emit("change-scene");
-    // }
     if (healthRef.value !== undefined) {
       fadeinout.value = true;
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
