@@ -47,7 +47,7 @@ defineExpose({ scene, game });
 
 <template>
   <div id="game-container">
-    <ChatPanel v-if="showGamePanel" />
+    <ChatPanel v-show="showGamePanel" />
     <PlayerStatus v-if="showGamePanel" />
   </div>
 </template>
