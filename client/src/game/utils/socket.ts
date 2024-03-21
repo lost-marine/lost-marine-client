@@ -11,6 +11,7 @@ import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
+import type { Chat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
@@ -63,6 +64,11 @@ socket.on("game-over", async (gameOverResponse: GameOverResponse) => {
 // 다른 플레이어들의 위치 동기화 신호 수신
 socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
   onReceviedOthersPositionSync(positionsInfo);
+});
+
+// 플레이어가 입력한 채팅 메시지 수신
+socket.on("chat-message-receive", (message: Chat) => {
+  g.chatList.value.push(message);
 });
 
 // 플레이어 충돌 후 상태 수정
