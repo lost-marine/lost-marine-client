@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.202",
+    "@types/vue-virtual-scroller": "npm:@earltp/vue-virtual-scroller",
     "@typescript-eslint/parser": "^7.1.0",
     "lodash": "^4.17.21",
     "phaser": "^3.70.0",
