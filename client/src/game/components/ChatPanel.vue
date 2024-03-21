@@ -127,6 +127,11 @@ function closeChatPanel(): void {
 
 <style scoped lang="scss">
 .container {
+  /* CSS 지역 변수 선언 */
+  --semi-transparent-black: rgba(0, 0, 0, 0.5);
+}
+
+.container {
   max-width: 25rem;
   width: 100%;
 
@@ -156,7 +161,7 @@ function closeChatPanel(): void {
     }
 
     .chat-list {
-      height: 20rem;
+      height: 15rem;
       overflow-y: scroll;
     }
 
@@ -203,6 +208,7 @@ function closeChatPanel(): void {
       border-radius: 10px;
       height: 2rem;
       font-size: larger;
+      cursor: pointer;
     }
 
     .send-button:focus {

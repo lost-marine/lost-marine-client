@@ -46,7 +46,3 @@ body {
     color: rgba(255, 255, 255, 0.3);
   }
 }
-
-:root {
-  --semi-transparent-black: rgba(0, 0, 0, 0.5); /* 50% 투명도의 검정색 */
-}
