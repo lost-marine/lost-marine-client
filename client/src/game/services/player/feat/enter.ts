@@ -36,9 +36,9 @@ const enterService: EnterService = {
             }
             let speciesId: number = 0;
             if (result.isConfirmed) {
-              speciesId = 3;
+              speciesId = 1;
             } else {
-              speciesId = 3;
+              speciesId = 2;
             }
             if (speciesId !== 0) {
               socket.emit("player-enter", { nickname, speciesId }, async (response: NameCertificateResponse) => {
