@@ -69,17 +69,27 @@ export class GameOver extends Scene {
   }
 
   create(): void {
+    const COLORS = {
+      RED: "#DB4A4A",
+      WHITE: "#FFFFFF",
+      YELLOW: "#FDE790",
+      BLACK: "#000000"
+    };
+
     this.sound.add("bgm", { loop: true }).play();
     this.camera = this.cameras.main;
-    this.camera.setBackgroundColor("rgba(0,0,0)");
+    this.camera.setBackgroundColor(COLORS.BLACK);
 
     this.background = this.add.image(512, 384, "background");
+    const scaleX = this.cameras.main.width / this.background.width;
+    const scaleY = this.cameras.main.height / this.background.height;
     this.background.setAlpha(0.4);
+    this.background.setScale(scaleX, scaleY);
 
     const baseTextStyle = {
       fontFamily: "Arial Black",
       fontSize: 17,
-      color: "#FFFFFF",
+      color: COLORS.WHITE,
       align: "center"
     };
 
@@ -87,22 +97,18 @@ export class GameOver extends Scene {
       fontSize: 25
     };
 
-    const COLORS = {
-      RED: "#DB4A4A"
-    };
-
     if (g.myInfo != null && this.mySpeciesInfo != null && this.attackerSpeciesInfo != null) {
       // 본인 이름
       this.add.text(100, 50, g.myInfo?.nickname, {
         fontFamily: "Arial Black",
         fontSize: 25,
-        color: "#ffffff"
+        color: COLORS.WHITE
       });
       // 죽었을 때 보이는 멘트
       this.add.text(100, 90, `당신의 안일함이\n${this.mySpeciesInfo.name}의 개체수를 줄였습니다.`, {
         fontFamily: "Arial Black",
         fontSize: 25,
-        color: "#FDE790"
+        color: COLORS.YELLOW
       });
 
       // 점수 정보

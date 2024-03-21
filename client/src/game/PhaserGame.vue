@@ -51,4 +51,3 @@ defineExpose({ scene, game });
     <PlayerStatus v-if="showGamePanel" />
   </div>
 </template>
-./constants/species
