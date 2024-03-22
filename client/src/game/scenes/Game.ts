@@ -62,6 +62,7 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
+    console.log("create Game");
     this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
@@ -216,9 +217,6 @@ export class Game extends Scene {
         case "others-position-sync":
           this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
           break;
-        case "game-over":
-          this.onReceivedGameOver();
-          break;
       }
     }
   }
@@ -260,10 +258,6 @@ export class Game extends Scene {
         }
       }
     });
-  }
-
-  onReceivedGameOver(): void {
-    EventBus.emit("change-scene", SCENE.GAME_OVER);
   }
 
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {

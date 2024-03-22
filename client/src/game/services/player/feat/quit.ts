@@ -1,6 +1,7 @@
 import g from "@/game/utils/global";
 import type { GameOverResponse } from "../types/quit";
 import { SCENE } from "@/game/constants/scene";
+import { EventBus } from "@/game/EventBus";
 
 const quitService = {
   onReceviedQuit: (playerId: number): void => {},
@@ -20,10 +21,7 @@ quitService.onReceviedGameOver = (gameOverResponse: GameOverResponse): void => {
   g.playerMap.delete(gameOverResponse.playerId);
   g.gameOverResult = gameOverResponse;
   g.currentScene = SCENE.GAME_OVER;
-  g.eventQueue.append({
-    key: "game-over",
-    data: null
-  });
+  EventBus.emit("change-scene", SCENE.GAME_OVER);
 };
 
 export default quitService;
