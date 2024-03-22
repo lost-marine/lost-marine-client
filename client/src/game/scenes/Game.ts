@@ -335,6 +335,7 @@ export class Game extends Scene {
           g.planktonMap.delete(planktonId);
 
           this.sound.add("eat_plankton").play({ volume: 0.2 });
+          EventBus.emit("player-eat-plankton", response.player);
         }
       }
     );

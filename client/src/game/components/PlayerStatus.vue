@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { EventBus } from "../EventBus";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
+import type { Player } from "../types/player";
 
 const healthRef = ref<HTMLDivElement>();
 const pointRef = ref<HTMLDivElement>();
@@ -15,6 +16,12 @@ onMounted(() => {
     }
     if (pointRef.value !== undefined) {
       pointRef.value.style.width = `${playerStatusInfo.point}%`;
+    }
+  });
+
+  EventBus.on("player-eat-plankton", (player: Player) => {
+    if (pointRef.value !== undefined) {
+      pointRef.value.style.width = `${player.point}%`;
     }
   });
 });
