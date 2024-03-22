@@ -127,28 +127,16 @@ function closeChatPanel(): void {
 
 <style scoped lang="scss">
 .container {
-  /* CSS 지역 변수 선언 */
-  --semi-transparent-black: rgba(0, 0, 0, 0.5);
-}
-
-.container {
   max-width: 25rem;
   width: 100%;
 
   position: absolute;
-  background-color: var(--semi-transparent-black);
+  background-color: var(--transparent-black);
   bottom: 2rem;
   left: 1rem;
 
   padding: 10px;
   border-radius: 10px;
-
-  .scroll-end-float-button {
-    position: absolute;
-    bottom: 3rem;
-    right: 3rem;
-    cursor: pointer;
-  }
 
   .chat-container {
     display: flex;
@@ -161,7 +149,7 @@ function closeChatPanel(): void {
     }
 
     .chat-list {
-      height: 15rem;
+      height: 10rem;
       overflow-y: scroll;
     }
 
@@ -184,16 +172,15 @@ function closeChatPanel(): void {
 
   .input-group {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    height: 2rem;
 
     .input-field {
+      height: 100%;
       width: 100%;
-      background-color: black;
+      background-color: var(--transparent-black);
       color: white;
-
       border-radius: 5px;
-      height: 2rem;
       font-size: 1rem;
       border: none;
     }
@@ -203,10 +190,10 @@ function closeChatPanel(): void {
     }
 
     .send-button {
-      background-color: black;
+      height: 100%;
+      background-color: var(--transparent-black);
       border: 2px solid white;
       border-radius: 10px;
-      height: 2rem;
       font-size: larger;
       cursor: pointer;
     }
