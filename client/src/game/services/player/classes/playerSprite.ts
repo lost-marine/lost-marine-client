@@ -54,7 +54,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       // 바디 교체
       super.setFlipX(isFlipX);
       const bodyData = isFlipX ? this.shapes.flipped : this.shapes.default;
-      this.setBody(bodyData);
+      // this.setBody(bodyData);
 
       // 저장된 속도와 위치를 새 바디에 적용
       this.setVelocity(currentVelocity.x, currentVelocity.y);

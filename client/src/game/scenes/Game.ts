@@ -177,6 +177,10 @@ export class Game extends Scene {
       playerInfo
     );
     this.playerList.set(playerInfo.playerId, newPlayer);
+    newPlayer.setBounce(0);
+    if (playerInfo.playerId !== g.myInfo?.playerId) {
+      newPlayer.setStatic(true);
+    }
     return newPlayer;
   }
 
