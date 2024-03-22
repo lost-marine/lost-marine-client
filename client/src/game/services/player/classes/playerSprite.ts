@@ -6,8 +6,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   nicknameSprite: Phaser.GameObjects.Text;
   moveSpeed: number;
   shapes: {
-    default: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
-    flipped: string | Phaser.Types.Physics.Matter.MatterSetBodyConfig;
+    default: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
+    flipped: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
   };
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
@@ -55,7 +55,6 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       super.setFlipX(isFlipX);
       const bodyData = isFlipX ? this.shapes.flipped : this.shapes.default;
       this.setBody(bodyData);
-
       // 저장된 속도와 위치를 새 바디에 적용
       this.setVelocity(currentVelocity.x, currentVelocity.y);
       this.setPosition(currentPosition.x, currentPosition.y);
