@@ -255,7 +255,7 @@ export class Game extends Scene {
 
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
     crashService.crash(playerAId, playerBId);
-  }, 30);
+  }, 1000);
 
   createTilemap(): boolean {
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });

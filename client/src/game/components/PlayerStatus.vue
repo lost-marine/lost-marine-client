@@ -9,11 +9,14 @@ const fadeinout = ref<boolean>(false);
 
 onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
-    if (healthRef.value !== undefined) {
+    if (healthRef.value !== undefined && healthRef.value !== null) {
       fadeinout.value = true;
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
+      setTimeout(() => {
+        fadeinout.value = false;
+      }, 5000);
     }
-    if (pointRef.value !== undefined) {
+    if (pointRef.value !== undefined && pointRef.value !== null) {
       pointRef.value.style.width = `${playerStatusInfo.point}%`;
     }
   });
@@ -42,7 +45,7 @@ onMounted(() => {
   4% {
     transform: scale(1);
   }
-  80% {
+  60% {
     opacity: 1;
   }
   100% {
@@ -93,7 +96,7 @@ onMounted(() => {
   }
 
   .cont-bar.health.fadeinout {
-    animation: fadeinout 8s cubic-bezier(0, 0, 0.2, 1);
+    animation: fadeinout 8s ease-out;
   }
 
   .cont-bar.point {
