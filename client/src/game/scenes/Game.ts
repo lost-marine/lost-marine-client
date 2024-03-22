@@ -143,9 +143,15 @@ export class Game extends Scene {
 
     const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
     const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
-    this.direction = direction;
-    this.player.setFlipX(shouldFlipX);
-    this.player.setAngle(angle);
+    if (this.direction !== direction) {
+      this.direction = direction;
+    }
+    if (this.player.flipX !== shouldFlipX) {
+      this.player.setFlipX(shouldFlipX);
+    }
+    if (this.player.angle !== angle) {
+      this.player.setAngle(angle);
+    }
 
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
@@ -177,6 +183,10 @@ export class Game extends Scene {
       playerInfo
     );
     this.playerList.set(playerInfo.playerId, newPlayer);
+    newPlayer.setBounce(0);
+    if (playerInfo.playerId !== g.myInfo?.playerId) {
+      newPlayer.setStatic(true);
+    }
     return newPlayer;
   }
 
@@ -240,10 +250,13 @@ export class Game extends Scene {
           targetPlayerSprite.x = player.centerX;
           targetPlayerSprite.y = player.centerY;
           const { angle, shouldFlipX } = directionToAngleFlip(player.direction, player.isFlipX ?? false);
-          targetPlayer.isFlipX = shouldFlipX;
-          targetPlayerSprite.setFlipX(shouldFlipX);
+          if (targetPlayerSprite.flipX !== shouldFlipX) {
+            targetPlayerSprite.setFlipX(shouldFlipX);
+          }
+          if (targetPlayerSprite.angle !== angle) {
+            targetPlayerSprite.setAngle(angle);
+          }
           targetPlayerSprite.updateNicknamePosition();
-          targetPlayerSprite.setAngle(angle);
         }
       }
     });
