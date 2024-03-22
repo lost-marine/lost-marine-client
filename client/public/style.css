@@ -49,5 +49,5 @@ body {
 
 :root {
   /* CSS 지역 변수 선언 */
-  --transparent-black: rgba(0, 0, 0, 0.35);
+  --transparent-black: rgba(0, 0, 0, 0.3);
 }

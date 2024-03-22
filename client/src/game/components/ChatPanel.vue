@@ -127,7 +127,7 @@ function closeChatPanel(): void {
 
 <style scoped lang="scss">
 .container {
-  max-width: 25rem;
+  max-width: 20rem;
   width: 100%;
 
   position: absolute;
