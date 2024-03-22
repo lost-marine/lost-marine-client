@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import { EventBus } from "../EventBus";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 
+const healthContainerRef = ref<HTMLDListElement>();
 const healthRef = ref<HTMLDivElement>();
 const pointRef = ref<HTMLDivElement>();
 const fadeinout = ref<boolean>(false);
@@ -10,11 +11,16 @@ const fadeinout = ref<boolean>(false);
 onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
     if (healthRef.value !== undefined && healthRef.value !== null) {
-      fadeinout.value = true;
+      if (fadeinout.value && healthContainerRef.value !== undefined && healthContainerRef.value !== null) {
+        // 리플로우를 발생시켜서 애니메이션 재실행
+        healthContainerRef.value.style.animation = "none";
+        // 아래와 같은 프로퍼티를 호출하는 것만으로도 reflow가 발생합니다.
+        void healthContainerRef.value.offsetHeight;
+        healthContainerRef.value.style.animation = "";
+      } else {
+        fadeinout.value = true;
+      }
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
-      setTimeout(() => {
-        fadeinout.value = false;
-      }, 5000);
     }
     if (pointRef.value !== undefined && pointRef.value !== null) {
       pointRef.value.style.width = `${playerStatusInfo.point}%`;
@@ -25,7 +31,7 @@ onMounted(() => {
 
 <template>
   <div class="player-status">
-    <div class="health cont-bar" :class="{ fadeinout }">
+    <div class="health cont-bar" :class="{ fadeinout }" ref="healthContainerRef">
       <span>HP</span>
       <div ref="healthRef" class="bar"></div>
     </div>
