@@ -81,8 +81,8 @@ export class GameOver extends Scene {
     this.camera.setBackgroundColor(COLORS.BLACK);
 
     this.background = this.add.image(512, 384, "background");
-    const scaleX = this.cameras.main.width / this.background.width;
-    const scaleY = this.cameras.main.height / this.background.height;
+    const scaleX = this.background.width / this.cameras.main.width;
+    const scaleY = this.background.height / this.cameras.main.height;
     this.background.setAlpha(0.4);
     this.background.setScale(scaleX, scaleY);
 
