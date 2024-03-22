@@ -6,32 +6,43 @@ import type { PlayerStatusInfo } from "../services/player/types/crash";
 const healthContainerRef = ref<HTMLDListElement>();
 const healthRef = ref<HTMLDivElement>();
 const pointRef = ref<HTMLDivElement>();
-const fadeinout = ref<boolean>(false);
+const fadein = ref<boolean>(false);
+const fadeout = ref<boolean>(false);
 
 onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
-    if (healthRef.value !== undefined && healthRef.value !== null) {
-      if (fadeinout.value && healthContainerRef.value !== undefined && healthContainerRef.value !== null) {
+    // 점수바 관리
+    if (pointRef.value !== undefined && pointRef.value !== null) {
+      pointRef.value.style.width = `${playerStatusInfo.point}%`;
+    }
+
+    // 체력바 관리
+    if (healthContainerRef.value === undefined || healthContainerRef.value === null) {
+      return;
+    }
+
+    // 체력이 닳은 경우
+    if (playerStatusInfo.health < 100 && healthRef.value !== undefined && healthRef.value !== null) {
+      if (fadein.value) {
         // 리플로우를 발생시켜서 애니메이션 재실행
         healthContainerRef.value.style.animation = "none";
         // 아래와 같은 프로퍼티를 호출하는 것만으로도 reflow가 발생합니다.
         void healthContainerRef.value.offsetHeight;
         healthContainerRef.value.style.animation = "";
       } else {
-        fadeinout.value = true;
+        fadein.value = true;
       }
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
-    if (pointRef.value !== undefined && pointRef.value !== null) {
-      pointRef.value.style.width = `${playerStatusInfo.point}%`;
-    }
   });
+
+  // TODO: 체력 회복 UI
 });
 </script>
 
 <template>
   <div class="player-status">
-    <div class="health cont-bar" :class="{ fadeinout }" ref="healthContainerRef">
+    <div class="health cont-bar" :class="{ fadein, fadeout }" ref="healthContainerRef">
       <span>HP</span>
       <div ref="healthRef" class="bar"></div>
     </div>
@@ -43,19 +54,12 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-@keyframes fadeinout {
-  0% {
-    opacity: 1;
+@keyframes heartbeat {
+  from {
     transform: scale(1.2);
   }
-  4% {
+  to {
     transform: scale(1);
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
   }
 }
 
@@ -99,10 +103,16 @@ onMounted(() => {
       width: 100%;
       background: linear-gradient(90deg, #ff4f17 1.86%, rgba(255, 168, 0, 0.94));
     }
+    transition: opacity 1s;
   }
 
-  .cont-bar.health.fadeinout {
-    animation: fadeinout 8s ease-out;
+  .cont-bar.health.fadein {
+    opacity: 1;
+    animation: heartbeat 1s ease-out;
+  }
+
+  .cont-bar.health.fadeout {
+    opacity: 0;
   }
 
   .cont-bar.point {
