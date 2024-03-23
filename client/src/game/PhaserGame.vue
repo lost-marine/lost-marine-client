@@ -9,6 +9,7 @@ import ChatPanel from "./components/ChatPanel.vue";
 import { socket } from "./utils/socket";
 import PlayerStatus from "./components/PlayerStatus.vue";
 import type { SceneType } from "./types/scene";
+import EvolutionList from "./components/EvolutionList.vue";
 
 // Save the current scene instance
 const scene = ref();
@@ -49,5 +50,6 @@ defineExpose({ scene, game });
   <div id="game-container">
     <ChatPanel v-show="showGamePanel" />
     <PlayerStatus v-if="showGamePanel" />
+    <EvolutionList v-if="showGamePanel" />
   </div>
 </template>
