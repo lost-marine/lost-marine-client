@@ -11,11 +11,15 @@ import _ from "lodash";
 import { syncMyPosition } from "../services/player/feat/movement";
 import type { PlayerPositionInfo } from "../services/player/types/position";
 import { PlanktonGraphics } from "../services/plankton/classes";
+import type { Plankton } from "../types/plankton";
+import { socket } from "../utils/socket";
+import type { eatPlanktonResponse } from "../services/plankton";
 import { speciesMap } from "../constants/species";
 import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
+import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -33,6 +37,7 @@ export class Game extends Scene {
 
   preload(): void {
     this.load.audio("bgm", "assets/sounds/background.mp3");
+    this.load.audio("eat_plankton", "assets/sounds/eatPlankton.wav");
     this.load.image("bg", "assets/bg.png");
     this.load.image("tile_deep_water", "assets/tileset/DeepWater/Tiles/tileset.png");
     this.load.image("tile_deep_water_object", "assets/tileset/DeepWater/Objects/tileset.png");
@@ -122,20 +127,23 @@ export class Game extends Scene {
     // 플랑크톤을 그립니다.
     this.planktonList = new Map<number, PlanktonGraphics>();
 
-    g.planktonMap.forEach((plankton) => {
-      const planktonGraphic = new PlanktonGraphics(this, plankton);
+    g.planktonMap.forEach((plankton: Plankton) => {
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
 
-    this.matter.world.on(
-      "collisionstart",
-      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
-        // 플레이어간 충돌
-        if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
-          this.sendPlayerCrash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+    this.matter.world.on("collisionstart", (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+      event.pairs.forEach((pair: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+        // 플레이어와의 충돌
+        if (pair.bodyA.gameObject instanceof PlayerSprite && pair.bodyB.gameObject instanceof PlayerSprite) {
+          this.sendPlayerCrash(pair.bodyA.gameObject.playerId, pair.bodyB.gameObject.playerId);
         }
-      }
-    );
+        // 플랑크톤과 플레이어의 충돌
+        else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
+          onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
+        }
+      });
+    });
   }
 
   update(): void {
@@ -214,7 +222,19 @@ export class Game extends Scene {
           break;
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
-          this.onReceviedPositionSync(event.data as PlayerPositionInfo[]);
+          this.onReceivedPositionSync(event.data as PlayerPositionInfo[]);
+          break;
+        // 내 플레이어가 플랑크톤 섭취
+        case "plankton-eat":
+          this.onReceivedPlanktonEat(event.data as number, this.player.playerId);
+          break;
+        // 다른 플레이어가 플랑크톤 섭취
+        case "plankton-delete":
+          this.onReceivedPlanktonDelete(event.data as number);
+          break;
+        // 플랑크톤 리스폰
+        case "plankton-respawn":
+          this.onReceivedPlanktonRespawn(event.data as Plankton[]);
           break;
         case "game-over":
           this.onReceivedGameOver();
@@ -241,7 +261,7 @@ export class Game extends Scene {
   }
 
   // 다른 플레이어들의 위치 동기화 신호 수신
-  onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
+  onReceivedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
     positionsInfo.forEach((player) => {
       const targetPlayer = g.playerMap.get(player.playerId);
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
@@ -316,6 +336,43 @@ export class Game extends Scene {
     this.matter.world.convertTilemapLayer(this.collisionLayer);
 
     return true;
+  }
+
+  onReceivedPlanktonEat(planktonId: number, playerId: number): void {
+    socket.emit(
+      "plankton-eat",
+      {
+        playerId,
+        planktonId
+      },
+      (response: eatPlanktonResponse) => {
+        if (response.isSuccess) {
+          this.planktonList.get(planktonId)?.destroy();
+          this.planktonList.delete(planktonId);
+          g.planktonMap.delete(planktonId);
+
+          this.sound.add("eat_plankton").play({ volume: 0.2 });
+          if (g.myInfo !== null) {
+            g.myInfo.point = response.player.point;
+            g.myInfo.planktonCount = response.player.planktonCount;
+          }
+          EventBus.emit("player-eat-plankton", response.player);
+        }
+      }
+    );
+  }
+
+  onReceivedPlanktonDelete(planktonId: number): void {
+    this.planktonList.get(planktonId)?.destroy();
+    this.planktonList.delete(planktonId);
+  }
+
+  onReceivedPlanktonRespawn(newPlanktonList: Plankton[]): void {
+    newPlanktonList.forEach((plankton: Plankton) => {
+      g.planktonMap.set(plankton.planktonId, plankton);
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
+      this.planktonList.set(plankton.planktonId, planktonGraphic);
+    });
   }
 
   changeScene(target: SceneType): void {
