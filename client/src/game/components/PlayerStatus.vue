@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { EventBus } from "../EventBus";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
+import type { Player } from "../types/player";
 
 const healthContainerRef = ref<HTMLDListElement>();
 const healthRef = ref<HTMLDivElement>();
@@ -34,9 +35,15 @@ onMounted(() => {
       }
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
+    
+    // TODO: 체력 회복 UI
   });
 
-  // TODO: 체력 회복 UI
+  EventBus.on("player-eat-plankton", (player: Player) => {
+    if (pointRef.value !== undefined) {
+      pointRef.value.style.width = `${player.point}%`;
+    }
+  });
 });
 </script>
 

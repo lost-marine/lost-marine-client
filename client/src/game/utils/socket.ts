@@ -66,6 +66,23 @@ socket.on("others-position-sync", (positionsInfo: PlayerPositionInfo[]) => {
   onReceviedOthersPositionSync(positionsInfo);
 });
 
+// 다른 플레이어가 플랑크톤 섭취
+socket.on("plankton-delete", (planktonId: number) => {
+  g.planktonMap.delete(planktonId);
+  g.eventQueue.append({
+    key: "plankton-delete",
+    data: planktonId
+  });
+});
+
+// 플랑크톤 리스폰
+socket.on("plankton-respawn", (newPlanktonList: Plankton[]) => {
+  g.eventQueue.append({
+    key: "plankton-respawn",
+    data: newPlanktonList
+  });
+});
+
 // 플레이어가 입력한 채팅 메시지 수신
 socket.on("chat-message-receive", (message: Chat) => {
   g.chatList.value.push(message);
