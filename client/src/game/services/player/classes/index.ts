@@ -1,1 +1,1 @@
-export * from "./PlayerSprite";
+export * from "./playerSprite";

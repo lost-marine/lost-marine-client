@@ -1,7 +1,9 @@
 import { Scene, type GameObjects } from "phaser";
 import { EventBus } from "../EventBus";
-import { enterGame } from "../services/player";
 import { inputNameElement } from "../components/inputNameElement";
+import enterService from "../services/player/feat/enter";
+import type { SceneType } from "../types/scene";
+import Swal from "sweetalert2";
 
 export class MainMenu extends Scene {
   background: GameObjects.Image;
@@ -10,13 +12,16 @@ export class MainMenu extends Scene {
   startButton: GameObjects.Text;
   nameInput: Phaser.GameObjects.DOMElement;
   inputElement: HTMLInputElement;
-  startGame: () => void;
-
   constructor() {
     super("MainMenu");
   }
 
+  preload(): void {
+    this.load.audio("bgm", "assets/sounds/background.mp3");
+  }
+
   create(): void {
+    this.sound.add("bgm", { loop: true }).play();
     this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // 이미지의 스케일을 게임의 크기에 맞추기
@@ -27,19 +32,14 @@ export class MainMenu extends Scene {
     // 계산된 스케일로 이미지 스케일 설정
     this.background.setScale(scale).setScrollFactor(0);
 
-    this.logo = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, "logo").setDepth(100);
-
+    this.logo = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 3, "logo").setDepth(100);
+    this.logo.setScale(1.3);
     // name form
     this.inputElement = inputNameElement();
 
-    this.startGame = () => {
-      const nickname = this.inputElement.value;
-      enterGame(nickname);
-    };
-
     // Phaser DOMElement로 추가
     this.nameInput = this.add
-      .dom(this.cameras.main.width / 2, 480, this.inputElement)
+      .dom(this.cameras.main.width / 2, this.cameras.main.height / 2, this.inputElement)
       .setOrigin(0.5, 0.5)
       .setDepth(100);
 
@@ -48,13 +48,13 @@ export class MainMenu extends Scene {
     this.inputElement.addEventListener("keypress", (event) => {
       if (event.key === "Enter") {
         // 엔터 키를 누를 때의 처리
-        this.startGame();
+        void this.startGame();
       }
     });
 
     // 게임시작 버튼 추가
     this.startButton = this.add
-      .text(this.cameras.main.width / 2, 550, "게임 시작", {
+      .text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 100, "게임 시작", {
         fontFamily: "Arial Black",
         fontSize: 38,
         color: "#ffffff",
@@ -65,11 +65,13 @@ export class MainMenu extends Scene {
       .setInteractive()
       .setOrigin(0.5)
       .setDepth(100)
-      .on("pointerdown", this.startGame);
+      .on("pointerdown", async () => {
+        await this.startGame();
+      });
 
     // 버튼에 마우스 오버/아웃 효과
     this.startButton.on("pointerover", () => {
-      this.startButton.setScale(1.1); // 마우스 오버 시 버튼 확대
+      this.startButton.setScale(1.1); // 마우스 오버 시 버튼 확대`
     });
     this.startButton.on("pointerout", () => {
       this.startButton.setScale(1.0); // 마우스 아웃 시 버튼 원래 크기로
@@ -78,12 +80,14 @@ export class MainMenu extends Scene {
     EventBus.emit("current-scene-ready", this);
   }
 
-  changeScene(): void {
-    if (this.logoTween != null) {
-      this.logoTween.stop();
-      this.logoTween = null;
+  async startGame(): Promise<void> {
+    if (Swal.getContainer() == null) {
+      const nickname = this.inputElement.value;
+      await enterService.enterGame(nickname);
     }
+  }
 
-    this.scene.start("Game");
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
   }
 }
