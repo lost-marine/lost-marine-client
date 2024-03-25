@@ -69,4 +69,9 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       this.y - this.height / 2 - this.nicknameSprite.height
     );
   }
+
+  destroy(): void {
+    this.nicknameSprite.destroy();
+    super.destroy();
+  }
 }

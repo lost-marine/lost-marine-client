@@ -28,9 +28,13 @@ export class GameOver extends Scene {
         this.gameOverResult = g.gameOverResult;
       } else {
         this.restartGame();
+        console.debug("g.gameOverResult.playerId === g.myInfo?.playerId");
+        console.debug("g.gameOverResult.playerId : ", g.gameOverResult?.playerId);
+        console.debug("g.myInfo?.playerId : ", g.myInfo?.playerId);
       }
     } else {
       this.restartGame();
+      console.debug("gameOverResult is null");
     }
     // 내 캐릭터 이미지 로드
     if (this.mySpeciesInfo != null) {
