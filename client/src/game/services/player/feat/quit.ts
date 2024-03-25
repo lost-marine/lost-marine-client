@@ -22,6 +22,7 @@ quitService.onReceviedGameOver = (gameOverResponse: GameOverResponse): void => {
   g.gameOverResult = gameOverResponse;
   g.currentScene = SCENE.GAME_OVER;
   EventBus.emit("change-scene", SCENE.GAME_OVER);
+  g.clear();
 };
 
 export default quitService;

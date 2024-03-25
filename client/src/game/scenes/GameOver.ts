@@ -174,5 +174,6 @@ export class GameOver extends Scene {
   restartGame(): void {
     this.changeScene(SCENE.MAIN_MENU);
     g.gameOverResult = null;
+    g.clear();
   }
 }

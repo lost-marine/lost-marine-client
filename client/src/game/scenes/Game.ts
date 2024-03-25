@@ -18,7 +18,7 @@ import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
 
 export class Game extends Scene {
-  player: PlayerSprite;
+  player: PlayerSprite | null;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
   direction: DirectionType;
@@ -62,7 +62,6 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
-    console.log("create Game");
     this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
@@ -106,19 +105,22 @@ export class Game extends Scene {
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 6400, 6400, true);
     this.matter.world.setBounds(0, 0, 6400, 6400);
-    // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
-    this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
 
-    // 커서 키를 생성합니다.
-    if (this.input?.keyboard !== null) {
-      this.cursors = this.input.keyboard.createCursorKeys();
+    if (this.player != null) {
+      // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
+      this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
+
+      // 커서 키를 생성합니다.
+      if (this.input?.keyboard !== null) {
+        this.cursors = this.input.keyboard.createCursorKeys();
+      }
+
+      EventBus.emit("current-scene-ready", this);
+
+      // 기본 방향을 설정하고 초기 생성 위치를 보낼 필요가 있을까요?
+      this.direction = DIRECTION.RIGHT;
+      EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
     }
-
-    EventBus.emit("current-scene-ready", this);
-
-    // 기본 방향을 설정하고 초기 생성 위치를 보낼 필요가 있을까요?
-    this.direction = DIRECTION.RIGHT;
-    EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
 
     // 플랑크톤을 그립니다.
     this.planktonList = new Map<number, PlanktonGraphics>();
@@ -142,36 +144,38 @@ export class Game extends Scene {
   update(): void {
     this.handleSocketEvent();
 
-    const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
-    const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
-    if (this.direction !== direction) {
-      this.direction = direction;
-    }
-    if (this.player.flipX !== shouldFlipX) {
-      this.player.setFlipX(shouldFlipX);
-    }
-    if (this.player.angle !== angle) {
-      this.player.setAngle(angle);
-    }
-
-    const isArrowKeyPressed =
-      this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
-    // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
-    if (isArrowKeyPressed || this.isMoving) {
-      this.player.move(directionX, directionY);
-      this.sendSyncPosition();
-      // 움직임 상태 여부를 동기화합니다.
-      if (isArrowKeyPressed) {
-        this.isMoving = true;
-      } else {
-        this.isMoving = false;
+    if (this.player !== null) {
+      const { direction, directionX, directionY } = getDirection(this.player.flipX, this.cursors);
+      const { angle, shouldFlipX } = directionToAngleFlip(direction, this.player.flipX);
+      if (this.direction !== direction) {
+        this.direction = direction;
       }
-    }
+      if (this.player.flipX !== shouldFlipX) {
+        this.player.setFlipX(shouldFlipX);
+      }
+      if (this.player.angle !== angle) {
+        this.player.setAngle(angle);
+      }
 
-    // 캐릭터의 닉네임 위치를 관리합니다.
-    const playerBody = this.player.body as MatterJS.BodyType;
-    if (!playerBody.isSleeping) {
-      this.player.updateNicknamePosition();
+      const isArrowKeyPressed =
+        this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
+      // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
+      if (isArrowKeyPressed || this.isMoving) {
+        this.player.move(directionX, directionY);
+        this.sendSyncPosition();
+        // 움직임 상태 여부를 동기화합니다.
+        if (isArrowKeyPressed) {
+          this.isMoving = true;
+        } else {
+          this.isMoving = false;
+        }
+      }
+
+      // 캐릭터의 닉네임 위치를 관리합니다.
+      const playerBody = this.player.body as MatterJS.BodyType;
+      if (!playerBody.isSleeping) {
+        this.player.updateNicknamePosition();
+      }
     }
   }
 
@@ -192,13 +196,15 @@ export class Game extends Scene {
   }
 
   sendSyncPosition = _.throttle(() => {
-    syncMyPosition({
-      playerId: this.player.playerId,
-      centerX: this.player.x,
-      centerY: this.player.y,
-      direction: this.direction,
-      isFlipX: this.player.flipX
-    });
+    if (this.player !== null) {
+      syncMyPosition({
+        playerId: this.player.playerId,
+        centerX: this.player.x,
+        centerY: this.player.y,
+        direction: this.direction,
+        isFlipX: this.player.flipX
+      });
+    }
   }, 30);
 
   handleSocketEvent(): void {
@@ -240,6 +246,22 @@ export class Game extends Scene {
 
   // 다른 플레이어들의 위치 동기화 신호 수신
   onReceviedPositionSync(positionsInfo: PlayerPositionInfo[]): void {
+    // 혹시 플레이어 quit 처리가 잘 안되었을 경우
+    if (positionsInfo.length < this.playerList.size) {
+      this.playerList.forEach((player) => {
+        const positionInfo = positionsInfo.find((info) => info.playerId === player.playerId);
+        if (positionInfo === undefined) {
+          if (this.player?.playerId === player.playerId && g.gameOverResult !== null) {
+            this.changeScene(SCENE.GAME_OVER);
+          } else {
+            this.playerList.delete(player.playerId);
+            console.log("다른 플레이어가 나가지지 않았음.");
+            player.destroy();
+          }
+        }
+      });
+    }
+
     positionsInfo.forEach((player) => {
       const targetPlayer = g.playerMap.get(player.playerId);
       if (targetPlayer != null && this.playerList.has(player.playerId)) {
@@ -254,6 +276,7 @@ export class Game extends Scene {
           if (targetPlayerSprite.angle !== angle) {
             targetPlayerSprite.setAngle(angle);
           }
+          targetPlayerSprite.setStatic(true);
           targetPlayerSprite.updateNicknamePosition();
         }
       }
