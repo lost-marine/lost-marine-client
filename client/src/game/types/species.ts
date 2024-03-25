@@ -9,11 +9,13 @@ export type Species = {
   evolutionSet: Set<number>;
   tierCode: number;
   spritesheetUrl: string;
+  baseSpriteUrl: string;
   frameStart: number;
   frameEnd: number;
   englishName: string;
   IUCNGrade: string;
   info: string;
+  requirementPoint: number;
 };
 
 export const IUCN_GRADE = {
