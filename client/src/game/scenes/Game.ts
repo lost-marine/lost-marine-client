@@ -64,6 +64,12 @@ export class Game extends Scene {
 
   async create(): Promise<void> {
     this.ready = false;
+    if (this.playerList?.size > 0) {
+      this.playerList.forEach((player) => {
+        player.destroy();
+      });
+    }
+
     this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);

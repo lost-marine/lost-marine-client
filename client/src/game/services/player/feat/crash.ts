@@ -18,7 +18,11 @@ const crashService: CrashService = {
   },
 
   onReceivedCrash: (playerStatusInfo: PlayerStatusInfo) => {
-    if (g.myInfo !== null && g.myInfo.playerId === playerStatusInfo.playerId) {
+    if (
+      g.myInfo !== null &&
+      g.myInfo.playerId === playerStatusInfo.playerId &&
+      (g.myInfo.health !== playerStatusInfo.health || g.myInfo.point !== playerStatusInfo.point)
+    ) {
       g.myInfo.health = playerStatusInfo.health;
       g.myInfo.point = playerStatusInfo.point;
     }
