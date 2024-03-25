@@ -19,6 +19,7 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
+import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -127,19 +128,22 @@ export class Game extends Scene {
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
-      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
 
-    this.matter.world.on(
-      "collisionstart",
-      (event: Phaser.Physics.Matter.Events.CollisionStartEvent, bodyA: MatterJS.BodyType, bodyB: MatterJS.BodyType) => {
-        // 플레이어간 충돌
-        if (bodyA.gameObject instanceof PlayerSprite && bodyB.gameObject instanceof PlayerSprite) {
-          this.sendPlayerCrash(bodyA.gameObject.playerId, bodyB.gameObject.playerId);
+    this.matter.world.on("collisionstart", (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+      event.pairs.forEach((pair: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+        // 플레이어와의 충돌
+        if (pair.bodyA.gameObject instanceof PlayerSprite && pair.bodyB.gameObject instanceof PlayerSprite) {
+          this.sendPlayerCrash(pair.bodyA.gameObject.playerId, pair.bodyB.gameObject.playerId);
         }
-      }
-    );
+        // 플랑크톤과 플레이어의 충돌
+        else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
+          onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
+        }
+      });
+    });
   }
 
   update(): void {
@@ -349,7 +353,7 @@ export class Game extends Scene {
   onReceivedPlanktonRespawn(newPlanktonList: Plankton[]): void {
     newPlanktonList.forEach((plankton: Plankton) => {
       g.planktonMap.set(plankton.planktonId, plankton);
-      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton, this.player);
+      const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
   }

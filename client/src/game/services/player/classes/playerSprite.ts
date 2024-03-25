@@ -1,7 +1,5 @@
 import type { Player } from "@/game/types/player";
 import { speciesMap } from "@/game/constants/species";
-import g from "@/game/utils/global";
-import { PlanktonGraphics } from "../../plankton/classes";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
@@ -39,8 +37,6 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     scene.add.existing(this);
     this.setPosition(player.centerX, player.centerY);
     this.updateNicknamePosition();
-
-    this.setPlayerCollisionEvent();
   }
 
   move(directionX: number, directionY: number): void {
@@ -73,22 +69,5 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       this.x - this.nicknameSprite.width / 2,
       this.y - this.height / 2 - this.nicknameSprite.height
     );
-  }
-
-  setPlayerCollisionEvent(): void {
-    this.world.on("collisionstart", (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
-      event.pairs.forEach((pair: Phaser.Types.Physics.Matter.MatterCollisionData) => {
-        if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this) {
-          this.onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
-        }
-      });
-    });
-  }
-
-  onTriggerPlanktonEat(planktonId: any): void {
-    g.eventQueue.append({
-      key: "plankton-eat",
-      data: planktonId
-    });
   }
 }
