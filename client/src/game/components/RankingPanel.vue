@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from "vue";
+import { onMounted, ref, type Ref, onUpdated } from "vue";
 import { socket } from "../utils/socket";
-import unfold from "../../../public/assets/components/unfold.svg";
-import fold from "../../../public/assets/components/fold.svg";
+import unfold from "@/../public/assets/components/unfold.svg";
+import fold from "@/../public/assets/components/fold.svg";
 
 type Ranking = {
   playerId: number;
@@ -12,39 +12,32 @@ type Ranking = {
 };
 
 const rankingList: Ref<Ranking[]> = ref([]);
-
-for (let i = 100; i < 109; i++) {
-  rankingList.value.push({
-    playerId: i,
-    nickname: `테스트${i}`,
-    speciesname: `고등어`,
-    point: 80 + i
-  });
-}
-
-rankingList.value.push({
-  playerId: 110,
-  nickname: "나의이름은열두글자이지요",
-  speciesname: "바나나시클리드",
-  point: 10000
-});
-
+const toggleRankingPanel: Ref<boolean> = ref(true);
+const textEllipsisRef: Ref<HTMLDivElement[]> = ref([]);
 const rankingPlaces = ["🥇", "🥈", "🥉", "#4", "#5", "#6", "#7", "#8", "#9", "#10"];
 
 onMounted(() => {
   socket.on("ranking-receive", (rankingResponse: Ranking[]) => {
-    // rankingList.value = rankingResponse;
-    console.log(rankingResponse);
+    rankingList.value = rankingResponse;
   });
 });
 
-const toggleRankingPanel: Ref<boolean> = ref(true);
+onUpdated(() => {
+  textEllipsisRef.value.forEach((el) => {
+    // 텍스트 너비가 width를 초과하는 경우, ellipsis 적용
+    if (el.offsetWidth < el.scrollWidth) {
+      const translateX = -(el.scrollWidth - el.offsetWidth + 5) + "px";
+      el.style.setProperty("--translate-x", translateX);
+      el.classList.add("hover-ellipsis");
+    }
+  });
+});
 </script>
 
 <template>
   <div class="container" @click="toggleRankingPanel = !toggleRankingPanel">
     <div class="ranking-title">
-      <div style="font-weight: bold">랭킹</div>
+      <div class="font-bold">랭킹</div>
       <img v-if="toggleRankingPanel" class="ranking-toggle" :src="unfold" alt="" />
       <img v-else class="ranking-toggle" :src="fold" alt="" />
     </div>
@@ -55,19 +48,19 @@ const toggleRankingPanel: Ref<boolean> = ref(true);
             <th></th>
             <th>닉네임</th>
             <th>어종</th>
-            <th style="white-space: nowrap">경험치</th>
+            <th class="ranking-point">경험치</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(ranking, index) in rankingList" :key="index" :class="{ 'font-bold': index < 3 }">
             <td class="ranking-place">{{ rankingPlaces[index] }}</td>
-            <td style="overflow: hidden">
-              <div class="ranking-nickname">{{ ranking.nickname }}</div>
+            <td class="overflow-hidden">
+              <div ref="textEllipsisRef" class="ranking-nickname">{{ ranking.nickname }}</div>
             </td>
-            <td style="overflow: hidden">
-              <div class="ranking-speciesname">{{ ranking.speciesname }}</div>
+            <td class="overflow-hidden">
+              <div ref="textEllipsisRef" class="ranking-speciesname">{{ ranking.speciesname }}</div>
             </td>
-            <td>{{ ranking.point }}</td>
+            <td class="ranking-point">{{ ranking.point }}</td>
           </tr>
         </tbody>
       </table>
@@ -76,20 +69,25 @@ const toggleRankingPanel: Ref<boolean> = ref(true);
 </template>
 
 <style scoped lang="scss">
-.font-bold {
-  font-weight: bold;
-}
-
 .container {
   max-width: 15rem;
   width: 100%;
   background-color: var(--transparent-black);
-
   position: absolute;
   right: 1rem;
   top: 1rem;
   padding: 10px;
   border-radius: 10px;
+
+  --table-padding: 3px;
+
+  .font-bold {
+    font-weight: bold;
+  }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
 
   .ranking-title {
     display: flex;
@@ -106,50 +104,49 @@ const toggleRankingPanel: Ref<boolean> = ref(true);
     text-align: center;
 
     table {
-      border-collapse: collapse; // tr에 border 설정 시 필요
+      border-collapse: collapse; // border 설정 시 필요
 
       thead {
         font-size: 0.65rem;
+        border-bottom: 1px solid var(--transparent-white);
 
         th {
           font-weight: lighter;
         }
       }
 
-      tr {
-        border-bottom: 1px solid var(--transparent-white);
-      }
-
       td {
-        padding: 3px 0;
+        padding: var(--table-padding) 0;
       }
     }
 
     .ranking-place {
       color: yellowgreen;
+      padding-right: var(--table-padding);
     }
 
-    .ranking-nickname {
+    .ranking-nickname,
+    .ranking-speciesname {
       width: 6rem;
-      display: block;
-      overflow: hidden;
       white-space: nowrap;
+      overflow: hidden;
       text-overflow: ellipsis;
-    }
 
-    .ranking-nickname:hover {
-      position: relative;
-      overflow: visible;
-      transition: transform 3s ease-in;
-      transform: translateX(-100%);
+      &.hover-ellipsis:hover {
+        overflow: visible;
+        transition: all 1.5s ease-in-out 0.5s;
+        transform: translateX(var(--translate-x, -100%));
+      }
     }
 
     .ranking-speciesname {
       width: 5rem;
-      display: block;
-      overflow: hidden;
+      padding-left: var(--table-padding);
+    }
+
+    .ranking-point {
+      padding-left: var(--table-padding);
       white-space: nowrap;
-      text-overflow: ellipsis;
     }
   }
 }
