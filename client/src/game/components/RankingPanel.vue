@@ -78,6 +78,7 @@ onUpdated(() => {
   top: 1rem;
   padding: 10px;
   border-radius: 10px;
+  cursor: default;
 
   --table-padding: 3px;
 
