@@ -5,8 +5,7 @@ import g from "../utils/global";
 import { speciesMap } from "../constants/species";
 import HealthIcon from "@public/assets/components/icons/heart.png";
 import PowerIcon from "@public/assets/components/icons/power.png";
-import { socket } from "../utils/socket";
-import type { PlayerEvolutionResponse } from "../services/player/types/evolution";
+import evolutionService from "@/game/services/player/feat/evolution";
 import { type SpeciesId } from "@/game/types/species";
 
 const currentSpeciesId: Ref<SpeciesId> = ref<SpeciesId>(g.myInfo?.speciesId ?? 1);
@@ -14,22 +13,11 @@ const show: Ref<boolean> = ref<boolean>(false);
 
 const sendPlayerEvolution = (selectedSpeciesId: SpeciesId): void => {
   if (g.myInfo !== null) {
-    socket.emit(
-      "player-evolution",
-      { speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, nowExp: g.myInfo.nowExp },
-      ({ isSuccess, msg }: PlayerEvolutionResponse) => {
-        if (isSuccess) {
-          console.log(msg);
-          currentSpeciesId.value = selectedSpeciesId;
-          EventBus.emit("player-evolution"); // to `PlayerStatus.vue`
-          g.eventQueue.append({ key: "player-evolution", data: selectedSpeciesId });
-          show.value = false;
-        } else {
-          // 실패 시
-          console.log(msg);
-        }
-      }
-    );
+    evolutionService.evolve({ speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, nowExp: g.myInfo.nowExp });
+    currentSpeciesId.value = selectedSpeciesId;
+    show.value = false;
+  } else {
+    console.error("내 정보가 없습니다.");
   }
 };
 

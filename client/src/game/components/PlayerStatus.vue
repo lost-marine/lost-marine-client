@@ -3,6 +3,8 @@ import { onMounted, ref } from "vue";
 import { EventBus } from "../EventBus";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 import type { Player } from "../types/player";
+import { speciesMap } from "../constants/species";
+import g from "../utils/global";
 
 const healthContainerRef = ref<HTMLDListElement>();
 const healthRef = ref<HTMLDivElement>();
@@ -11,10 +13,18 @@ const fadein = ref<boolean>(false);
 const fadeout = ref<boolean>(false);
 
 onMounted(() => {
+  let requiredPoint: number = 100;
+  if (g.myInfo !== null) {
+    const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
+    if (currentSpeciesInfo !== undefined) {
+      requiredPoint = currentSpeciesInfo.requirementPoint;
+    }
+  }
+
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
     // 점수바 관리
     if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
-      nowExpRef.value.style.width = `${playerStatusInfo.nowExp}%`;
+      nowExpRef.value.style.width = `${(playerStatusInfo.nowExp / requiredPoint) * 100}%`;
     }
 
     // 체력바 관리
@@ -41,12 +51,12 @@ onMounted(() => {
 
   EventBus.on("player-eat-plankton", (player: Player) => {
     if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
-      nowExpRef.value.style.width = `${player.nowExp}%`;
+      nowExpRef.value.style.width = `${(player.nowExp / requiredPoint) * 100}%`;
     }
   });
 
-  // 진화 시 체력 만땅 채우기
   EventBus.on("player-evolution", () => {
+    // 진화 시 체력 만땅 채우기
     if (healthRef.value !== undefined && healthRef.value !== null) {
       healthRef.value.style.width = `100%`;
     }
@@ -54,6 +64,14 @@ onMounted(() => {
       fadein.value = false;
       fadeout.value = true;
     }, 1000);
+
+    // 진화 시 포인트 업데이트
+    if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
+      if (g.myInfo !== null) {
+        console.log(g.myInfo.nowExp);
+        nowExpRef.value.style.width = `${(g.myInfo.nowExp / requiredPoint) * 100}%`;
+      }
+    }
   });
 });
 </script>

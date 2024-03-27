@@ -10,20 +10,26 @@ type EvolutionService = {
 };
 
 const evolutionService: EvolutionService = {
-  evolve: (playerEvolutionInfo: PlayerEvolutionInfo) => {
-    socket.emit("player-evolution", playerEvolutionInfo, ({ isSuccess, msg }: PlayerEvolutionResponse): void => {
+  evolve: ({ speciesId, playerId, nowExp }: PlayerEvolutionInfo) => {
+    socket.emit("player-evolution", { speciesId, playerId, nowExp }, ({ isSuccess, msg, nowExp }: PlayerEvolutionResponse) => {
       if (isSuccess) {
+        console.log(msg);
+
         if (g.myInfo !== null) {
-          g.myInfo.speciesId = playerEvolutionInfo.speciesId;
-          const newHealth: number | undefined = speciesMap.get(playerEvolutionInfo.speciesId)?.health;
+          g.myInfo.speciesId = speciesId;
+          g.myInfo.nowExp = nowExp;
+          const newHealth: number | undefined = speciesMap.get(speciesId)?.health;
           if (newHealth === undefined) {
             throw new Error("해당 개체 정보가 불완전합니다.");
           }
           g.myInfo.health = newHealth;
-          EventBus.emit("player-evolution", playerEvolutionInfo);
         }
+
+        EventBus.emit("player-evolution"); // to `PlayerStatus.vue`
+        g.eventQueue.append({ key: "player-evolution", data: speciesId });
       } else {
-        EventBus.emit("player-evolution", msg);
+        // 실패 시
+        console.log(msg);
       }
     });
   },
