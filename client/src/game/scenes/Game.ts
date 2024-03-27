@@ -45,6 +45,7 @@ export class Game extends Scene {
     this.load.image("tile_deep_water_green", "assets/tileset/DeepWater_Green/Tiles/tileset.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
     this.load.json("shapes", "assets/shapes/shapes.json");
+
     speciesMap.forEach((value) => {
       try {
         // 동적으로
@@ -68,7 +69,6 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
-    this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
 
     this.ready = false;
@@ -200,6 +200,7 @@ export class Game extends Scene {
       speciesMap.get(g.myInfo?.speciesId ?? 1)?.key ?? "nemo",
       playerInfo
     );
+    newPlayer.setFlipX(playerInfo.isFlipX);
     this.playerList.set(playerInfo.playerId, newPlayer);
     newPlayer.setBounce(0);
     if (playerInfo.playerId !== g.myInfo?.playerId) {
