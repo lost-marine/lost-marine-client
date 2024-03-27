@@ -1,10 +1,12 @@
 import type { Player } from "@/game/types/player";
 import { speciesMap } from "@/game/constants/species";
+import type { SpeciesId } from "@/game/types/species";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
   nicknameSprite: Phaser.GameObjects.Text;
   moveSpeed: number;
+  shape: any;
   shapes: {
     default: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
     flipped: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
@@ -13,8 +15,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, player: Player) {
     const shapes = scene.cache.json.get("shapes");
     const speciesKey = speciesMap.get(player.speciesId ?? 1)?.key ?? "nemo";
-
     super(world, player.centerX, player.centerY, texture, 0, { shape: shapes[speciesKey] });
+    this.shape = shapes;
     this.shapes = {
       default: shapes[speciesKey],
       flipped: shapes[speciesKey + "Flipped"]
@@ -68,5 +70,32 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       this.x - this.nicknameSprite.width / 2,
       this.y - this.height / 2 - this.nicknameSprite.height
     );
+  }
+
+  evolve(speciesId: SpeciesId): void {
+    const speciesKey = speciesMap.get(speciesId)?.key ?? "nemo";
+    this.setTexture(speciesKey);
+    this.shapes = {
+      default: this.shape[speciesKey],
+      flipped: this.shape[speciesKey + "Flipped"]
+    };
+
+    if (this.body !== null && this.body !== undefined) {
+      // 현재 속도와 위치 저장
+      const currentVelocity = this.body.velocity;
+      const currentPosition = { x: this.x, y: this.y };
+
+      // 바디 교체
+      const bodyData = this.flipX ? this.shapes.flipped : this.shapes.default;
+      this.setBody(bodyData);
+      // 저장된 속도와 위치를 새 바디에 적용
+      this.setVelocity(currentVelocity.x, currentVelocity.y);
+      this.setPosition(currentPosition.x, currentPosition.y);
+    }
+
+    // 현재 개체에 맞는 애니메이션 재생
+    this.anims.play(speciesKey + "_anims");
+    // 인스턴스의 초기 스폰 위치를 설정합니다.
+    this.updateNicknamePosition();
   }
 }

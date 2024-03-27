@@ -15,6 +15,8 @@ import type { Chat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import evolutionService from "../services/player/feat/evolution";
 
 export const state = reactive({
   connected: false
@@ -91,4 +93,9 @@ socket.on("chat-message-receive", (message: Chat) => {
 // 플레이어 충돌 후 상태 수정
 socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
   crashService.onReceivedCrash(playerStatusInfo);
+});
+
+// 다른 플레이어 진화 싱크
+socket.on("others-evolution-sync", (othersEvolutionInfo: OthersEvolutionInfo) => {
+  evolutionService.onReceivedEvolutionSync(othersEvolutionInfo);
 });

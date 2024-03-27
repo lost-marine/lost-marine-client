@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, type Ref } from "vue";
+import { onMounted, ref, watch, type Ref } from "vue";
 import { EventBus } from "../EventBus";
 import g from "../utils/global";
 import { speciesMap } from "../constants/species";
@@ -7,14 +7,11 @@ import HealthIcon from "@public/assets/components/icons/heart.png";
 import PowerIcon from "@public/assets/components/icons/power.png";
 import { socket } from "../utils/socket";
 import type { PlayerEvolutionResponse } from "../services/player/types/evolution";
+import { type SpeciesId } from "@/game/types/species";
 
-const currentSpeciesId: Ref<number> = ref<number>(g.myInfo?.speciesId ?? 1);
+const currentSpeciesId: Ref<SpeciesId> = ref<SpeciesId>(g.myInfo?.speciesId ?? 1);
 const show: Ref<boolean> = ref<boolean>(false);
-const evolutionMap: Map<number, number[]> = new Map<number, number[]>([
-  [1, [2, 3]],
-  [2, [3]],
-  [3, []]
-]);
+
 const handleMouseEvolution = (e: MouseEvent, speciesId: number): void => {
   // TODO: 소켓 통신, 숫자 버튼에 이벤트, 진화 요청 소켓통신
   // if (g.myInfo !== null) {
@@ -34,14 +31,18 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
     e.key === "8" ||
     e.key === "9";
   if (isNumber) {
-    const availableList: number[] = evolutionMap.get(currentSpeciesId.value) ?? [];
-    if (availableList.length === 0) {
+    const evolutionList: SpeciesId[] | undefined = speciesMap.get(currentSpeciesId.value)?.evolutionList;
+    if (evolutionList === undefined) {
+      throw new Error("해당 개체 정보가 불완전합니다.");
+    }
+
+    if (evolutionList.length === 0) {
       // TODO: 모든 진화가 완료되었을 때
       console.log("모든 진화가 완료되었습니다.");
     } else {
       const idx = parseInt(e.key) - 1;
-      if (idx in availableList && g.myInfo !== null) {
-        const selectedSpeciesId: number = availableList[idx];
+      if (idx in evolutionList && g.myInfo !== null) {
+        const selectedSpeciesId: SpeciesId = evolutionList[idx];
         socket.emit(
           "player-evolution",
           { speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, point: g.myInfo.point },
@@ -49,9 +50,8 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
             if (isSuccess) {
               console.log(msg);
               currentSpeciesId.value = selectedSpeciesId;
-              // 나의 스프라이트 변경
-
-              // 남에게도 변경
+              g.eventQueue.append({ key: "player-evolution", data: selectedSpeciesId });
+              show.value = false;
             } else {
               // 실패 시
               console.log(msg);
@@ -63,16 +63,18 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
   }
 };
 
+watch(show, () => {
+  if (show.value) {
+    window.addEventListener("keydown", handleKeyboardEvolution);
+  } else {
+    window.removeEventListener("keydown", handleKeyboardEvolution);
+  }
+});
+
 onMounted(() => {
   EventBus.on("player-evolution-required", () => {
     show.value = true;
   });
-
-  window.addEventListener("keydown", handleKeyboardEvolution);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyboardEvolution);
 });
 </script>
 
@@ -81,7 +83,7 @@ onUnmounted(() => {
     <p class="desc">진화할 생명을 선택하세요.</p>
     <ul class="list-evolution">
       <li
-        v-for="(speciesId, idx) in evolutionMap.get(currentSpeciesId)"
+        v-for="(speciesId, idx) in speciesMap.get(currentSpeciesId)?.evolutionList"
         :key="speciesId"
         @click="
           (e: MouseEvent) => {

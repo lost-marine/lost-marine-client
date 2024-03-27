@@ -1,5 +1,7 @@
+import type { SpeciesId } from "@/game/types/species";
+
 export type PlayerEvolutionInfo = {
-  speciesId: number;
+  speciesId: SpeciesId;
   playerId: number;
   point: number;
 };
@@ -7,4 +9,9 @@ export type PlayerEvolutionInfo = {
 export type PlayerEvolutionResponse = {
   isSuccess: boolean;
   msg: string;
+};
+
+export type OthersEvolutionInfo = {
+  playerId: number;
+  speciesId: SpeciesId;
 };

@@ -20,6 +20,8 @@ import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
 import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import type { SpeciesId } from "../types/species";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -176,8 +178,8 @@ export class Game extends Scene {
     }
 
     // 캐릭터의 닉네임 위치를 관리합니다.
-    const playerBody = this.player.body as MatterJS.BodyType;
-    if (!playerBody.isSleeping) {
+    // const playerBody = this.player.body as MatterJS.BodyType;
+    if (this.isMoving) {
       this.player.updateNicknamePosition();
     }
   }
@@ -236,8 +238,14 @@ export class Game extends Scene {
         case "plankton-respawn":
           this.onReceivedPlanktonRespawn(event.data as Plankton[]);
           break;
+        case "player-evolution":
+          this.onReceivedPlayerEvolution(event.data as SpeciesId);
+          break;
         case "game-over":
           this.onReceivedGameOver();
+          break;
+        case "others-evolution-sync":
+          this.onReceivedOthersEvolution(event.data as OthersEvolutionInfo);
           break;
       }
     }
@@ -355,6 +363,12 @@ export class Game extends Scene {
           if (g.myInfo !== null) {
             g.myInfo.point = response.player.point;
             g.myInfo.planktonCount = response.player.planktonCount;
+
+            // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
+            const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
+            if (currentSpeciesInfo !== undefined && g.myInfo.point >= currentSpeciesInfo.requirementPoint) {
+              EventBus.emit("player-evolution-required");
+            }
           }
           EventBus.emit("player-eat-plankton", response.player);
         }
@@ -373,6 +387,22 @@ export class Game extends Scene {
       const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
+  }
+
+  onReceivedPlayerEvolution(selectedSpeciesId: SpeciesId): void {
+    if (g.myInfo !== null) {
+      g.myInfo.speciesId = selectedSpeciesId;
+      this.player.evolve(selectedSpeciesId);
+    } else {
+      throw new Error("내 정보가 없습니다.");
+    }
+  }
+
+  onReceivedOthersEvolution({ playerId, speciesId }: OthersEvolutionInfo): void {
+    if (this.playerList.has(playerId)) {
+      const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.evolve(speciesId);
+    }
   }
 
   changeScene(target: SceneType): void {
