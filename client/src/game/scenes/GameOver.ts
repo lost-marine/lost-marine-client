@@ -20,7 +20,6 @@ export class GameOver extends Scene {
   }
 
   preload(): void {
-    this.load.audio("bgm", "assets/sounds/background.mp3");
     if (g.gameOverResult != null) {
       if (g.gameOverResult.playerId === g.myInfo?.playerId) {
         if (g.myInfo != null) this.mySpeciesInfo = speciesMap.get(g.myInfo?.speciesId) ?? null;
@@ -80,7 +79,6 @@ export class GameOver extends Scene {
       BLACK: "#000000"
     };
 
-    this.sound.add("bgm", { loop: true }).play();
     this.camera = this.cameras.main;
     this.camera.setBackgroundColor(COLORS.BLACK);
 
