@@ -20,6 +20,8 @@ import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
 import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
+import { ItemSprite } from "../services/item/classes";
+import { itemList } from "../constants/item";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -32,6 +34,7 @@ export class Game extends Scene {
   backgroundLayer: Phaser.Tilemaps.TilemapLayer;
   collisionLayer: Phaser.Tilemaps.TilemapLayer;
   ready: boolean;
+  itemList: ItemSprite[];
   constructor() {
     super("Game");
   }
@@ -153,6 +156,12 @@ export class Game extends Scene {
           onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
         }
       });
+    });
+
+    this.itemList = [];
+
+    itemList.forEach((item) => {
+      this.itemList.push(new ItemSprite(this.matter.world, this, item));
     });
   }
 
