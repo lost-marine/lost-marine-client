@@ -5,7 +5,7 @@ export type PlayerCrashResponse = {
 export type PlayerStatusInfo = {
   playerId: number;
   health: number;
-  point: number;
+  nowExp: number;
   centerX: number;
   centerY: number;
   isGameOver: boolean;

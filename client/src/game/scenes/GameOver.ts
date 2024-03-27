@@ -119,7 +119,7 @@ export class GameOver extends Scene {
       this.add.text(100, 170, "킬", baseTextStyle);
       this.add.text(100, 200, `${this.gameOverResult.playerCount}`, baseTextStyle);
       this.add.text(150, 170, "경험치", baseTextStyle);
-      this.add.text(150, 200, `${this.gameOverResult.point}`, baseTextStyle);
+      this.add.text(150, 200, `${this.gameOverResult.totalExp}`, baseTextStyle);
       this.add.text(250, 170, "플랑크톤", baseTextStyle);
       this.add.text(250, 200, `${this.gameOverResult.planktonCount}`, baseTextStyle);
       this.add.text(380, 170, "미세 플라스틱", baseTextStyle);

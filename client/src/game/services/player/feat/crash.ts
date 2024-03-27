@@ -21,10 +21,10 @@ const crashService: CrashService = {
     if (
       g.myInfo !== null &&
       g.myInfo.playerId === playerStatusInfo.playerId &&
-      (g.myInfo.health !== playerStatusInfo.health || g.myInfo.point !== playerStatusInfo.point)
+      (g.myInfo.health !== playerStatusInfo.health || g.myInfo.nowExp !== playerStatusInfo.nowExp)
     ) {
       g.myInfo.health = playerStatusInfo.health;
-      g.myInfo.point = playerStatusInfo.point;
+      g.myInfo.nowExp = playerStatusInfo.nowExp;
     }
     EventBus.emit("player-status-sync", playerStatusInfo);
   }
