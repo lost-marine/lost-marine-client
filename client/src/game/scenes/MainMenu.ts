@@ -12,16 +12,21 @@ export class MainMenu extends Scene {
   startButton: GameObjects.Text;
   nameInput: Phaser.GameObjects.DOMElement;
   inputElement: HTMLInputElement;
+  musicOnButton: Phaser.GameObjects.Image;
+  musicOffButton: Phaser.GameObjects.Image;
+
   constructor() {
     super("MainMenu");
   }
 
   preload(): void {
     this.load.audio("bgm", "assets/sounds/background.mp3");
+    this.load.svg("music_on", "assets/components/VolumeUp.svg");
+    this.load.svg("music_off", "assets/components/VolumeOff.svg");
   }
 
   create(): void {
-    this.sound.add("bgm", { loop: true }).play();
+    this.sound.add("bgm", { loop: true, volume: 0.5 }).play();
     this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // 이미지의 스케일을 게임의 크기에 맞추기
@@ -77,6 +82,46 @@ export class MainMenu extends Scene {
       this.startButton.setScale(1.0); // 마우스 아웃 시 버튼 원래 크기로
     });
 
+    // 음악끄는 버튼 추가
+    this.musicOffButton = this.add
+      .image(this.cameras.main.width - 100, 100, "music_on")
+      .setInteractive()
+      .setScale(1.5)
+      .setOrigin(0.5)
+      .setDepth(100)
+      .on("pointerdown", async () => {
+        this.setSoundMute(true);
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.musicOffButton.on("pointerover", () => {
+      this.musicOffButton.setScale(1.7); // 마우스 오버 시 버튼 확대`
+    });
+    this.musicOffButton.on("pointerout", () => {
+      this.musicOffButton.setScale(1.5); // 마우스 아웃 시 버튼 원래 크기로
+    });
+
+    // 음악끄는 버튼 추가
+    this.musicOnButton = this.add
+      .image(this.cameras.main.width - 100, 100, "music_off")
+      .setInteractive()
+      .setOrigin(0.5)
+      .setScale(1.5)
+      .setDepth(100)
+      .on("pointerdown", async () => {
+        this.setSoundMute(false);
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.musicOnButton.on("pointerover", () => {
+      this.musicOnButton.setScale(1.7); // 마우스 오버 시 버튼 확대
+    });
+    this.musicOnButton.on("pointerout", () => {
+      this.musicOnButton.setScale(1.5); // 마우스 아웃 시 버튼 원래 크기로
+    });
+    const isSoundMute: boolean = JSON.parse(localStorage.getItem("isSoundMute") ?? "true");
+    this.setSoundMute(isSoundMute);
+
     EventBus.emit("current-scene-ready", this);
   }
 
@@ -89,5 +134,17 @@ export class MainMenu extends Scene {
 
   changeScene(target: SceneType): void {
     this.scene.start(target);
+  }
+
+  setSoundMute(value: boolean): void {
+    localStorage.setItem("isSoundMute", JSON.stringify(value));
+    this.sound.mute = !value;
+    if (value) {
+      this.musicOnButton.setActive(true).setVisible(true);
+      this.musicOffButton.setActive(false).setVisible(false);
+    } else {
+      this.musicOnButton.setActive(false).setVisible(false);
+      this.musicOffButton.setActive(true).setVisible(true);
+    }
   }
 }

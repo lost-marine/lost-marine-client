@@ -19,7 +19,6 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
-import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 import type { OthersEvolutionInfo } from "../services/player/types/evolution";
 import type { SpeciesId } from "../types/species";
 
@@ -47,6 +46,7 @@ export class Game extends Scene {
     this.load.image("tile_deep_water_green", "assets/tileset/DeepWater_Green/Tiles/tileset.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
     this.load.json("shapes", "assets/shapes/shapes.json");
+
     speciesMap.forEach((value) => {
       try {
         // 동적으로
@@ -70,7 +70,6 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
-    this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
 
     this.ready = false;
@@ -137,6 +136,12 @@ export class Game extends Scene {
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
 
     // 플랑크톤을 그립니다.
+    if (this.planktonList?.size > 0) {
+      this.planktonList.forEach((plankton) => {
+        plankton.destroy();
+      });
+    }
+
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
@@ -152,7 +157,7 @@ export class Game extends Scene {
         }
         // 플랑크톤과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
-          onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
+          this.eatPlankton(pair.bodyA.gameObject.plankton.planktonId, this.player.playerId);
         }
       });
     });
@@ -202,6 +207,7 @@ export class Game extends Scene {
       speciesMap.get(g.myInfo?.speciesId ?? 1)?.key ?? "nemo",
       playerInfo
     );
+    newPlayer.setFlipX(playerInfo.isFlipX);
     this.playerList.set(playerInfo.playerId, newPlayer);
     newPlayer.setBounce(0);
     if (playerInfo.playerId !== g.myInfo?.playerId) {
@@ -235,10 +241,6 @@ export class Game extends Scene {
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
           this.onReceivedPositionSync(event.data as PlayerPositionInfo[]);
-          break;
-        // 내 플레이어가 플랑크톤 섭취
-        case "plankton-eat":
-          this.onReceivedPlanktonEat(event.data as number, this.player.playerId);
           break;
         // 다른 플레이어가 플랑크톤 섭취
         case "plankton-delete":
@@ -351,7 +353,7 @@ export class Game extends Scene {
     return true;
   }
 
-  onReceivedPlanktonEat(planktonId: number, playerId: number): void {
+  eatPlankton(planktonId: number, playerId: number): void {
     socket.emit(
       "plankton-eat",
       {
@@ -363,11 +365,13 @@ export class Game extends Scene {
           this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
-
           this.sound.add("eat_plankton").play({ volume: 0.2 });
+
           if (g.myInfo !== null) {
-            g.myInfo.nowExp = response.player.nowExp;
-            g.myInfo.planktonCount = response.player.planktonCount;
+            g.myInfo.planktonCount = response.planktonCount;
+            g.myInfo.microplasticCount = response.microplasticCount;
+            g.myInfo.health = response.playerStatusInfo.health;
+            g.myInfo.nowExp = response.playerStatusInfo.nowExp;
 
             // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
             const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
@@ -375,7 +379,7 @@ export class Game extends Scene {
               EventBus.emit("player-evolution-required");
             }
           }
-          EventBus.emit("player-eat-plankton", response.player);
+          EventBus.emit("player-status-sync", response.playerStatusInfo);
         }
       }
     );

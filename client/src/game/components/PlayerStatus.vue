@@ -2,7 +2,6 @@
 import { onMounted, ref } from "vue";
 import { EventBus } from "../EventBus";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
-import type { Player } from "../types/player";
 import { speciesMap } from "../constants/species";
 import g from "../utils/global";
 
@@ -46,12 +45,9 @@ onMounted(() => {
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
 
-    // TODO: 체력 회복 UI
-  });
-
-  EventBus.on("player-eat-plankton", (player: Player) => {
-    if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
-      nowExpRef.value.style.width = `${(player.nowExp / requiredPoint) * 100}%`;
+    // 플랑크톤 섭취 시 체력 회복
+    if (healthRef.value !== undefined && healthRef.value !== null) {
+      healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
   });
 
