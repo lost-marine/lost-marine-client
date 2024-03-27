@@ -16,6 +16,7 @@ type GlobalStore = {
   currentScene: SceneType;
   chatList: Ref<Chat[]>;
   gameOverResult: GameOverResponse | null;
+  clear: () => void;
 };
 const g: GlobalStore = {
   myInfo: null,
@@ -24,7 +25,12 @@ const g: GlobalStore = {
   planktonMap: new Map<number, Plankton>(),
   currentScene: SCENE.MAIN_MENU,
   chatList: ref<Chat[]>([]),
-  gameOverResult: null
+  gameOverResult: null,
+  clear: () => {
+    g.playerMap.clear();
+    g.eventQueue = new Queue<BaseSocketObject>();
+    g.planktonMap.clear();
+  }
 };
 
 export default g;
