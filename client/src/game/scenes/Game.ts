@@ -19,7 +19,6 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
-import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -135,6 +134,12 @@ export class Game extends Scene {
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
 
     // 플랑크톤을 그립니다.
+    if (this.planktonList?.size > 0) {
+      this.planktonList.forEach((plankton) => {
+        plankton.destroy();
+      });
+    }
+
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
@@ -150,7 +155,7 @@ export class Game extends Scene {
         }
         // 플랑크톤과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
-          onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
+          this.eatPlankton(pair.bodyA.gameObject.plankton.planktonId, this.player.playerId);
         }
       });
     });
@@ -234,10 +239,6 @@ export class Game extends Scene {
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
           this.onReceivedPositionSync(event.data as PlayerPositionInfo[]);
-          break;
-        // 내 플레이어가 플랑크톤 섭취
-        case "plankton-eat":
-          this.onReceivedPlanktonEat(event.data as number, this.player.playerId);
           break;
         // 다른 플레이어가 플랑크톤 섭취
         case "plankton-delete":
@@ -344,7 +345,7 @@ export class Game extends Scene {
     return true;
   }
 
-  onReceivedPlanktonEat(planktonId: number, playerId: number): void {
+  eatPlankton(planktonId: number, playerId: number): void {
     socket.emit(
       "plankton-eat",
       {
@@ -356,13 +357,15 @@ export class Game extends Scene {
           this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
-
           this.sound.add("eat_plankton").play({ volume: 0.2 });
+
           if (g.myInfo !== null) {
-            g.myInfo.nowExp = response.player.nowExp;
-            g.myInfo.planktonCount = response.player.planktonCount;
+            g.myInfo.planktonCount = response.planktonCount;
+            g.myInfo.microplasticCount = response.microplasticCount;
+            g.myInfo.health = response.playerStatusInfo.health;
+            g.myInfo.nowExp = response.playerStatusInfo.nowExp;
           }
-          EventBus.emit("player-eat-plankton", response.player);
+          EventBus.emit("player-status-sync", response.playerStatusInfo);
         }
       }
     );

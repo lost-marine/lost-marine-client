@@ -1,6 +1,8 @@
-import type { Player } from "@/game/types/player";
+import type { PlayerStatusInfo } from "../../player/types/crash";
 
 export type eatPlanktonResponse = {
   isSuccess: boolean;
-  player: Player;
+  planktonCount: number;
+  microplasticCount: number;
+  playerStatusInfo: PlayerStatusInfo;
 };
