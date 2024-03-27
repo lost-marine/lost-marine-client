@@ -19,7 +19,6 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
-import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -156,7 +155,7 @@ export class Game extends Scene {
         }
         // 플랑크톤과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
-          onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
+          this.eatPlankton(pair.bodyA.gameObject.plankton.planktonId, this.player.playerId);
         }
       });
     });
@@ -239,10 +238,6 @@ export class Game extends Scene {
         // 다른 플레이어들의 위치 동기화 신호 수신
         case "others-position-sync":
           this.onReceivedPositionSync(event.data as PlayerPositionInfo[]);
-          break;
-        // 내 플레이어가 플랑크톤 섭취
-        case "plankton-eat":
-          this.onReceivedPlanktonEat(event.data as number, this.player.playerId);
           break;
         // 다른 플레이어가 플랑크톤 섭취
         case "plankton-delete":
@@ -349,7 +344,7 @@ export class Game extends Scene {
     return true;
   }
 
-  onReceivedPlanktonEat(planktonId: number, playerId: number): void {
+  eatPlankton(planktonId: number, playerId: number): void {
     socket.emit(
       "plankton-eat",
       {
@@ -358,7 +353,7 @@ export class Game extends Scene {
       },
       (response: eatPlanktonResponse) => {
         if (response.isSuccess) {
-          this.planktonList.get(planktonId)?.hidden();
+          this.planktonList.get(planktonId)?.destroy();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
           this.sound.add("eat_plankton").play({ volume: 0.2 });
@@ -376,7 +371,7 @@ export class Game extends Scene {
   }
 
   onReceivedPlanktonDelete(planktonId: number): void {
-    this.planktonList.get(planktonId)?.hidden();
+    this.planktonList.get(planktonId)?.destroy();
     this.planktonList.delete(planktonId);
   }
 

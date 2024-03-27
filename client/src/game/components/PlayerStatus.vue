@@ -35,7 +35,9 @@ onMounted(() => {
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
 
-    // TODO: 체력 회복 UI
+    if (healthRef.value !== undefined && healthRef.value !== null) {
+      healthRef.value.style.width = `${playerStatusInfo.health}%`;
+    }
   });
 });
 </script>
