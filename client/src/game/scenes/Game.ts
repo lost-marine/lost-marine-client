@@ -33,6 +33,7 @@ export class Game extends Scene {
   planktonList: Map<number, PlanktonGraphics>;
   backgroundLayer: Phaser.Tilemaps.TilemapLayer;
   collisionLayer: Phaser.Tilemaps.TilemapLayer;
+  ready: boolean;
   constructor() {
     super("Game");
   }
@@ -71,8 +72,16 @@ export class Game extends Scene {
   async create(): Promise<void> {
     this.sound.add("bgm", { loop: true }).play();
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
-    this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
+
+    this.ready = false;
+    if (this.playerList?.size > 0) {
+      this.playerList.forEach((player) => {
+        player.destroy();
+      });
+    }
     this.playerList = new Map<number, PlayerSprite>();
+
+    this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
 
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
@@ -94,14 +103,14 @@ export class Game extends Scene {
     // 타일 맵을 그린 이후 `PlayerSprite`를 추가합니다.
     if (this.createTilemap()) {
       // 플레이어 스프라이트를 생성합니다.
-      if (g.myInfo !== null) {
-        g.playerMap.forEach((player) => {
-          const newPlayer = this.addPlayer(player);
-          if (g.myInfo?.playerId === newPlayer.playerId) {
-            this.player = newPlayer;
-          }
-        });
-      }
+
+      g.playerMap.forEach((player) => {
+        const newPlayer = this.addPlayer(player);
+        if (g.myInfo?.playerId === newPlayer.playerId) {
+          this.player = newPlayer;
+        }
+      });
+      this.ready = true;
     } else {
       await Swal.fire("error", "맵 생성 중 오류가 발생했습니다.", "error").then(() => {
         EventBus.emit("change-scene", SCENE.MAIN_MENU);
@@ -112,6 +121,7 @@ export class Game extends Scene {
     // 카메라 뷰를 관리합니다.
     this.cameras.main.setBounds(0, 0, 6400, 6400, true);
     this.matter.world.setBounds(0, 0, 6400, 6400);
+
     // 카메라의 움직임의 부드러운 정도는 startFollow의 3,4번째 인자인 lerp(보간) 값(0~1)을 조정하여 바꿀 수 있습니다.
     this.cameras.main.startFollow(this.player, true, 0.5, 0.5);
 
@@ -159,7 +169,7 @@ export class Game extends Scene {
     if (this.player.flipX !== shouldFlipX) {
       this.player.setFlipX(shouldFlipX);
     }
-    if (this.player.angle !== angle) {
+    if (this.player?.angle !== undefined && this.player.angle !== angle) {
       this.player.setAngle(angle);
     }
 
@@ -262,9 +272,10 @@ export class Game extends Scene {
   onReceivedQuit(playerId: number): void {
     if (this.playerList.has(playerId)) {
       const targetPlayer = this.playerList.get(playerId);
-      targetPlayer?.nicknameSprite.destroy();
       targetPlayer?.destroy();
       this.playerList.delete(playerId);
+    } else {
+      console.error("targetPlayer가 없습니다. ");
     }
   }
 
@@ -284,14 +295,11 @@ export class Game extends Scene {
           if (targetPlayerSprite.angle !== angle) {
             targetPlayerSprite.setAngle(angle);
           }
+          targetPlayerSprite.setStatic(true);
           targetPlayerSprite.updateNicknamePosition();
         }
       }
     });
-  }
-
-  onReceivedGameOver(): void {
-    EventBus.emit("change-scene", SCENE.GAME_OVER);
   }
 
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
@@ -361,7 +369,7 @@ export class Game extends Scene {
 
           this.sound.add("eat_plankton").play({ volume: 0.2 });
           if (g.myInfo !== null) {
-            g.myInfo.point = response.player.point;
+            g.myInfo.nowExp = response.player.nowExp;
             g.myInfo.planktonCount = response.player.planktonCount;
 
             // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.

@@ -11,6 +11,6 @@ export type Player = {
   playerCount: number;
   stopTime: number;
   level: number;
-  point: number;
+  nowExp: number;
   speciesId: SpeciesId;
 } & Creature;

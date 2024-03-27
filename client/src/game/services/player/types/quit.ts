@@ -7,5 +7,5 @@ export type GameOverResponse = {
   planktonCount: number;
   microplasticCount: number;
   playerCount: number;
-  point: number;
+  totalExp: number;
 };

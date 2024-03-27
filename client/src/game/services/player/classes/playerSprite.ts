@@ -4,7 +4,7 @@ import type { SpeciesId } from "@/game/types/species";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
-  nicknameSprite: Phaser.GameObjects.Text;
+  nicknameSprite: Phaser.GameObjects.Text | null;
   moveSpeed: number;
   shape: any;
   shapes: {
@@ -66,10 +66,20 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   }
 
   updateNicknamePosition(): void {
-    this.nicknameSprite.setPosition(
-      this.x - this.nicknameSprite.width / 2,
-      this.y - this.height / 2 - this.nicknameSprite.height
-    );
+    if (this.nicknameSprite != null) {
+      this.nicknameSprite.setPosition(
+        this.x - this.nicknameSprite.width / 2,
+        this.y - this.height / 2 - this.nicknameSprite.height
+      );
+    }
+  }
+
+  destroy(): void {
+    if (this.nicknameSprite != null) {
+      this.nicknameSprite.destroy(true);
+      this.nicknameSprite = null;
+    }
+    super.destroy(true);
   }
 
   evolve(speciesId: SpeciesId): void {

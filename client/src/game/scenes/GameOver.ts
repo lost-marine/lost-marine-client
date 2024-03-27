@@ -28,9 +28,13 @@ export class GameOver extends Scene {
         this.gameOverResult = g.gameOverResult;
       } else {
         this.restartGame();
+        console.debug("g.gameOverResult.playerId === g.myInfo?.playerId");
+        console.debug("g.gameOverResult.playerId : ", g.gameOverResult?.playerId);
+        console.debug("g.myInfo?.playerId : ", g.myInfo?.playerId);
       }
     } else {
       this.restartGame();
+      console.debug("gameOverResult is null");
     }
     // 내 캐릭터 이미지 로드
     if (this.mySpeciesInfo != null) {
@@ -81,8 +85,8 @@ export class GameOver extends Scene {
     this.camera.setBackgroundColor(COLORS.BLACK);
 
     this.background = this.add.image(512, 384, "background");
-    const scaleX = this.cameras.main.width / this.background.width;
-    const scaleY = this.cameras.main.height / this.background.height;
+    const scaleX = this.background.width / this.cameras.main.width;
+    const scaleY = this.background.height / this.cameras.main.height;
     this.background.setAlpha(0.4);
     this.background.setScale(scaleX, scaleY);
 
@@ -115,7 +119,7 @@ export class GameOver extends Scene {
       this.add.text(100, 170, "킬", baseTextStyle);
       this.add.text(100, 200, `${this.gameOverResult.playerCount}`, baseTextStyle);
       this.add.text(150, 170, "경험치", baseTextStyle);
-      this.add.text(150, 200, `${this.gameOverResult.point}`, baseTextStyle);
+      this.add.text(150, 200, `${this.gameOverResult.totalExp}`, baseTextStyle);
       this.add.text(250, 170, "플랑크톤", baseTextStyle);
       this.add.text(250, 200, `${this.gameOverResult.planktonCount}`, baseTextStyle);
       this.add.text(380, 170, "미세 플라스틱", baseTextStyle);
@@ -174,5 +178,6 @@ export class GameOver extends Scene {
   restartGame(): void {
     this.changeScene(SCENE.MAIN_MENU);
     g.gameOverResult = null;
+    g.clear();
   }
 }

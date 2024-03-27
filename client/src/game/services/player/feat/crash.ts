@@ -19,9 +19,13 @@ const crashService: CrashService = {
   },
 
   onReceivedCrash: (playerStatusInfo: PlayerStatusInfo) => {
-    if (g.myInfo !== null && g.myInfo.playerId === playerStatusInfo.playerId) {
+    if (
+      g.myInfo !== null &&
+      g.myInfo.playerId === playerStatusInfo.playerId &&
+      (g.myInfo.health !== playerStatusInfo.health || g.myInfo.nowExp !== playerStatusInfo.nowExp)
+    ) {
       g.myInfo.health = playerStatusInfo.health;
-      g.myInfo.point = playerStatusInfo.point;
+      g.myInfo.nowExp = playerStatusInfo.nowExp;
 
       // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
       const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
