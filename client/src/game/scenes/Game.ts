@@ -68,17 +68,18 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
+    this.sound.add("bgm", { loop: true }).play();
+    // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
+
     this.ready = false;
     if (this.playerList?.size > 0) {
       this.playerList.forEach((player) => {
         player.destroy();
       });
     }
-
-    this.sound.add("bgm", { loop: true }).play();
-    // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
-    this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
     this.playerList = new Map<number, PlayerSprite>();
+
+    this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
 
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
@@ -166,7 +167,7 @@ export class Game extends Scene {
     if (this.player.flipX !== shouldFlipX) {
       this.player.setFlipX(shouldFlipX);
     }
-    if (this.player.angle !== angle) {
+    if (this.player?.angle !== undefined && this.player.angle !== angle) {
       this.player.setAngle(angle);
     }
 
@@ -262,6 +263,8 @@ export class Game extends Scene {
       const targetPlayer = this.playerList.get(playerId);
       targetPlayer?.destroy();
       this.playerList.delete(playerId);
+    } else {
+      console.error("targetPlayer가 없습니다. ");
     }
   }
 
