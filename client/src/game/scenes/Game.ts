@@ -353,7 +353,7 @@ export class Game extends Scene {
 
           this.sound.add("eat_plankton").play({ volume: 0.2 });
           if (g.myInfo !== null) {
-            g.myInfo.point = response.player.point;
+            g.myInfo.nowExp = response.player.nowExp;
             g.myInfo.planktonCount = response.player.planktonCount;
           }
           EventBus.emit("player-eat-plankton", response.player);

@@ -8,7 +8,7 @@ type Ranking = {
   playerId: number;
   nickname: string;
   speciesname: string;
-  point: number;
+  totalExp: number;
 };
 
 const rankingList: Ref<Ranking[]> = ref([]);
@@ -48,7 +48,7 @@ onUpdated(() => {
             <th></th>
             <th>닉네임</th>
             <th>어종</th>
-            <th class="ranking-point">경험치</th>
+            <th class="ranking-total-exp">경험치</th>
           </tr>
         </thead>
         <tbody>
@@ -60,7 +60,7 @@ onUpdated(() => {
             <td class="overflow-hidden">
               <div ref="textEllipsisRef" class="ranking-speciesname">{{ ranking.speciesname }}</div>
             </td>
-            <td class="ranking-point">{{ ranking.point }}</td>
+            <td class="ranking-total-exp">{{ ranking.totalExp }}</td>
           </tr>
         </tbody>
       </table>
@@ -145,7 +145,7 @@ onUpdated(() => {
       padding-left: var(--table-padding);
     }
 
-    .ranking-point {
+    .ranking-total-exp {
       padding-left: var(--table-padding);
       white-space: nowrap;
     }

@@ -20,7 +20,7 @@ const crashService: CrashService = {
   onReceivedCrash: (playerStatusInfo: PlayerStatusInfo) => {
     if (g.myInfo !== null && g.myInfo.playerId === playerStatusInfo.playerId) {
       g.myInfo.health = playerStatusInfo.health;
-      g.myInfo.point = playerStatusInfo.point;
+      g.myInfo.nowExp = playerStatusInfo.nowExp;
     }
     EventBus.emit("player-status-sync", playerStatusInfo);
   }

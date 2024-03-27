@@ -6,15 +6,15 @@ import type { Player } from "../types/player";
 
 const healthContainerRef = ref<HTMLDListElement>();
 const healthRef = ref<HTMLDivElement>();
-const pointRef = ref<HTMLDivElement>();
+const nowExpRef = ref<HTMLDivElement>();
 const fadein = ref<boolean>(false);
 const fadeout = ref<boolean>(false);
 
 onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
     // 점수바 관리
-    if (pointRef.value !== undefined && pointRef.value !== null) {
-      pointRef.value.style.width = `${playerStatusInfo.point}%`;
+    if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
+      nowExpRef.value.style.width = `${playerStatusInfo.nowExp}%`;
     }
 
     // 체력바 관리
@@ -35,13 +35,13 @@ onMounted(() => {
       }
       healthRef.value.style.width = `${playerStatusInfo.health}%`;
     }
-    
+
     // TODO: 체력 회복 UI
   });
 
   EventBus.on("player-eat-plankton", (player: Player) => {
-    if (pointRef.value !== undefined) {
-      pointRef.value.style.width = `${player.point}%`;
+    if (nowExpRef.value !== undefined) {
+      nowExpRef.value.style.width = `${player.nowExp}%`;
     }
   });
 });
@@ -53,9 +53,9 @@ onMounted(() => {
       <span>HP</span>
       <div ref="healthRef" class="bar"></div>
     </div>
-    <div class="point cont-bar">
+    <div class="now-exp cont-bar">
       <span>EXP</span>
-      <div ref="pointRef" class="bar"></div>
+      <div ref="nowExpRef" class="bar"></div>
     </div>
   </div>
 </template>
@@ -122,7 +122,7 @@ onMounted(() => {
     opacity: 0;
   }
 
-  .cont-bar.point {
+  .cont-bar.now-exp {
     width: 26rem;
     .bar {
       width: 0%;
