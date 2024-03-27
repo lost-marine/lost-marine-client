@@ -12,11 +12,29 @@ import { type SpeciesId } from "@/game/types/species";
 const currentSpeciesId: Ref<SpeciesId> = ref<SpeciesId>(g.myInfo?.speciesId ?? 1);
 const show: Ref<boolean> = ref<boolean>(false);
 
-const handleMouseEvolution = (e: MouseEvent, speciesId: number): void => {
-  // TODO: 소켓 통신, 숫자 버튼에 이벤트, 진화 요청 소켓통신
-  // if (g.myInfo !== null) {
-  //   socket.emit('player-evolution', {speciesId, playerId: g.myInfo.playerId, point: g.myInfo.point})
-  // }
+const sendPlayerEvolution = (selectedSpeciesId: SpeciesId): void => {
+  if (g.myInfo !== null) {
+    socket.emit(
+      "player-evolution",
+      { speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, nowExp: g.myInfo.nowExp },
+      ({ isSuccess, msg }: PlayerEvolutionResponse) => {
+        if (isSuccess) {
+          console.log(msg);
+          currentSpeciesId.value = selectedSpeciesId;
+          EventBus.emit("player-evolution"); // to `PlayerStatus.vue`
+          g.eventQueue.append({ key: "player-evolution", data: selectedSpeciesId });
+          show.value = false;
+        } else {
+          // 실패 시
+          console.log(msg);
+        }
+      }
+    );
+  }
+};
+
+const handleMouseEvolution = (e: MouseEvent, selectedSpeciesId: SpeciesId): void => {
+  sendPlayerEvolution(selectedSpeciesId);
 };
 
 const handleKeyboardEvolution = (e: KeyboardEvent): void => {
@@ -41,23 +59,9 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
       console.log("모든 진화가 완료되었습니다.");
     } else {
       const idx = parseInt(e.key) - 1;
-      if (idx in evolutionList && g.myInfo !== null) {
+      if (idx in evolutionList) {
         const selectedSpeciesId: SpeciesId = evolutionList[idx];
-        socket.emit(
-          "player-evolution",
-          { speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, point: g.myInfo.point },
-          ({ isSuccess, msg }: PlayerEvolutionResponse) => {
-            if (isSuccess) {
-              console.log(msg);
-              currentSpeciesId.value = selectedSpeciesId;
-              g.eventQueue.append({ key: "player-evolution", data: selectedSpeciesId });
-              show.value = false;
-            } else {
-              // 실패 시
-              console.log(msg);
-            }
-          }
-        );
+        sendPlayerEvolution(selectedSpeciesId);
       }
     }
   }
