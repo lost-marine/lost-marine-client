@@ -34,4 +34,9 @@ export class PlanktonGraphics extends Phaser.Physics.Matter.Sprite {
     super.destroy();
     this.graphics.destroy();
   }
+
+  hidden(): void {
+    this.setActive(false).setVisible(false);
+    this.graphics.setVisible(false);
+  }
 }

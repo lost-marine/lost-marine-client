@@ -135,6 +135,12 @@ export class Game extends Scene {
     EventBus.emit("player-moved", this.player.x, this.player.y, this.direction);
 
     // 플랑크톤을 그립니다.
+    if (this.planktonList?.size > 0) {
+      this.planktonList.forEach((plankton) => {
+        plankton.destroy();
+      });
+    }
+
     this.planktonList = new Map<number, PlanktonGraphics>();
 
     g.planktonMap.forEach((plankton: Plankton) => {
@@ -352,23 +358,25 @@ export class Game extends Scene {
       },
       (response: eatPlanktonResponse) => {
         if (response.isSuccess) {
-          this.planktonList.get(planktonId)?.destroy();
+          this.planktonList.get(planktonId)?.hidden();
           this.planktonList.delete(planktonId);
           g.planktonMap.delete(planktonId);
-
           this.sound.add("eat_plankton").play({ volume: 0.2 });
+
           if (g.myInfo !== null) {
-            g.myInfo.nowExp = response.player.nowExp;
-            g.myInfo.planktonCount = response.player.planktonCount;
+            g.myInfo.planktonCount = response.planktonCount;
+            g.myInfo.microplasticCount = response.microplasticCount;
+            g.myInfo.health = response.playerStatusInfo.health;
+            g.myInfo.nowExp = response.playerStatusInfo.nowExp;
           }
-          EventBus.emit("player-eat-plankton", response.player);
+          EventBus.emit("player-status-sync", response.playerStatusInfo);
         }
       }
     );
   }
 
   onReceivedPlanktonDelete(planktonId: number): void {
-    this.planktonList.get(planktonId)?.destroy();
+    this.planktonList.get(planktonId)?.hidden();
     this.planktonList.delete(planktonId);
   }
 
