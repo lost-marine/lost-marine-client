@@ -26,7 +26,7 @@ export class MainMenu extends Scene {
   }
 
   create(): void {
-    this.sound.add("bgm", { loop: true }).play();
+    this.sound.add("bgm", { loop: true, volume: 0.5 }).play();
     this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // 이미지의 스케일을 게임의 크기에 맞추기
