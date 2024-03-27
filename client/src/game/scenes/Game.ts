@@ -69,13 +69,6 @@ export class Game extends Scene {
   }
 
   async create(): Promise<void> {
-    // const isSoundMute: boolean = JSON.parse(localStorage.getItem("isSoundMute") !! "false");
-    // console.log(isSoundMute);
-    // if (isSoundMute) {
-    //   this.sound.mute = isSoundMute;
-    // }
-    // this.sound.add("bgm", { loop: true }).play();
-
     // 배경 이미지의 사이즈를 맵의 크기에 맞게 스케일 업 합니다.
 
     this.ready = false;
