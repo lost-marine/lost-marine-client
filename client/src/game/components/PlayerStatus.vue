@@ -40,9 +40,20 @@ onMounted(() => {
   });
 
   EventBus.on("player-eat-plankton", (player: Player) => {
-    if (nowExpRef.value !== undefined) {
+    if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
       nowExpRef.value.style.width = `${player.nowExp}%`;
     }
+  });
+
+  // 진화 시 체력 만땅 채우기
+  EventBus.on("player-evolution", () => {
+    if (healthRef.value !== undefined && healthRef.value !== null) {
+      healthRef.value.style.width = `100%`;
+    }
+    setTimeout(() => {
+      fadein.value = false;
+      fadeout.value = true;
+    }, 1000);
   });
 });
 </script>
