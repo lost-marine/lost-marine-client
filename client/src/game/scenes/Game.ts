@@ -251,9 +251,6 @@ export class Game extends Scene {
         case "player-evolution":
           this.onReceivedPlayerEvolution(event.data as SpeciesId);
           break;
-        case "game-over":
-          this.onReceivedGameOver();
-          break;
         case "others-evolution-sync":
           this.onReceivedOthersEvolution(event.data as OthersEvolutionInfo);
           break;
@@ -374,7 +371,7 @@ export class Game extends Scene {
 
             // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
             const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
-            if (currentSpeciesInfo !== undefined && g.myInfo.point >= currentSpeciesInfo.requirementPoint) {
+            if (currentSpeciesInfo !== undefined && g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
               EventBus.emit("player-evolution-required");
             }
           }

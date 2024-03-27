@@ -96,7 +96,7 @@ export const speciesMap: Map<SpeciesId, Species> = new Map<SpeciesId, Species>([
     4,
     {
       speciesId: 4,
-      name: "페넌트산호",
+      name: "페넌트 코랄 피쉬",
       key: "pennant",
       width: 128,
       height: 128,
