@@ -13,10 +13,10 @@ export const DIRECTION_X = {
   NONE: 0,
   LEFT: -1,
   RIGHT: 1
-};
+} as const;
 
 export const DIRECTION_Y = {
   NONE: 0,
   DOWN: 1,
   UP: -1
-};
+} as const;

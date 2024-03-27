@@ -1,12 +1,21 @@
+export type RequiredPointToEvolve = {
+  tier1: number;
+  tier2: number;
+  tier3: number;
+  tier4: number;
+};
+
+export type SpeciesId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
 export type Species = {
-  speciesId: number;
+  speciesId: SpeciesId;
   name: string;
   key: string;
   width: number;
   height: number;
   power: number;
   health: number;
-  evolutionSet: Set<number>;
+  evolutionList: SpeciesId[];
   tierCode: number;
   spritesheetUrl: string;
   baseSpriteUrl: string;
@@ -16,16 +25,4 @@ export type Species = {
   IUCNGrade: string;
   info: string;
   requirementPoint: number;
-};
-
-export const IUCN_GRADE = {
-  EX: "절멸 (EX, Extinct)",
-  EW: "야생절멸 (EW, Extinct in the Wild)",
-  CR: "위급 (CR, Critically Endangered)",
-  EN: "위기 (EN, Endangered)",
-  VU: "취약 (VU, Vulnerable)",
-  NT: "준위협 (NT, Near Threatened)",
-  LC: "최소관심 (LC, Least Concern)",
-  DD: "정보부족 (DD, Data Deficient)",
-  NE: "미평가 (NE, Not Evaluated)"
 };
