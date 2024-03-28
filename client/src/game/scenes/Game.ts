@@ -22,6 +22,7 @@ import type { SceneType } from "../types/scene";
 import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 import { ItemSprite } from "../services/item/classes";
 import { itemList } from "../constants/item";
+import { onTriggerItemEat } from "../services/item/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -168,6 +169,10 @@ export class Game extends Scene {
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
           onTriggerPlanktonEat(pair.bodyA.gameObject.plankton.planktonId);
         }
+        // 아이템과 플레이어의 충돌
+        else if (pair.bodyA.gameObject instanceof ItemSprite && pair.bodyB.gameObject === this.player) {
+          onTriggerItemEat(pair.bodyA.gameObject.itemId);
+        }
       });
     });
 
@@ -269,6 +274,10 @@ export class Game extends Scene {
         // 플랑크톤 리스폰
         case "plankton-respawn":
           this.onReceivedPlanktonRespawn(event.data as Plankton[]);
+          break;
+        // 내 플레이어가 아이템 섭취
+        case "item-eat":
+          this.onReceivedItemEat(event.data as number, this.player.playerId);
           break;
       }
     }
@@ -406,5 +415,13 @@ export class Game extends Scene {
 
   changeScene(target: SceneType): void {
     this.scene.start(target);
+  }
+
+  onReceivedItemEat(itemId: number, playerId: number): void {
+    socket.emit("item-eat", {
+      playerId,
+      itemId
+    });
+    this.itemList[itemId]?.setVisible(false);
   }
 }

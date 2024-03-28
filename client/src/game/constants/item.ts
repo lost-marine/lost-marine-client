@@ -3,7 +3,7 @@ import type { Item } from "../types/item";
 export const itemList: Item[] = [
   {
     key: "starfish",
-    itemId: 1,
+    itemId: 0,
     isActive: true,
     centerX: 50,
     centerY: 60,

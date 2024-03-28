@@ -9,5 +9,7 @@ export class ItemSprite extends Phaser.Physics.Matter.Sprite {
 
     scene.add.existing(this);
     this.setStatic(true);
+    this.setSensor(true);
+    this.itemId = item.itemId;
   }
 }
