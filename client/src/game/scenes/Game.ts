@@ -25,6 +25,8 @@ export class Game extends Scene {
   player: PlayerSprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
+  miniMap: Phaser.GameObjects.Image;
+  mapPoint: Phaser.GameObjects.Arc;
   direction: DirectionType;
   playerList: Map<number, PlayerSprite>;
   isMoving: boolean;
@@ -32,6 +34,8 @@ export class Game extends Scene {
   backgroundLayer: Phaser.Tilemaps.TilemapLayer;
   collisionLayer: Phaser.Tilemaps.TilemapLayer;
   ready: boolean;
+  mapStartPosition: { x: number; y: number };
+
   constructor() {
     super("Game");
   }
@@ -45,6 +49,7 @@ export class Game extends Scene {
     this.load.image("tile_deep_water_green", "assets/tileset/DeepWater_Green/Tiles/tileset.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
     this.load.json("shapes", "assets/shapes/shapes.json");
+    this.load.image("mini_map", "assets/tilemap/miniMap.png");
 
     speciesMap.forEach((value) => {
       try {
@@ -81,6 +86,26 @@ export class Game extends Scene {
 
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
 
+    this.miniMap = this.add
+      .image(this.cameras.main.width, this.cameras.main.height, "mini_map")
+      .setOrigin(1, 1)
+      .setDepth(3)
+      .setScale(0.3)
+      .setAlpha(0.7)
+      .setScrollFactor(0);
+
+    this.mapStartPosition = {
+      x: this.cameras.main.width - this.miniMap.width * 0.3,
+      y: this.cameras.main.height - this.miniMap.height * 0.3
+    };
+
+    this.mapPoint = this.add
+      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, 0xff0000)
+      .setDepth(5)
+      .setScale(0.3)
+      .setAlpha(0.5)
+      .setScrollFactor(0);
+
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
       try {
@@ -106,6 +131,10 @@ export class Game extends Scene {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
           this.player = newPlayer;
+          this.mapPoint.setPosition(
+            this.mapStartPosition.x + (this.player.x / 8) * 0.3,
+            this.mapStartPosition.y + (this.player.y / 8) * 0.3
+          );
         }
       });
       this.ready = true;
@@ -177,6 +206,10 @@ export class Game extends Scene {
     if (isArrowKeyPressed || this.isMoving) {
       this.player.move(directionX, directionY);
       this.sendSyncPosition();
+      this.mapPoint.setPosition(
+        this.mapStartPosition.x + (this.player.x / 8) * 0.3,
+        this.mapStartPosition.y + (this.player.y / 8) * 0.3
+      );
       // 움직임 상태 여부를 동기화합니다.
       if (isArrowKeyPressed) {
         this.isMoving = true;
