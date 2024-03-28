@@ -343,7 +343,6 @@ export class Game extends Scene {
 
   checkPortal = _.throttle(() => {
     const result = checkPortal(this.player.x, this.player.y);
-    console.log(result);
     if (result !== undefined) {
       this.player.x = result[0];
       this.player.y = result[1];
