@@ -23,6 +23,7 @@ import { onTriggerPlanktonEat } from "../services/plankton/feat/eat";
 import { ItemSprite } from "../services/item/classes";
 import { itemList } from "../constants/item";
 import { onTriggerItemEat } from "../services/item/feat/eat";
+import type { ItemInfo } from "../services/player/types/item";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -279,6 +280,10 @@ export class Game extends Scene {
         case "item-eat":
           this.onReceivedItemEat(event.data as number, this.player.playerId);
           break;
+        // 아이템 싱크
+        case "item-sync":
+          this.onReceivedItemSync(event.data as ItemInfo);
+          break;
       }
     }
   }
@@ -423,5 +428,9 @@ export class Game extends Scene {
       itemId
     });
     this.itemList[itemId]?.setVisible(false);
+  }
+
+  onReceivedItemSync(item: ItemInfo): void {
+    this.itemList[item.itemId]?.setVisible(item.isActive);
   }
 }
