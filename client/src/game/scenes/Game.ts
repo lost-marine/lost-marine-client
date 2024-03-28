@@ -19,6 +19,7 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
+import { checkPortal } from "../utils/portal";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -208,7 +209,17 @@ export class Game extends Scene {
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
-    if (isArrowKeyPressed || this.isMoving) {
+    if (
+      isArrowKeyPressed ||
+      this.isMoving ||
+      (g.myInfo != null && this.player.x !== g.myInfo.centerX) ||
+      (g.myInfo != null && this.player.y !== g.myInfo.centerY)
+    ) {
+      if (g.myInfo != null) {
+        g.myInfo.centerX = this.player.x;
+        g.myInfo.centerY = this.player.y;
+      }
+      this.checkPortal();
       this.player.move(directionX, directionY);
       this.sendSyncPosition();
       this.mapPoint.setPosition(
@@ -329,6 +340,15 @@ export class Game extends Scene {
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
     crashService.crash(playerAId, playerBId);
   }, 30);
+
+  checkPortal = _.throttle(() => {
+    const result = checkPortal(this.player.x, this.player.y);
+    console.log(result);
+    if (result !== undefined) {
+      this.player.x = result[0];
+      this.player.y = result[1];
+    }
+  }, 300);
 
   createTilemap(): boolean {
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
