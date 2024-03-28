@@ -423,11 +423,13 @@ export class Game extends Scene {
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {
-    socket.emit("item-eat", {
-      playerId,
-      itemId
-    });
-    this.itemList[itemId]?.setVisible(false);
+    if (this.itemList[itemId]?.visible) {
+      socket.emit("item-eat", {
+        playerId,
+        itemId
+      });
+      this.itemList[itemId]?.setVisible(false);
+    }
   }
 
   onReceivedItemSync(item: ItemInfo): void {
