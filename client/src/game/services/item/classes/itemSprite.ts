@@ -8,7 +8,6 @@ export class ItemSprite extends Phaser.Physics.Matter.Sprite {
     super(world, item.centerX, item.centerY, texture, "itemSprite");
 
     scene.add.existing(this);
-    this.setStatic(true);
     this.setSensor(true);
     this.itemId = item.itemId;
   }
