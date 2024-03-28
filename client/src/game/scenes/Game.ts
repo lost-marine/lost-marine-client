@@ -69,6 +69,19 @@ export class Game extends Scene {
         console.error(e);
       }
     });
+
+    // 아이템 이미지 등록
+    itemList.forEach((value) => {
+      try {
+        // 동적으로
+        this.load.spritesheet(value.key, value.spritesheetUrl, {
+          frameWidth: value.width,
+          frameHeight: value.height
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
   async create(): Promise<void> {
@@ -160,8 +173,9 @@ export class Game extends Scene {
 
     this.itemList = [];
 
+    // 아이템 추가
     itemList.forEach((item) => {
-      this.itemList.push(new ItemSprite(this.matter.world, this, item));
+      this.itemList.push(new ItemSprite(this.matter.world, this, item.key, item));
     });
   }
 

@@ -1,6 +1,14 @@
 import type { Item } from "../types/item";
 
 export const itemList: Item[] = [
-  { itemId: 1, isActive: true, centerX: 10, centerY: 20 },
-  { itemId: 2, isActive: true, centerX: 20, centerY: 30 }
+  {
+    key: "starfish",
+    itemId: 1,
+    isActive: true,
+    centerX: 50,
+    centerY: 60,
+    width: 300,
+    height: 200,
+    spritesheetUrl: "assets/items/Starfish.png"
+  }
 ];
