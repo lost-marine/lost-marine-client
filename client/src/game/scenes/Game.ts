@@ -24,6 +24,7 @@ import { ItemSprite } from "../services/item/classes";
 import { itemList } from "../constants/item";
 import { onTriggerItemEat } from "../services/item/feat/eat";
 import type { ItemInfo } from "../services/player/types/item";
+import type { PlayerCrashResult } from "../services/player/types/crash";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -40,7 +41,7 @@ export class Game extends Scene {
   ready: boolean;
   itemList: ItemSprite[];
   mapStartPosition: { x: number; y: number };
-
+  colors: Record<string, number>;
   constructor() {
     super("Game");
   }
@@ -89,6 +90,11 @@ export class Game extends Scene {
         console.error(e);
       }
     });
+
+    this.colors = {
+      red: 0xff0000,
+      crimson: 0xff9ea6
+    };
   }
 
   async create(): Promise<void> {
@@ -118,7 +124,7 @@ export class Game extends Scene {
     };
 
     this.mapPoint = this.add
-      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, 0xff0000)
+      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, this.colors.red)
       .setDepth(5)
       .setScale(0.3)
       .setAlpha(0.5)
@@ -329,6 +335,10 @@ export class Game extends Scene {
         case "item-sync":
           this.onReceivedItemSync(event.data as ItemInfo);
           break;
+        // 플레이어간의 충돌
+        case "player-crash":
+          this.onReceivedPlayerCrash(event.data as PlayerCrashResult);
+          break;
       }
     }
   }
@@ -473,10 +483,6 @@ export class Game extends Scene {
     });
   }
 
-  changeScene(target: SceneType): void {
-    this.scene.start(target);
-  }
-
   onReceivedItemEat(itemId: number, playerId: number): void {
     if (this.itemList[itemId]?.visible) {
       socket.emit("item-eat", {
@@ -489,5 +495,40 @@ export class Game extends Scene {
 
   onReceivedItemSync(item: ItemInfo): void {
     this.itemList[item.itemId]?.setVisible(item.isActive);
+  }
+
+  onReceivedPlayerCrash(playerCrashResult: PlayerCrashResult): void {
+    const playerId = playerCrashResult.playerId;
+    const damageAmount = playerCrashResult.damage;
+    const targetPlayer = this.playerList.get(playerId);
+    if (targetPlayer !== undefined) {
+      this.spriteFlashRed(targetPlayer);
+      const damageText = this.add.text(targetPlayer.x, targetPlayer.y, "" + damageAmount, {
+        fontSize: "22px",
+        color: "red"
+      });
+      this.tweens.add({
+        targets: damageText,
+        y: targetPlayer.y - 15,
+        alpha: 0.8,
+        duration: 800,
+        onComplete: () => {
+          damageText.destroy();
+        }
+      });
+    }
+  }
+
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
+  }
+
+  spriteFlashRed(sprite: PlayerSprite): void {
+    sprite.setTint(this.colors.crimson); // 붉은색으로 변경
+    sprite.setAlpha(0.8);
+    this.time.delayedCall(200, () => {
+      sprite.clearTint(); // 원래 색상으로 복원
+      sprite.setAlpha(1);
+    });
   }
 }
