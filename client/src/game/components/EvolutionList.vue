@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, type Ref } from "vue";
+import { onMounted, ref, watch, type Ref, onUnmounted } from "vue";
 import { EventBus } from "../EventBus";
 import g from "../utils/global";
 import { speciesMap } from "../constants/species";
@@ -84,6 +84,10 @@ onMounted(() => {
   EventBus.on("player-evolution-required", () => {
     show.value = true;
   });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyboardEvolution);
 });
 </script>
 
