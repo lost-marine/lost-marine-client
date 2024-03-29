@@ -11,10 +11,11 @@ import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
-import type { Chat } from "../types/chat";
+import type { Chat, SystemChat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
+import type { ItemInfo } from "../services/player/types/item";
 
 export const state = reactive({
   connected: false
@@ -88,7 +89,20 @@ socket.on("chat-message-receive", (message: Chat) => {
   g.chatList.value.push(message);
 });
 
+// 시스템이 보내주는 시스템 메시지 수신
+socket.on("system-log", (message: SystemChat) => {
+  g.chatList.value.push(message);
+});
+
 // 플레이어 충돌 후 상태 수정
 socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
   crashService.onReceivedCrash(playerStatusInfo);
+});
+
+// 아이템 충돌 후 상태 수정
+socket.on("item-sync", (itemInfo: ItemInfo) => {
+  g.eventQueue.append({
+    key: "item-sync",
+    data: itemInfo
+  });
 });

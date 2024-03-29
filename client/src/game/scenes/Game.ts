@@ -19,11 +19,18 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
+import { checkPortal } from "../utils/portal";
+import { ItemSprite } from "../services/item/classes";
+import { itemList } from "../constants/item";
+import { onTriggerItemEat } from "../services/item/feat/eat";
+import type { ItemInfo } from "../services/player/types/item";
 
 export class Game extends Scene {
   player: PlayerSprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   platform: Phaser.GameObjects.Image;
+  miniMap: Phaser.GameObjects.Image;
+  mapPoint: Phaser.GameObjects.Arc;
   direction: DirectionType;
   playerList: Map<number, PlayerSprite>;
   isMoving: boolean;
@@ -31,6 +38,9 @@ export class Game extends Scene {
   backgroundLayer: Phaser.Tilemaps.TilemapLayer;
   collisionLayer: Phaser.Tilemaps.TilemapLayer;
   ready: boolean;
+  itemList: ItemSprite[];
+  mapStartPosition: { x: number; y: number };
+
   constructor() {
     super("Game");
   }
@@ -44,6 +54,7 @@ export class Game extends Scene {
     this.load.image("tile_deep_water_green", "assets/tileset/DeepWater_Green/Tiles/tileset.png");
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
     this.load.json("shapes", "assets/shapes/shapes.json");
+    this.load.image("mini_map", "assets/tilemap/miniMap.png");
 
     speciesMap.forEach((value) => {
       try {
@@ -65,6 +76,19 @@ export class Game extends Scene {
         console.error(e);
       }
     });
+
+    // 아이템 이미지 등록
+    itemList.forEach((value) => {
+      try {
+        // 동적으로
+        this.load.spritesheet(value.key, value.spritesheetUrl, {
+          frameWidth: value.width,
+          frameHeight: value.height
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
   async create(): Promise<void> {
@@ -79,6 +103,26 @@ export class Game extends Scene {
     this.playerList = new Map<number, PlayerSprite>();
 
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
+
+    this.miniMap = this.add
+      .image(this.cameras.main.width, this.cameras.main.height, "mini_map")
+      .setOrigin(1, 1)
+      .setDepth(3)
+      .setScale(0.3)
+      .setAlpha(0.7)
+      .setScrollFactor(0);
+
+    this.mapStartPosition = {
+      x: this.cameras.main.width - this.miniMap.width * 0.3,
+      y: this.cameras.main.height - this.miniMap.height * 0.3
+    };
+
+    this.mapPoint = this.add
+      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, 0xff0000)
+      .setDepth(5)
+      .setScale(0.3)
+      .setAlpha(0.5)
+      .setScrollFactor(0);
 
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
@@ -105,6 +149,10 @@ export class Game extends Scene {
         const newPlayer = this.addPlayer(player);
         if (g.myInfo?.playerId === newPlayer.playerId) {
           this.player = newPlayer;
+          this.mapPoint.setPosition(
+            this.mapStartPosition.x + (this.player.x / 8) * 0.3,
+            this.mapStartPosition.y + (this.player.y / 8) * 0.3
+          );
         }
       });
       this.ready = true;
@@ -157,7 +205,18 @@ export class Game extends Scene {
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
           this.eatPlankton(pair.bodyA.gameObject.plankton.planktonId, this.player.playerId);
         }
+        // 아이템과 플레이어의 충돌
+        else if (pair.bodyA.gameObject instanceof ItemSprite && pair.bodyB.gameObject === this.player) {
+          onTriggerItemEat(pair.bodyA.gameObject.itemId);
+        }
       });
+    });
+
+    this.itemList = [];
+
+    // 아이템 추가
+    itemList.forEach((item) => {
+      this.itemList.push(new ItemSprite(this.matter.world, this, item.key, item));
     });
   }
 
@@ -179,9 +238,23 @@ export class Game extends Scene {
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
-    if (isArrowKeyPressed || this.isMoving) {
+    if (
+      isArrowKeyPressed ||
+      this.isMoving ||
+      (g.myInfo != null && this.player.x !== g.myInfo.centerX) ||
+      (g.myInfo != null && this.player.y !== g.myInfo.centerY)
+    ) {
+      if (g.myInfo != null) {
+        g.myInfo.centerX = this.player.x;
+        g.myInfo.centerY = this.player.y;
+      }
+      this.checkPortal();
       this.player.move(directionX, directionY);
       this.sendSyncPosition();
+      this.mapPoint.setPosition(
+        this.mapStartPosition.x + (this.player.x / 8) * 0.3,
+        this.mapStartPosition.y + (this.player.y / 8) * 0.3
+      );
       // 움직임 상태 여부를 동기화합니다.
       if (isArrowKeyPressed) {
         this.isMoving = true;
@@ -255,6 +328,14 @@ export class Game extends Scene {
         case "plankton-respawn":
           this.onReceivedPlanktonRespawn(event.data as Plankton[]);
           break;
+        // 내 플레이어가 아이템 섭취
+        case "item-eat":
+          this.onReceivedItemEat(event.data as number, this.player.playerId);
+          break;
+        // 아이템 싱크
+        case "item-sync":
+          this.onReceivedItemSync(event.data as ItemInfo);
+          break;
       }
     }
   }
@@ -303,6 +384,14 @@ export class Game extends Scene {
   sendPlayerCrash = _.throttle((playerAId: number, playerBId: number) => {
     crashService.crash(playerAId, playerBId);
   }, 30);
+
+  checkPortal = _.throttle(() => {
+    const result = checkPortal(this.player.x, this.player.y);
+    if (result !== undefined) {
+      this.player.x = result[0];
+      this.player.y = result[1];
+    }
+  }, 300);
 
   createTilemap(): boolean {
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
@@ -411,5 +500,19 @@ export class Game extends Scene {
     this.cursors.right.enabled = true;
     this.cursors.space.enabled = true;
     this.cursors.shift.enabled = true;
+  }
+
+  onReceivedItemEat(itemId: number, playerId: number): void {
+    if (this.itemList[itemId]?.visible) {
+      socket.emit("item-eat", {
+        playerId,
+        itemId
+      });
+      this.itemList[itemId]?.setVisible(false);
+    }
+  }
+
+  onReceivedItemSync(item: ItemInfo): void {
+    this.itemList[item.itemId]?.setVisible(item.isActive);
   }
 }

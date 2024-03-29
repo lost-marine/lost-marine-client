@@ -12,7 +12,8 @@ watch(
   () => g.chatList.value,
   (newValue) => {
     if (newValue.length > 0) {
-      if (newValue[newValue.length - 1].playerId === g.myInfo?.playerId) {
+      const newChat = newValue[newValue.length - 1];
+      if ("playerId" in newChat && newChat.playerId === g.myInfo?.playerId) {
         scrollToBottom();
       } else if (endIndex.value === newValue.length) {
         scrollToBottom();
@@ -23,6 +24,7 @@ watch(
 );
 
 const endIndex: Ref<number> = ref(0);
+
 function onUpdate(viewStartIndex: number, viewEndIndex: number, visibleStartIndex: number, visibleEndIndex: number): void {
   endIndex.value = visibleEndIndex;
 }
@@ -105,10 +107,13 @@ function closeChatPanel(inputElement: HTMLInputElement | null): void {
             :item="item"
             :data-index="index"
             :active="active"
-            :size-dependencies="[item.speciesname, item.nickname]"
+            :size-dependencies="[item?.speciesname, item?.nickname, item.msg]"
           >
             <div class="scroller-item">
-              [{{ item.speciesname }}] <strong>{{ item.nickname }}</strong> 💬 {{ item.msg }}
+              <div v-if="item?.speciesname">
+                [{{ item.speciesname }}] <strong>{{ item.nickname }}</strong> 💬 {{ item.msg }}
+              </div>
+              <div v-else :class="[item.type]">[SYSTEM] 💬 {{ item.msg }}</div>
             </div>
           </DynamicScrollerItem>
         </template>
@@ -132,6 +137,10 @@ function closeChatPanel(inputElement: HTMLInputElement | null): void {
 
 <style scoped lang="scss">
 .container {
+  $red: #ffa6a6;
+  $orange: #e38a17;
+  $green: #51d65a;
+
   max-width: 20rem;
   width: 100%;
 
@@ -167,6 +176,23 @@ function closeChatPanel(inputElement: HTMLInputElement | null): void {
     .chat-list {
       height: 10rem;
       overflow-y: scroll;
+
+      .warn {
+        color: $orange;
+      }
+
+      .error {
+        color: $red;
+      }
+
+      .kill-log {
+        color: $red;
+        font-weight: bold;
+      }
+
+      .info {
+        color: $green;
+      }
     }
 
     .chat-list::-webkit-scrollbar {
@@ -220,4 +246,3 @@ function closeChatPanel(inputElement: HTMLInputElement | null): void {
   }
 }
 </style>
-../types/chat

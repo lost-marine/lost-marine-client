@@ -5,7 +5,7 @@ import type { Plankton } from "../types/plankton";
 import type { SceneType } from "../types/scene";
 import { SCENE } from "../constants/scene";
 import { ref, type Ref } from "vue";
-import type { Chat } from "../types/chat";
+import type { Chat, SystemChat } from "../types/chat";
 import type { GameOverResponse } from "../services/player/types/quit";
 
 type GlobalStore = {
@@ -14,7 +14,7 @@ type GlobalStore = {
   eventQueue: Queue<BaseSocketObject>;
   planktonMap: Map<number, Plankton>;
   currentScene: SceneType;
-  chatList: Ref<Chat[]>;
+  chatList: Ref<Array<Chat | SystemChat>>;
   chatInputFocused: boolean;
   gameOverResult: GameOverResponse | null;
   clear: () => void;

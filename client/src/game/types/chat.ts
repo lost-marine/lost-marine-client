@@ -6,6 +6,11 @@ export type Chat = {
   timeStamp: number;
 };
 
+export type SystemChat = {
+  type: string;
+  msg: string;
+  timeStamp: number;
+};
 export type InputChat = {
   playerId: number;
   msg: string;
