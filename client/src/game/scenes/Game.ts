@@ -41,7 +41,7 @@ export class Game extends Scene {
   ready: boolean;
   itemList: ItemSprite[];
   mapStartPosition: { x: number; y: number };
-
+  colors: Record<string, number>;
   constructor() {
     super("Game");
   }
@@ -90,6 +90,11 @@ export class Game extends Scene {
         console.error(e);
       }
     });
+
+    this.colors = {
+      red: 0xff0000,
+      crimson: 0xff9ea6
+    };
   }
 
   async create(): Promise<void> {
@@ -119,7 +124,7 @@ export class Game extends Scene {
     };
 
     this.mapPoint = this.add
-      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, 0xff0000)
+      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, this.colors.red)
       .setDepth(5)
       .setScale(0.3)
       .setAlpha(0.5)
@@ -498,7 +503,10 @@ export class Game extends Scene {
     const targetPlayer = this.playerList.get(playerId);
     if (targetPlayer !== undefined) {
       this.spriteFlashRed(targetPlayer);
-      const damageText = this.add.text(targetPlayer.x, targetPlayer.y, "" + damageAmount, { fontSize: "22px", color: "#ff0000" });
+      const damageText = this.add.text(targetPlayer.x, targetPlayer.y, "" + damageAmount, {
+        fontSize: "22px",
+        color: "red"
+      });
       this.tweens.add({
         targets: damageText,
         y: targetPlayer.y - 15,
@@ -516,7 +524,7 @@ export class Game extends Scene {
   }
 
   spriteFlashRed(sprite: PlayerSprite): void {
-    sprite.setTint(0xff9ea6); // 붉은색으로 변경
+    sprite.setTint(this.colors.crimson); // 붉은색으로 변경
     sprite.setAlpha(0.8);
     this.time.delayedCall(200, () => {
       sprite.clearTint(); // 원래 색상으로 복원
