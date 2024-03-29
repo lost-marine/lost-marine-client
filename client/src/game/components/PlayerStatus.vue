@@ -11,19 +11,24 @@ const nowExpRef = ref<HTMLDivElement>();
 const fadein = ref<boolean>(false);
 const fadeout = ref<boolean>(false);
 
-onMounted(() => {
-  let requiredPoint: number = 100;
+const getRequiredExp = (): number => {
+  let requiredExp = 100;
   if (g.myInfo !== null) {
     const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
     if (currentSpeciesInfo !== undefined) {
-      requiredPoint = currentSpeciesInfo.requirementPoint;
+      requiredExp = currentSpeciesInfo.requirementPoint;
     }
   }
 
+  return requiredExp;
+};
+
+onMounted(() => {
   EventBus.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
+    const requiredExp = getRequiredExp();
     // 점수바 관리
     if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
-      nowExpRef.value.style.width = `${(playerStatusInfo.nowExp / requiredPoint) * 100}%`;
+      nowExpRef.value.style.width = `${(playerStatusInfo.nowExp / requiredExp) * 100}%`;
     }
 
     // 체력바 관리
@@ -61,11 +66,11 @@ onMounted(() => {
       fadeout.value = true;
     }, 1000);
 
+    const requiredExp = getRequiredExp();
     // 진화 시 포인트 업데이트
     if (nowExpRef.value !== undefined && nowExpRef.value !== null) {
       if (g.myInfo !== null) {
-        console.log(g.myInfo.nowExp);
-        nowExpRef.value.style.width = `${(g.myInfo.nowExp / requiredPoint) * 100}%`;
+        nowExpRef.value.style.width = `${(g.myInfo.nowExp / requiredExp) * 100}%`;
       }
     }
   });
