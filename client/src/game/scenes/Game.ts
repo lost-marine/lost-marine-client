@@ -54,15 +54,6 @@ export class Game extends Scene {
           frameWidth: value.width,
           frameHeight: value.height
         });
-        this.anims.create({
-          key: value.key,
-          frames: this.anims.generateFrameNumbers(value.key, {
-            start: value.frameStart,
-            end: value.frameEnd
-          }),
-          frameRate: 3,
-          repeat: -1
-        });
       } catch (e) {
         console.error(e);
       }
@@ -376,6 +367,7 @@ export class Game extends Scene {
             // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
             const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
             if (currentSpeciesInfo !== undefined && g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
+              console.log("현재 경험치", g.myInfo.nowExp);
               EventBus.emit("player-evolution-required");
             }
           }

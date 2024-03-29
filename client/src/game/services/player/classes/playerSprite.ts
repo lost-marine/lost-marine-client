@@ -104,7 +104,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     }
 
     // 현재 개체에 맞는 애니메이션 재생
-    // this.anims.play(speciesKey + "_anims");
+    this.anims.play(speciesKey + "_anims");
     // 인스턴스의 초기 스폰 위치를 설정합니다.
     this.updateNicknamePosition();
   }
