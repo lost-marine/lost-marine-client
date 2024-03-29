@@ -2,6 +2,7 @@ import type { Item } from "@/game/types/item";
 
 export class ItemSprite extends Phaser.Physics.Matter.Sprite {
   itemId: number;
+  itemType: number;
   isActive: boolean;
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, item: Item) {
@@ -10,5 +11,6 @@ export class ItemSprite extends Phaser.Physics.Matter.Sprite {
     scene.add.existing(this);
     this.setSensor(true);
     this.itemId = item.itemId;
+    this.itemType = item.itemType;
   }
 }
