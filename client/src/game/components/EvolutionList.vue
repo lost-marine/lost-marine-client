@@ -11,18 +11,26 @@ import { type SpeciesId } from "@/game/types/species";
 const currentSpeciesId: Ref<SpeciesId> = ref<SpeciesId>(g.myInfo?.speciesId ?? 1);
 const show: Ref<boolean> = ref<boolean>(false);
 
-const sendPlayerEvolution = (selectedSpeciesId: SpeciesId): void => {
+const sendPlayerEvolution = async (selectedSpeciesId: SpeciesId): Promise<boolean> => {
+  let isEvolutionSuccess: boolean = false;
   if (g.myInfo !== null) {
-    evolutionService.evolve({ speciesId: selectedSpeciesId, playerId: g.myInfo.playerId, nowExp: g.myInfo.nowExp });
+    isEvolutionSuccess = await evolutionService.evolve({
+      speciesId: selectedSpeciesId,
+      playerId: g.myInfo.playerId,
+      nowExp: g.myInfo.nowExp
+    });
+  }
+  return isEvolutionSuccess;
+};
+
+const handleMouseEvolution = async (e: MouseEvent, selectedSpeciesId: SpeciesId): Promise<void> => {
+  const isEvolutionSuccess: boolean = await sendPlayerEvolution(selectedSpeciesId);
+  if (isEvolutionSuccess) {
     currentSpeciesId.value = selectedSpeciesId;
     show.value = false;
   } else {
-    console.error("내 정보가 없습니다.");
+    console.error("진화에 실패했습니다.");
   }
-};
-
-const handleMouseEvolution = (e: MouseEvent, selectedSpeciesId: SpeciesId): void => {
-  sendPlayerEvolution(selectedSpeciesId);
 };
 
 const handleKeyboardEvolution = (e: KeyboardEvent): void => {
@@ -36,23 +44,32 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
     e.key === "7" ||
     e.key === "8" ||
     e.key === "9";
-  if (isNumber) {
-    const evolutionList: SpeciesId[] | undefined = speciesMap.get(currentSpeciesId.value)?.evolutionList;
-    if (evolutionList === undefined) {
-      throw new Error("해당 개체 정보가 불완전합니다.");
-    }
 
-    if (evolutionList.length === 0) {
-      // TODO: 모든 진화가 완료되었을 때
-      console.log("모든 진화가 완료되었습니다.");
-    } else {
-      const idx = parseInt(e.key) - 1;
-      if (idx in evolutionList) {
-        const selectedSpeciesId: SpeciesId = evolutionList[idx];
-        sendPlayerEvolution(selectedSpeciesId);
+  void (async (): Promise<void> => {
+    if (isNumber) {
+      const evolutionList: SpeciesId[] | undefined = speciesMap.get(currentSpeciesId.value)?.evolutionList;
+      if (evolutionList === undefined) {
+        throw new Error("해당 개체 정보가 불완전합니다.");
+      }
+
+      const isEvolutionDone = evolutionList.length === 0;
+      if (isEvolutionDone) {
+        console.log("모든 진화가 완료되었습니다.");
+      } else {
+        const idx = parseInt(e.key) - 1;
+        if (idx in evolutionList) {
+          const selectedSpeciesId: SpeciesId = evolutionList[idx];
+          const isEvolutionSuccess: boolean = await sendPlayerEvolution(selectedSpeciesId);
+          if (isEvolutionSuccess) {
+            currentSpeciesId.value = selectedSpeciesId;
+            show.value = false;
+          } else {
+            console.error("진화에 실패했습니다.");
+          }
+        }
       }
     }
-  }
+  })();
 };
 
 watch(show, () => {
