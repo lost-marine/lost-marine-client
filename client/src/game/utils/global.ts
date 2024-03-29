@@ -15,6 +15,7 @@ type GlobalStore = {
   planktonMap: Map<number, Plankton>;
   currentScene: SceneType;
   chatList: Ref<Chat[]>;
+  chatInputFocused: boolean;
   gameOverResult: GameOverResponse | null;
   clear: () => void;
 };
@@ -25,6 +26,7 @@ const g: GlobalStore = {
   planktonMap: new Map<number, Plankton>(),
   currentScene: SCENE.MAIN_MENU,
   chatList: ref<Chat[]>([]),
+  chatInputFocused: false,
   gameOverResult: null,
   clear: () => {
     g.playerMap.clear();

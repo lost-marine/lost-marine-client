@@ -195,6 +195,13 @@ export class Game extends Scene {
     if (!playerBody.isSleeping) {
       this.player.updateNicknamePosition();
     }
+
+    // 채팅 입력필드에 포커스되면 커서를 비활성화합니다.
+    if (g.chatInputFocused) {
+      this.disableCursors();
+    } else {
+      this.enableCursors();
+    }
   }
 
   // 플레이어 추가
@@ -386,5 +393,23 @@ export class Game extends Scene {
 
   changeScene(target: SceneType): void {
     this.scene.start(target);
+  }
+
+  disableCursors(): void {
+    this.cursors.up.enabled = false;
+    this.cursors.down.enabled = false;
+    this.cursors.left.enabled = false;
+    this.cursors.right.enabled = false;
+    this.cursors.space.enabled = false;
+    this.cursors.shift.enabled = false;
+  }
+
+  enableCursors(): void {
+    this.cursors.up.enabled = true;
+    this.cursors.down.enabled = true;
+    this.cursors.left.enabled = true;
+    this.cursors.right.enabled = true;
+    this.cursors.space.enabled = true;
+    this.cursors.shift.enabled = true;
   }
 }

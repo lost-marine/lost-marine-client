@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, type Ref } from "vue";
+import { ref, watch, type Ref, onMounted } from "vue";
 import g from "../utils/global";
 import { socket } from "../utils/socket";
 import type { InputChat } from "../types/chat";
@@ -7,19 +7,6 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 const toggleChatPanel: Ref<boolean> = ref(false);
 const inputMessage: Ref<string> = ref("");
-const focusInput: Ref<boolean> = ref(false);
-
-function sendMessage(): void {
-  if (inputMessage.value !== "" && g.myInfo !== null) {
-    const message: InputChat = {
-      playerId: g.myInfo?.playerId,
-      msg: inputMessage.value
-    };
-
-    socket.emit("chat-message-send", message);
-    inputMessage.value = "";
-  }
-}
 
 watch(
   () => g.chatList.value,
@@ -47,43 +34,62 @@ function scrollToBottom(): void {
   }
 }
 
-addEventListener("keydown", (event: KeyboardEvent) => {
+onMounted(() => {
   const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
 
-  // 채팅창에 포커스되어있을 때, 공백 입력을 받습니다.
-  if (focusInput.value && event.key === " ") {
-    inputMessage.value += " ";
-  }
-  // Enter를 입력하면, 채팅창이 열립니다.
-  else if (event.key === "Enter" && !toggleChatPanel.value) {
-    inputElement?.focus();
-    openChatPanel();
-  }
-  // Enter를 입력하면, 채팅창에 포커스됩니다.
-  else if (!focusInput.value && event.key === "Enter") {
-    inputElement?.focus();
-  }
-  // Escape를 입력하면, 채팅창이 닫힙니다.
-  else if (event.key === "Escape" && toggleChatPanel.value) {
-    inputElement?.blur();
-    closeChatPanel();
-  }
+  addEventListener("keydown", (event: KeyboardEvent) => {
+    // Enter키로 채팅을 시작합니다.
+    if (event.key === "Enter") {
+      if (g.chatInputFocused) {
+        sendMessage(inputElement);
+      } else {
+        openChatPanel(inputElement);
+      }
+    }
+    // Esc키로 채팅창을 숨깁니다.
+    else if (event.key === "Escape") {
+      closeChatPanel(inputElement);
+    }
+    // html input에 사용자 입력을 받습니다.
+    else if (g.chatInputFocused) {
+      if (event.key === " ") {
+        inputMessage.value += " ";
+      }
+    }
+  });
 });
 
-function openChatPanel(): void {
-  toggleChatPanel.value = true;
-  inputMessage.value = "";
+function sendMessage(inputElement: HTMLInputElement | null): void {
+  if (inputMessage.value !== "" && g.myInfo !== null) {
+    const message: InputChat = {
+      playerId: g.myInfo?.playerId,
+      msg: inputMessage.value
+    };
+
+    socket.emit("chat-message-send", message);
+    inputMessage.value = "";
+  }
+  inputElement?.blur();
 }
 
-function closeChatPanel(): void {
+function openChatPanel(inputElement: HTMLInputElement | null): void {
+  toggleChatPanel.value = true;
+  inputElement?.focus();
+}
+
+function closeChatPanel(inputElement: HTMLInputElement | null): void {
   toggleChatPanel.value = false;
+  inputElement?.blur();
 }
 </script>
 
 <template>
   <div class="container">
     <div class="chat-container" v-show="toggleChatPanel">
-      <span class="close-button" @click="closeChatPanel()">✖</span>
+      <div class="close">
+        <div class="close-esc">Esc키로 채팅창 숨기기</div>
+        <div class="close-button" @click="closeChatPanel(null)">✖</div>
+      </div>
       <DynamicScroller
         ref="scroller"
         @resize="scrollToBottom()"
@@ -114,13 +120,12 @@ function closeChatPanel(): void {
         class="input-field"
         type="text"
         v-model="inputMessage"
-        placeholder="텍스트 입력..."
-        @mousedown="openChatPanel()"
-        @keyup.enter="sendMessage()"
-        @focus="focusInput = true"
-        @blur="focusInput = false"
+        placeholder="Enter키로 채팅 시작하기"
+        @mousedown="openChatPanel(null)"
+        @focus="g.chatInputFocused = true"
+        @blur="g.chatInputFocused = false"
       />
-      <button class="send-button" @click="sendMessage()">💌</button>
+      <button class="send-button" @click="sendMessage(null)">💌</button>
     </div>
   </div>
 </template>
@@ -143,9 +148,20 @@ function closeChatPanel(): void {
     flex-direction: column;
     margin-bottom: 0.5rem;
 
-    .close-button {
-      cursor: pointer;
-      align-self: flex-end;
+    .close {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+
+      .close-esc {
+        color: var(--transparent-white);
+        padding-right: 10px;
+        font-size: x-small;
+      }
+
+      .close-button {
+        cursor: pointer;
+      }
     }
 
     .chat-list {
