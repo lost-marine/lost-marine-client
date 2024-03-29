@@ -11,7 +11,7 @@ import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
 import type { PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
-import type { Chat } from "../types/chat";
+import type { Chat, SystemChat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
@@ -86,6 +86,11 @@ socket.on("plankton-respawn", (newPlanktonList: Plankton[]) => {
 
 // 플레이어가 입력한 채팅 메시지 수신
 socket.on("chat-message-receive", (message: Chat) => {
+  g.chatList.value.push(message);
+});
+
+// 시스템이 보내주는 시스템 메시지 수신
+socket.on("system-log", (message: SystemChat) => {
   g.chatList.value.push(message);
 });
 
