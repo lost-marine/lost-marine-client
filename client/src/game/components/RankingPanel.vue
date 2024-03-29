@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, type Ref, onUpdated } from "vue";
 import { socket } from "../utils/socket";
-import unfold from "@/../public/assets/components/unfold.svg";
-import fold from "@/../public/assets/components/fold.svg";
+import fold from "@/assets/ranking/fold.svg";
+import unfold from "@/assets/ranking/unfold.svg";
 
 type Ranking = {
   playerId: number;

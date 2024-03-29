@@ -40,6 +40,8 @@ onMounted(() => {
   const inputElement: HTMLInputElement | null = document.querySelector(".input-field");
 
   addEventListener("keydown", (event: KeyboardEvent) => {
+    if (g.currentScene !== "Game") return;
+
     // Enter키로 채팅을 시작합니다.
     if (event.key === "Enter") {
       if (g.chatInputFocused) {
