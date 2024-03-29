@@ -24,7 +24,7 @@ const evolutionService: EvolutionService = {
             g.myInfo.health = newHealth;
           }
 
-          EventBus.emit("player-evolution"); // to `PlayerStatus.vue`
+          EventBus.emit("player-evolution", speciesId); // to `PlayerStatus.vue`
           g.eventQueue.append({ key: "player-evolution", data: speciesId });
           resolve(true);
         } else {
