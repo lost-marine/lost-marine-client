@@ -6,7 +6,7 @@ export class ItemSprite extends Phaser.Physics.Matter.Sprite {
   isActive: boolean;
 
   constructor(world: Phaser.Physics.Matter.World, scene: Phaser.Scene, texture: string, item: Item) {
-    super(world, item.centerX, item.centerY, texture, "itemSprite");
+    super(world, item.centerX, item.centerY, texture);
 
     scene.add.existing(this);
     this.setSensor(true);
