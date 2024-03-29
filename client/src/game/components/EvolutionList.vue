@@ -7,6 +7,7 @@ import HealthIcon from "@public/assets/components/icons/heart.png";
 import PowerIcon from "@public/assets/components/icons/power.png";
 import evolutionService from "@/game/services/player/feat/evolution";
 import { type SpeciesId } from "@/game/types/species";
+import { isNumber } from "@/game/utils/calcs/isNumber";
 
 const currentSpeciesId: Ref<SpeciesId> = ref<SpeciesId>(g.myInfo?.speciesId ?? 1);
 const show: Ref<boolean> = ref<boolean>(false);
@@ -34,19 +35,8 @@ const handleMouseEvolution = async (e: MouseEvent, selectedSpeciesId: SpeciesId)
 };
 
 const handleKeyboardEvolution = (e: KeyboardEvent): void => {
-  const isNumber: boolean =
-    e.key === "1" ||
-    e.key === "2" ||
-    e.key === "3" ||
-    e.key === "4" ||
-    e.key === "5" ||
-    e.key === "6" ||
-    e.key === "7" ||
-    e.key === "8" ||
-    e.key === "9";
-
   void (async (): Promise<void> => {
-    if (isNumber) {
+    if (isNumber(e.key)) {
       const evolutionList: SpeciesId[] | undefined = speciesMap.get(currentSpeciesId.value)?.evolutionList;
       if (evolutionList === undefined) {
         throw new Error("해당 개체 정보가 불완전합니다.");
@@ -54,7 +44,7 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
 
       const isEvolutionDone = evolutionList.length === 0;
       if (isEvolutionDone) {
-        console.log("모든 진화가 완료되었습니다.");
+        // TODO: 진화가 완료됐을 때 다음 구현
       } else {
         const idx = parseInt(e.key) - 1;
         if (idx in evolutionList) {
@@ -125,6 +115,11 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .container {
+  $bg_black: rgba(0, 0, 0, 0.4);
+  $bg_light_green: rgba(74, 141, 116, 0.2);
+  $dark_green: #4a6963;
+  $mid_green: rgba(74, 141, 116, 0.4);
+
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -140,7 +135,7 @@ onUnmounted(() => {
   }
 
   .desc {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: $bg_black;
     padding: 0.5rem 1rem 1rem 1rem;
     border-radius: 0 0 0.5rem 0.5rem;
   }
@@ -160,7 +155,7 @@ onUnmounted(() => {
       align-items: center;
       justify-content: end;
       overflow: hidden;
-      background-color: rgba(74, 141, 116, 0.2);
+      background-color: $bg_light_green;
       border-radius: 0 0 0.5rem 0.5rem;
       padding: 0.5rem 1rem;
       gap: 0.5rem;
@@ -171,11 +166,11 @@ onUnmounted(() => {
         right: 0.5rem;
         top: 0.5rem;
         display: inline-block;
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: $bg_black;
         padding: 0.3rem;
         border-radius: 20%;
         font-size: 0.6rem;
-        border: 1px solid #4a6963;
+        border: 1px solid $dark_green;
       }
 
       .name {
@@ -214,7 +209,7 @@ onUnmounted(() => {
   }
 
   .item-evolution:hover {
-    background-color: rgba(74, 141, 116, 0.4);
+    background-color: $mid_green;
     transition: background-color 0.3s;
   }
 }

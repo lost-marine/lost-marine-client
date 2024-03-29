@@ -123,6 +123,8 @@ onMounted(() => {
 }
 
 .player-status {
+  $bg_black: rgba(0, 0, 0, 0.44);
+
   position: absolute;
   bottom: 2rem;
   left: 50%;
@@ -135,7 +137,7 @@ onMounted(() => {
   font-size: 1.2rem;
 
   .cont-bar {
-    background-color: rgba(0, 0, 0, 0.44);
+    background-color: $bg_black;
     border-radius: 1.2rem;
     overflow: hidden;
     height: 2rem;

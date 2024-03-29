@@ -285,7 +285,7 @@ export const speciesMap: Map<SpeciesId, Species> = new Map<SpeciesId, Species>([
       frameEnd: 3,
       englishName: "Blue Whale",
       IUCNGrade: IUCN_GRADE.EN,
-      info: "고래는 수천만 년 동안 몸속의 이산화탄소(CO2) 저장 체계를 통해 지구를 지켜 왔다. 고래 한 마리는 평생 CO2 약 33t을 축적하는데 이는 나무 한 그루가 1년간 CO2 약 22kg을 흡수하는 것과 비교했을 때 어마어마한 양이다. 고래를 비롯한 해양 생태계를 보호하기 위해서는 여러분의 관심이 필요하다.",
+      info: "고래는 수천만 년 동안 몸속의 이산화탄소(CO2) 저장 체계를 통해 지구를 지켜 왔다. 고래 한 마리는 평생 CO2 약 33t을 축적하는데 이는 나무 한 그루가 1년간 CO2 약 22kg을 흡수하는 것과 비교했을 때 어마어마한 양이다.",
       get requirementPoint() {
         return requiredPointToEvolve[("tier" + this.tierCode) as keyof RequiredPointToEvolve];
       }
