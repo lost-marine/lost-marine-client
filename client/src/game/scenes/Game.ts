@@ -456,7 +456,6 @@ export class Game extends Scene {
             // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
             const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
             if (currentSpeciesInfo !== undefined && g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
-              console.log("현재 경험치", g.myInfo.nowExp);
               EventBus.emit("player-evolution-required");
             }
           }
