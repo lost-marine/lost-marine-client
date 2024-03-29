@@ -9,7 +9,7 @@ import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
-import type { PlayerStatusInfo } from "../services/player/types/crash";
+import type { PlayerCrashResult, PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
 import type { Chat, SystemChat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
@@ -98,7 +98,12 @@ socket.on("system-log", (message: SystemChat) => {
 
 // 플레이어 충돌 후 상태 수정
 socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
-  crashService.onReceivedCrash(playerStatusInfo);
+  crashService.onReceivedStatusSync(playerStatusInfo);
+});
+
+// 플레이어 충돌 후 결과 수신
+socket.on("player-crash", (playerCrashResult: PlayerCrashResult) => {
+  crashService.onReceivedCrash(playerCrashResult);
 });
 
 // 아이템 충돌 후 상태 수정
