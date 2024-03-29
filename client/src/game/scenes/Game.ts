@@ -487,6 +487,7 @@ export class Game extends Scene {
     if (this.itemList[itemId]?.visible) {
       socket.emit("item-eat", {
         playerId,
+        itemType: this.itemList[itemId]?.itemType,
         itemId
       });
       this.itemList[itemId]?.setVisible(false);

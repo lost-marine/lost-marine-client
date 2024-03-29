@@ -4,6 +4,7 @@ export const itemList: Item[] = [
   {
     key: "starfish",
     itemId: 0,
+    itemType: 1,
     isActive: true,
     centerX: 5820,
     centerY: 1380,
@@ -14,6 +15,7 @@ export const itemList: Item[] = [
   {
     key: "starfish",
     itemId: 1,
+    itemType: 1,
     isActive: true,
     centerX: 1850,
     centerY: 3430,
@@ -24,6 +26,7 @@ export const itemList: Item[] = [
   {
     key: "starfish",
     itemId: 2,
+    itemType: 1,
     isActive: true,
     centerX: 6200,
     centerY: 5220,
