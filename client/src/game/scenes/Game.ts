@@ -25,6 +25,8 @@ import { itemList } from "../constants/item";
 import { onTriggerItemEat } from "../services/item/feat/eat";
 import type { ItemInfo } from "../services/player/types/item";
 import type { PlayerCrashResult } from "../services/player/types/crash";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import type { SpeciesId } from "../types/species";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -63,15 +65,6 @@ export class Game extends Scene {
         this.load.spritesheet(value.key, value.spritesheetUrl, {
           frameWidth: value.width,
           frameHeight: value.height
-        });
-        this.anims.create({
-          key: value.key,
-          frames: this.anims.generateFrameNumbers(value.key, {
-            start: value.frameStart,
-            end: value.frameEnd
-          }),
-          frameRate: 3,
-          repeat: -1
         });
       } catch (e) {
         console.error(e);
@@ -270,8 +263,8 @@ export class Game extends Scene {
     }
 
     // 캐릭터의 닉네임 위치를 관리합니다.
-    const playerBody = this.player.body as MatterJS.BodyType;
-    if (!playerBody.isSleeping) {
+    // const playerBody = this.player.body as MatterJS.BodyType;
+    if (this.isMoving) {
       this.player.updateNicknamePosition();
     }
   }
@@ -338,6 +331,12 @@ export class Game extends Scene {
         // 플레이어간의 충돌
         case "player-crash":
           this.onReceivedPlayerCrash(event.data as PlayerCrashResult);
+          break;
+        case "player-evolution":
+          this.onReceivedPlayerEvolution(event.data as SpeciesId);
+          break;
+        case "others-evolution-sync":
+          this.onReceivedOthersEvolution(event.data as OthersEvolutionInfo);
           break;
       }
     }
@@ -463,8 +462,14 @@ export class Game extends Scene {
             g.myInfo.microplasticCount = response.microplasticCount;
             g.myInfo.health = response.playerStatusInfo.health;
             g.myInfo.nowExp = response.playerStatusInfo.nowExp;
+
+            // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
+            const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
+            if (currentSpeciesInfo !== undefined && g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
+              EventBus.emit("player-evolution-required");
+            }
           }
-          EventBus.emit("player-status-sync", response.playerStatusInfo);
+          EventBus.emit("player-eat-plankton", response.playerStatusInfo);
         }
       }
     );
@@ -481,6 +486,22 @@ export class Game extends Scene {
       const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });
+  }
+
+  onReceivedPlayerEvolution(selectedSpeciesId: SpeciesId): void {
+    if (g.myInfo !== null) {
+      g.myInfo.speciesId = selectedSpeciesId;
+      this.player.evolve(selectedSpeciesId);
+    } else {
+      throw new Error("내 정보가 없습니다.");
+    }
+  }
+
+  onReceivedOthersEvolution({ playerId, speciesId }: OthersEvolutionInfo): void {
+    if (this.playerList.has(playerId)) {
+      const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.evolve(speciesId);
+    }
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {

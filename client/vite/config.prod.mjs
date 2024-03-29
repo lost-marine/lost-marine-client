@@ -25,7 +25,8 @@ export default defineConfig({
     alias: [
       { find: "@", replacement: "/src" },
       { find: "@game", replacement: "/src/game" },
-      { find: "@components", replacement: "/src/gane/components" }
+      { find: "@components", replacement: "/src/gane/components" },
+      { find: "@public", replacement: "/public" }
     ]
   },
   logLevel: "warning",

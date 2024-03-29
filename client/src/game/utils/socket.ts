@@ -16,6 +16,8 @@ import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
 import type { ItemInfo } from "../services/player/types/item";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import evolutionService from "../services/player/feat/evolution";
 
 export const state = reactive({
   connected: false
@@ -110,4 +112,9 @@ socket.on("item-sync", (itemInfo: ItemInfo) => {
     key: "item-sync",
     data: itemInfo
   });
+});
+
+// 다른 플레이어 진화 싱크
+socket.on("others-evolution-sync", (othersEvolutionInfo: OthersEvolutionInfo) => {
+  evolutionService.onReceivedEvolutionSync(othersEvolutionInfo);
 });
