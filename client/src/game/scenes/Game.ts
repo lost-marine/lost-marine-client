@@ -459,7 +459,7 @@ export class Game extends Scene {
               EventBus.emit("player-evolution-required");
             }
           }
-          EventBus.emit("player-status-sync", response.playerStatusInfo);
+          EventBus.emit("player-eat-plankton", response.playerStatusInfo);
         }
       }
     );
