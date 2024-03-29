@@ -20,8 +20,7 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: "matter",
     matter: {
-      // debug: import.meta.env.DEV,
-      debug: false,
+      debug: import.meta.env.DEV,
       enableSleeping: true,
       gravity: { x: 0, y: 0 }
     }
