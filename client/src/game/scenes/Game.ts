@@ -248,6 +248,7 @@ export class Game extends Scene {
         g.myInfo.centerX = this.player.x;
         g.myInfo.centerY = this.player.y;
       }
+      console.log(this.player.x, this.player.y);
       this.checkPortal();
       this.player.move(directionX, directionY);
       this.sendSyncPosition();
@@ -478,17 +479,23 @@ export class Game extends Scene {
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {
-    if (this.itemList[itemId]?.visible) {
+    if (this.itemList[itemId]?.visible && this.itemList[itemId]?.itemType !== 3 && this.itemList[itemId]?.itemType !== 5) {
       socket.emit("item-eat", {
         playerId,
         itemType: this.itemList[itemId]?.itemType,
         itemId
       });
-      this.itemList[itemId]?.setVisible(false);
+
+      if (this.itemList[itemId]?.itemType === 2 || this.itemList[itemId]?.itemType === 4) {
+        this.itemList[itemId + 1]?.setVisible(true);
+      }
     }
   }
 
   onReceivedItemSync(item: ItemInfo): void {
     this.itemList[item.itemId]?.setVisible(item.isActive);
+    if (this.itemList[item.itemId]?.itemType === 2 || this.itemList[item.itemId]?.itemType === 4) {
+      this.itemList[item.itemId + 1]?.setVisible(!item.isActive);
+    }
   }
 }
