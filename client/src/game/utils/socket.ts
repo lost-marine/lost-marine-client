@@ -9,13 +9,15 @@ import type { Plankton } from "../types/plankton";
 import Swal from "sweetalert2";
 import { EventBus } from "../EventBus";
 import enterService from "./../services/player/feat/enter";
-import type { PlayerStatusInfo } from "../services/player/types/crash";
+import type { PlayerCrashResult, PlayerStatusInfo } from "../services/player/types/crash";
 import crashService from "../services/player/feat/crash";
 import type { Chat, SystemChat } from "../types/chat";
 import quitService from "../services/player/feat/quit";
 import type { GameOverResponse } from "../services/player/types/quit";
 import { SCENE } from "../constants/scene";
 import type { ItemInfo } from "../services/player/types/item";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import evolutionService from "../services/player/feat/evolution";
 
 export const state = reactive({
   connected: false
@@ -96,7 +98,12 @@ socket.on("system-log", (message: SystemChat) => {
 
 // 플레이어 충돌 후 상태 수정
 socket.on("player-status-sync", (playerStatusInfo: PlayerStatusInfo) => {
-  crashService.onReceivedCrash(playerStatusInfo);
+  crashService.onReceivedStatusSync(playerStatusInfo);
+});
+
+// 플레이어 충돌 후 결과 수신
+socket.on("player-crash", (playerCrashResult: PlayerCrashResult) => {
+  crashService.onReceivedCrash(playerCrashResult);
 });
 
 // 아이템 충돌 후 상태 수정
@@ -105,4 +112,9 @@ socket.on("item-sync", (itemInfo: ItemInfo) => {
     key: "item-sync",
     data: itemInfo
   });
+});
+
+// 다른 플레이어 진화 싱크
+socket.on("others-evolution-sync", (othersEvolutionInfo: OthersEvolutionInfo) => {
+  evolutionService.onReceivedEvolutionSync(othersEvolutionInfo);
 });

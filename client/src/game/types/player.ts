@@ -1,4 +1,5 @@
 import type { Creature } from "./creature";
+import type { SpeciesId } from "./species";
 
 export type Player = {
   playerId: number;
@@ -11,5 +12,5 @@ export type Player = {
   stopTime: number;
   level: number;
   nowExp: number;
-  speciesId: number;
+  speciesId: SpeciesId;
 } & Creature;

@@ -82,7 +82,7 @@ export class MainMenu extends Scene {
       this.startButton.setScale(1.0); // 마우스 아웃 시 버튼 원래 크기로
     });
 
-    // 음악끄는 버튼 추가
+    // 음악켜는 버튼 추가
     this.musicOffButton = this.add
       .image(this.cameras.main.width - 100, 100, "music_on")
       .setInteractive()
@@ -90,7 +90,7 @@ export class MainMenu extends Scene {
       .setOrigin(0.5)
       .setDepth(100)
       .on("pointerdown", async () => {
-        this.setSoundMute(true);
+        this.setSoundMute(false);
       });
 
     // 버튼에 마우스 오버/아웃 효과
@@ -109,7 +109,7 @@ export class MainMenu extends Scene {
       .setScale(1.5)
       .setDepth(100)
       .on("pointerdown", async () => {
-        this.setSoundMute(false);
+        this.setSoundMute(true);
       });
 
     // 버튼에 마우스 오버/아웃 효과
@@ -140,11 +140,11 @@ export class MainMenu extends Scene {
     localStorage.setItem("isSoundMute", JSON.stringify(value));
     this.sound.mute = !value;
     if (value) {
-      this.musicOnButton.setActive(true).setVisible(true);
-      this.musicOffButton.setActive(false).setVisible(false);
-    } else {
-      this.musicOnButton.setActive(false).setVisible(false);
       this.musicOffButton.setActive(true).setVisible(true);
+      this.musicOnButton.setActive(false).setVisible(false);
+    } else {
+      this.musicOffButton.setActive(false).setVisible(false);
+      this.musicOnButton.setActive(true).setVisible(true);
     }
   }
 }
