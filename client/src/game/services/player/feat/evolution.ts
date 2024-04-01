@@ -12,26 +12,44 @@ type EvolutionService = {
 const evolutionService: EvolutionService = {
   evolve: async ({ speciesId, playerId, nowExp }: PlayerEvolutionInfo) => {
     return await new Promise((resolve, reject) => {
-      socket.emit("player-evolution", { speciesId, playerId, nowExp }, ({ isSuccess, msg, nowExp }: PlayerEvolutionResponse) => {
-        if (isSuccess) {
-          if (g.myInfo !== null) {
-            g.myInfo.speciesId = speciesId;
-            g.myInfo.nowExp = nowExp;
-            const newHealth: number | undefined = speciesMap.get(speciesId)?.health;
-            if (newHealth === undefined) {
-              throw new Error("해당 개체 정보가 불완전합니다.");
-            }
-            g.myInfo.health = newHealth;
-          }
+      try {
+        socket.emit(
+          "player-evolution",
+          { speciesId, playerId, nowExp },
+          ({ isSuccess, msg, nowExp }: PlayerEvolutionResponse) => {
+            if (isSuccess) {
+              if (g.myInfo !== null) {
+                // TODO: 콘솔 삭제 필요
+                console.log("evolve Promise 내부: isSuccess true & g.myInfo not null");
+                g.myInfo.speciesId = speciesId;
+                g.myInfo.nowExp = nowExp;
+                const newHealth: number | undefined = speciesMap.get(speciesId)?.health;
+                if (newHealth === undefined) {
+                  console.error("해당 개체 정보가 불완전합니다.");
+                  return;
+                }
+                g.myInfo.health = newHealth;
+              } else {
+                console.error("내 정보가 없습니다.");
+                return;
+              }
 
-          EventBus.emit("player-evolution", speciesId); // to `PlayerStatus.vue`
-          g.eventQueue.append({ key: "player-evolution", data: speciesId });
-          resolve(true);
-        } else {
-          // 실패 시
-          reject(new Error(msg));
-        }
-      });
+              EventBus.emit("player-evolution", speciesId); // to `PlayerStatus.vue`
+              g.eventQueue.append({ key: "player-evolution", data: speciesId });
+              resolve(true);
+            } else {
+              // TODO: 콘솔 삭제 필요
+              console.log("evolve Promise 내부: isSuccess false, nowExp: ", nowExp);
+              console.log("서버 단 오류 메시지: ", msg);
+              // 실패 시
+              resolve(false);
+            }
+          }
+        );
+      } catch (e: unknown) {
+        console.error("소켓 통신에서 에러 발생", e);
+        reject(new Error("소켓 통신에서 에러 발생"));
+      }
     });
   },
 
