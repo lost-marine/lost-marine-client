@@ -14,7 +14,7 @@ export class MainMenu extends Scene {
   inputElement: HTMLInputElement;
   musicOnButton: Phaser.GameObjects.Image;
   musicOffButton: Phaser.GameObjects.Image;
-
+  infoButton: Phaser.GameObjects.Image;
   constructor() {
     super("MainMenu");
   }
@@ -23,6 +23,7 @@ export class MainMenu extends Scene {
     this.load.audio("bgm", "assets/sounds/background.mp3");
     this.load.image("music_on", "assets/components/VolumeUp.png");
     this.load.image("music_off", "assets/components/VolumeOff.png");
+    this.load.image("info", "assets/components/InfoButton.png");
   }
 
   create(): void {
@@ -104,7 +105,6 @@ export class MainMenu extends Scene {
     this.musicOnButton = this.add
       .image(this.cameras.main.width - 100, 100, "music_off")
       .setInteractive()
-      .setScale(1.5)
       .setDepth(100)
       .on("pointerdown", async () => {
         this.setSoundMute(true);
@@ -119,6 +119,23 @@ export class MainMenu extends Scene {
     });
     const isSoundMute: boolean = JSON.parse(localStorage.getItem("isSoundMute") ?? "true");
     this.setSoundMute(isSoundMute);
+
+    // 게임 정보 모달을 여는 버튼 추가
+    this.infoButton = this.add
+      .image(this.cameras.main.width - 200, 100, "info")
+      .setInteractive()
+      .setDepth(100)
+      .on("pointerdown", async () => {
+        EventBus.emit("open-info-modal");
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.infoButton.on("pointerover", () => {
+      this.infoButton.setScale(1.1); // 마우스 오버 시 버튼 확대
+    });
+    this.infoButton.on("pointerout", () => {
+      this.infoButton.setScale(1); // 마우스 아웃 시 버튼 원래 크기로
+    });
 
     EventBus.emit("current-scene-ready", this);
   }

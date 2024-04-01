@@ -32,6 +32,10 @@ onMounted(() => {
     emit("change-scene", g.currentScene);
   });
 
+  EventBus.on("open-info-modal", () => {
+    console.log("open-info-modal 클릭");
+  });
+
   socket.connect();
 });
 
