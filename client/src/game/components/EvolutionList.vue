@@ -26,11 +26,13 @@ const sendPlayerEvolution = async (selectedSpeciesId: SpeciesId): Promise<boolea
 
 const handleMouseEvolution = async (e: MouseEvent, selectedSpeciesId: SpeciesId): Promise<void> => {
   const isEvolutionSuccess: boolean = await sendPlayerEvolution(selectedSpeciesId);
+  // TODO: 콘솔 삭제 필요
+  console.log("요청 후 isEvolutionSuccess: ", isEvolutionSuccess);
   if (isEvolutionSuccess) {
     currentSpeciesId.value = selectedSpeciesId;
     show.value = false;
   } else {
-    console.error("진화에 실패했습니다.");
+    console.error("클라이언트 사이드 로그: 진화에 실패했습니다.");
   }
 };
 
@@ -49,12 +51,14 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
         const idx = parseInt(e.key) - 1;
         if (idx in evolutionList) {
           const selectedSpeciesId: SpeciesId = evolutionList[idx];
-          const isEvolutionSuccess: boolean = await sendPlayerEvolution(selectedSpeciesId);
+          const isEvolutionSuccess: boolean | Error = await sendPlayerEvolution(selectedSpeciesId);
+          // TODO: 콘솔 삭제 필요
+          console.log("요청 후 isEvolutionSuccess: ", isEvolutionSuccess);
           if (isEvolutionSuccess) {
             currentSpeciesId.value = selectedSpeciesId;
             show.value = false;
           } else {
-            console.error("진화에 실패했습니다.");
+            console.error("클라이언트 사이드 로그: 진화에 실패했습니다.");
           }
         }
       }
