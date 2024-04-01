@@ -275,7 +275,21 @@ export class Game extends Scene {
     } else {
       this.enableCursors();
     }
+
+    if (g.dashInfo.dashing) {
+      this.player.moveSpeed = this.player.originSpeed * g.dashInfo.speedUpMultiple;
+    } else {
+      this.player.moveSpeed = this.player.originSpeed;
+    }
   }
+
+  // bash = _.throttle(
+  //   (player: PlayerSprite) => {
+  //     console.log("기쁘다 dash 오셨네");
+  //     this.player.dash();
+  //   },
+  //   (g.dashInfo.delay + g.dashInfo.duration) * 1000
+  // );
 
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {

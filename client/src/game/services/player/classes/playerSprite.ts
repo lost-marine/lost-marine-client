@@ -1,10 +1,12 @@
 import type { Player } from "@/game/types/player";
 import { speciesMap } from "@/game/constants/species";
+import g from "@/game/utils/global";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
   nicknameSprite: Phaser.GameObjects.Text | null;
   moveSpeed: number;
+  originSpeed: number;
   shapes: {
     default: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
     flipped: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
@@ -37,6 +39,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     scene.add.existing(this);
     this.setPosition(player.centerX, player.centerY);
     this.updateNicknamePosition();
+
+    this.originSpeed = this.moveSpeed;
   }
 
   move(directionX: number, directionY: number): void {
@@ -78,5 +82,14 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
       this.nicknameSprite = null;
     }
     super.destroy(true);
+  }
+
+  dash(): void {
+    const backup = this.moveSpeed;
+    this.moveSpeed = backup * 2;
+
+    setTimeout(() => {
+      this.moveSpeed = backup;
+    }, g.dashInfo.duration * 1000);
   }
 }

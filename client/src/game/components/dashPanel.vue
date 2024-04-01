@@ -1,34 +1,38 @@
 <script setup lang="ts">
 import dash from "@/assets/dash/dash.svg";
 import { ref, type Ref } from "vue";
+import g from "../utils/global";
 
 const dashBackgroundRef: Ref<HTMLDivElement | undefined> = ref();
-const activeDashDelay: number = 10; // seconds
 
-// g.chatInputFocused가 false 이면서, enter를 입력받고, gameScene이 현재 게임인 경우에만 실행
-
-const test = function (): void {
-  if (dashBackgroundRef.value !== undefined && dashBackgroundRef.value !== null) {
-    dashBackgroundRef.value.style.visibility = "visible";
-    dashBackgroundRef.value.style.setProperty("--active-dash-delay", `${activeDashDelay}s`);
-    dashBackgroundRef.value.style.height = "0%";
-  }
-
-  setTimeout(() => {
+addEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.key === " " && !g.chatInputFocused && g.dashInfo.dashable) {
     if (dashBackgroundRef.value !== undefined && dashBackgroundRef.value !== null) {
-      dashBackgroundRef.value.style.visibility = "hidden";
-      dashBackgroundRef.value.style.setProperty("--active-dash-delay", `0s`);
-      dashBackgroundRef.value.style.height = "100%";
+      dashBackgroundRef.value.style.visibility = "visible";
+      dashBackgroundRef.value.style.setProperty("--dash-delay", `${g.dashInfo.delayTime}s`);
+      dashBackgroundRef.value.style.setProperty("--dash-duration", `${g.dashInfo.durationTime}s`);
+      dashBackgroundRef.value.style.height = "0%";
+      g.dashInfo.dashing = true;
+      g.dashInfo.dashable = false;
     }
-  }, activeDashDelay * 1000);
-};
+
+    setTimeout(() => {
+      g.dashInfo.dashing = false;
+    }, g.dashInfo.durationTime * 1000);
+
+    setTimeout(() => {
+      if (dashBackgroundRef.value !== undefined && dashBackgroundRef.value !== null) {
+        dashBackgroundRef.value.style.visibility = "hidden";
+        dashBackgroundRef.value.style.setProperty("--active-dash-delay", `0s`);
+        dashBackgroundRef.value.style.height = "100%";
+        g.dashInfo.dashable = true;
+      }
+    }, g.dashInfo.delayTime * 1000);
+  }
+});
 </script>
 
 <template>
-  <div
-    @click="test()"
-    style="background-color: red; position: absolute; height: 100px; width: 100px; bottom: 3rem; left: 10%"
-  ></div>
   <div class="container">
     <div class="dash-container">
       <div class="dash-flex-items">
@@ -77,7 +81,7 @@ const test = function (): void {
 
     .dash-background {
       visibility: hidden;
-      transition: height var(--active-dash-delay) linear;
+      transition: height var(--dash-delay) linear var(--dash-duration);
       height: 100%;
       width: 100%;
       background-color: $dark-black;

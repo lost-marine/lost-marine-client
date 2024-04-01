@@ -7,6 +7,7 @@ import { SCENE } from "../constants/scene";
 import { ref, type Ref } from "vue";
 import type { Chat, SystemChat } from "../types/chat";
 import type { GameOverResponse } from "../services/player/types/quit";
+import type { Dash } from "../types/dash";
 
 type GlobalStore = {
   myInfo: null | Player;
@@ -16,6 +17,7 @@ type GlobalStore = {
   currentScene: SceneType;
   chatList: Ref<Array<Chat | SystemChat>>;
   chatInputFocused: boolean;
+  dashInfo: Dash;
   gameOverResult: GameOverResponse | null;
   clear: () => void;
 };
@@ -27,6 +29,13 @@ const g: GlobalStore = {
   currentScene: SCENE.MAIN_MENU,
   chatList: ref<Chat[]>([]),
   chatInputFocused: false,
+  dashInfo: {
+    delayTime: 10,
+    durationTime: 1,
+    dashing: false,
+    dashable: true,
+    speedUpMultiple: 3
+  },
   gameOverResult: null,
   clear: () => {
     g.playerMap.clear();
