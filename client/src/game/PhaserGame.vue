@@ -11,12 +11,16 @@ import PlayerStatus from "./components/PlayerStatus.vue";
 import type { SceneType } from "./types/scene";
 import RankingPanel from "./components/RankingPanel.vue";
 import EvolutionList from "./components/EvolutionList.vue";
-
+import InfoModal from "./components/InfoModal.vue";
 // Save the current scene instance
 const scene = ref();
 const game = ref();
+const isOpenInfoModal: Ref<boolean> = ref<boolean>(true);
 const emit = defineEmits(["current-active-scene", "change-scene"]);
 const showGamePanel: Ref<boolean> = ref<boolean>(false);
+const closeModal = (): void => {
+  isOpenInfoModal.value = false;
+};
 
 onMounted(() => {
   game.value = StartGame("game-container");
@@ -34,6 +38,7 @@ onMounted(() => {
 
   EventBus.on("open-info-modal", () => {
     console.log("open-info-modal 클릭");
+    isOpenInfoModal.value = true;
   });
 
   socket.connect();
@@ -57,5 +62,6 @@ defineExpose({ scene, game });
     <RankingPanel v-show="showGamePanel" />
     <PlayerStatus v-if="showGamePanel" />
     <EvolutionList v-if="showGamePanel" />
+    <InfoModal v-show="isOpenInfoModal" @modal-close="closeModal" />
   </div>
 </template>
