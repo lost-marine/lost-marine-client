@@ -220,6 +220,7 @@ function closeChatPanel(inputElement: HTMLInputElement | null): void {
     height: 2rem;
 
     .input-field {
+      padding-left: 0.5rem;
       height: 100%;
       width: 100%;
       background-color: var(--transparent-black);

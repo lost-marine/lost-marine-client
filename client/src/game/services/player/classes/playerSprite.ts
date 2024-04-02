@@ -46,8 +46,6 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
   move(directionX: number, directionY: number): void {
     this.setAwake(); // 잠자는 상태일 때 객체를 깨워줍니다.
-    console.log(this.moveSpeed);
-    console.log(directionX, directionY);
     this.setVelocity(this.moveSpeed * directionX, this.moveSpeed * directionY);
   }
 
