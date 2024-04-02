@@ -42,7 +42,9 @@ const onSwipeBack = (): void => {
 $white: #ffffff;
 $soft-gray: #e6e6e6;
 $gray: #666666;
-$black-tint: rgba(0, 0, 0, 0.4); /* dimmed */
+$black-tint: rgba(0, 0, 0, 0.4);
+
+/* dimmed */
 .modal-wrap {
   position: fixed;
   left: 0;
@@ -59,7 +61,7 @@ $black-tint: rgba(0, 0, 0, 0.4); /* dimmed */
   left: 50%;
   transform: translate(-50%, -50%);
   width: 80%;
-  background: #fff;
+  background: $white;
   border-radius: 1rem;
   padding: 2rem;
   box-sizing: border-box;
