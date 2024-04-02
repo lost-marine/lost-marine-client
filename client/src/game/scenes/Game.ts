@@ -203,10 +203,14 @@ export class Game extends Scene {
         // 플랑크톤과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof PlanktonGraphics && pair.bodyB.gameObject === this.player) {
           this.eatPlankton(pair.bodyA.gameObject.plankton.planktonId, this.player.playerId);
+        } else if (pair.bodyB.gameObject instanceof PlanktonGraphics && pair.bodyA.gameObject === this.player) {
+          this.eatPlankton(pair.bodyB.gameObject.plankton.planktonId, this.player.playerId);
         }
         // 아이템과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof ItemSprite && pair.bodyB.gameObject === this.player) {
           onTriggerItemEat(pair.bodyA.gameObject.itemId);
+        } else if (pair.bodyB.gameObject instanceof ItemSprite && pair.bodyA.gameObject === this.player) {
+          onTriggerItemEat(pair.bodyB.gameObject.itemId);
         }
       });
     });
@@ -507,7 +511,6 @@ export class Game extends Scene {
 
   onReceivedPlanktonRespawn(newPlanktonList: Plankton[]): void {
     newPlanktonList.forEach((plankton: Plankton) => {
-      g.planktonMap.set(plankton.planktonId, plankton);
       const planktonGraphic = new PlanktonGraphics(this.matter.world, this, plankton);
       this.planktonList.set(plankton.planktonId, planktonGraphic);
     });

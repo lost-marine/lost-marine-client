@@ -80,6 +80,9 @@ socket.on("plankton-delete", (planktonId: number) => {
 
 // 플랑크톤 리스폰
 socket.on("plankton-respawn", (newPlanktonList: Plankton[]) => {
+  newPlanktonList.forEach((plankton: Plankton) => {
+    g.planktonMap.set(plankton.planktonId, plankton);
+  });
   g.eventQueue.append({
     key: "plankton-respawn",
     data: newPlanktonList
