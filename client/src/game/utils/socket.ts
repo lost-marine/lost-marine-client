@@ -18,6 +18,7 @@ import { SCENE } from "../constants/scene";
 import type { ItemInfo } from "../services/player/types/item";
 import type { OthersEvolutionInfo } from "../services/player/types/evolution";
 import evolutionService from "../services/player/feat/evolution";
+import itemEatService from "../services/item/feat/eat";
 
 export const state = reactive({
   connected: false
@@ -108,10 +109,7 @@ socket.on("player-crash", (playerCrashResult: PlayerCrashResult) => {
 
 // 아이템 충돌 후 상태 수정
 socket.on("item-sync", (itemInfo: ItemInfo) => {
-  g.eventQueue.append({
-    key: "item-sync",
-    data: itemInfo
-  });
+  itemEatService.itemSync(itemInfo);
 });
 
 // 다른 플레이어 진화 싱크

@@ -10,7 +10,8 @@ export const itemList: Item[] = [
     centerY: 1380,
     width: 75,
     height: 72,
-    spritesheetUrl: "assets/items/Starfish.png"
+    spritesheetUrl: "assets/items/Starfish.png",
+    changeType: 0
   },
   {
     key: "starfish",
@@ -21,7 +22,8 @@ export const itemList: Item[] = [
     centerY: 3430,
     width: 75,
     height: 72,
-    spritesheetUrl: "assets/items/Starfish.png"
+    spritesheetUrl: "assets/items/Starfish.png",
+    changeType: 0
   },
   {
     key: "starfish",
@@ -32,7 +34,8 @@ export const itemList: Item[] = [
     centerY: 5220,
     width: 75,
     height: 72,
-    spritesheetUrl: "assets/items/Starfish.png"
+    spritesheetUrl: "assets/items/Starfish.png",
+    changeType: 0
   },
   {
     key: "oyster_open",
@@ -43,39 +46,67 @@ export const itemList: Item[] = [
     centerY: 4300,
     width: 150,
     height: 120,
-    spritesheetUrl: "assets/items/Oyster_open.png"
+    spritesheetUrl: "assets/items/Oyster_open.png",
+    changeType: 1
   },
   {
     key: "oyster_close",
     itemId: 4,
-    itemType: 3,
+    itemType: 2,
     isActive: false,
     centerX: 1790,
     centerY: 4300,
     width: 150,
     height: 120,
-    spritesheetUrl: "assets/items/Oyster_close.png"
+    spritesheetUrl: "assets/items/Oyster_close.png",
+    changeType: 2
+  },
+  {
+    key: "oyster_open",
+    itemId: 5,
+    itemType: 2,
+    isActive: true,
+    centerX: 4610,
+    centerY: 6210,
+    width: 150,
+    height: 120,
+    spritesheetUrl: "assets/items/Oyster_open.png",
+    changeType: 1
+  },
+  {
+    key: "oyster_close",
+    itemId: 6,
+    itemType: 2,
+    isActive: false,
+    centerX: 4610,
+    centerY: 6210,
+    width: 150,
+    height: 120,
+    spritesheetUrl: "assets/items/Oyster_close.png",
+    changeType: 2
   },
   {
     key: "chest_open",
-    itemId: 5,
-    itemType: 4,
+    itemId: 7,
+    itemType: 3,
     isActive: true,
     centerX: 3090,
     centerY: 5450,
     width: 150,
     height: 120,
-    spritesheetUrl: "assets/items/Chest_open.png"
+    spritesheetUrl: "assets/items/Chest_open.png",
+    changeType: 1
   },
   {
     key: "chest_close",
-    itemId: 6,
-    itemType: 5,
+    itemId: 8,
+    itemType: 3,
     isActive: false,
     centerX: 3090,
     centerY: 5450,
     width: 150,
     height: 120,
-    spritesheetUrl: "assets/items/Chest_close.png"
+    spritesheetUrl: "assets/items/Chest_close.png",
+    changeType: 2
   }
 ];

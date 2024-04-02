@@ -22,11 +22,11 @@ import type { SceneType } from "../types/scene";
 import { checkPortal } from "../utils/portal";
 import { ItemSprite } from "../services/item/classes";
 import { itemList } from "../constants/item";
-import { onTriggerItemEat } from "../services/item/feat/eat";
 import type { ItemInfo } from "../services/player/types/item";
 import type { PlayerCrashResult } from "../services/player/types/crash";
 import type { OthersEvolutionInfo } from "../services/player/types/evolution";
 import type { SpeciesId } from "../types/species";
+import itemEatService from "../services/item/feat/eat";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -206,7 +206,7 @@ export class Game extends Scene {
         }
         // 아이템과 플레이어의 충돌
         else if (pair.bodyA.gameObject instanceof ItemSprite && pair.bodyB.gameObject === this.player) {
-          onTriggerItemEat(pair.bodyA.gameObject.itemId);
+          itemEatService.itemEat(pair.bodyA.gameObject.itemId);
         }
       });
     });
@@ -506,22 +506,23 @@ export class Game extends Scene {
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {
-    if (this.itemList[itemId]?.visible && this.itemList[itemId]?.itemType !== 3 && this.itemList[itemId]?.itemType !== 5) {
+    if (this.itemList[itemId]?.visible && (this.itemList[itemId]?.changeType === 0 || this.itemList[itemId]?.changeType === 1)) {
       socket.emit("item-eat", {
         playerId,
         itemType: this.itemList[itemId]?.itemType,
         itemId
       });
 
-      if (this.itemList[itemId]?.itemType === 2 || this.itemList[itemId]?.itemType === 4) {
+      if (this.itemList[itemId]?.changeType === 1) {
         this.itemList[itemId + 1]?.setVisible(true);
       }
+      this.itemList[itemId]?.setVisible(false);
     }
   }
 
   onReceivedItemSync(item: ItemInfo): void {
     this.itemList[item.itemId]?.setVisible(item.isActive);
-    if (this.itemList[item.itemId]?.itemType === 2 || this.itemList[item.itemId]?.itemType === 4) {
+    if (this.itemList[item.itemId]?.changeType === 1) {
       this.itemList[item.itemId + 1]?.setVisible(!item.isActive);
     }
   }
