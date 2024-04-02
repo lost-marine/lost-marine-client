@@ -74,6 +74,15 @@ watch(show, () => {
   }
 });
 
+watch(currentSpeciesId, () => {
+  const currentSpeciesInfo = speciesMap.get(currentSpeciesId.value);
+  if (g.myInfo !== null && currentSpeciesInfo !== undefined) {
+    if (g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
+      show.value = true;
+    }
+  }
+});
+
 onMounted(() => {
   EventBus.on("player-evolution-required", () => {
     show.value = true;
