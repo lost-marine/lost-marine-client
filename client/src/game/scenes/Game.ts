@@ -44,6 +44,9 @@ export class Game extends Scene {
   itemList: ItemSprite[];
   mapStartPosition: { x: number; y: number };
   colors: Record<string, number>;
+  musicOnButton: Phaser.GameObjects.Image;
+  musicOffButton: Phaser.GameObjects.Image;
+  infoButton: Phaser.GameObjects.Image;
   constructor() {
     super("Game");
   }
@@ -102,6 +105,66 @@ export class Game extends Scene {
     this.playerList = new Map<number, PlayerSprite>();
 
     this.platform = this.add.image(0, 0, "bg").setScale(4, 6).setOrigin(0, 0);
+
+    // 음악켜는 버튼 추가
+    this.musicOffButton = this.add
+      .image(this.cameras.main.width - 70, 50, "music_on")
+      .setInteractive()
+      .setOrigin(0.5)
+      .setDepth(100)
+      .setScrollFactor(0)
+      .setScale(0.8)
+      .on("pointerdown", async () => {
+        this.setSoundMute(false);
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.musicOffButton.on("pointerover", () => {
+      this.musicOffButton.setScale(0.9); // 마우스 오버 시 버튼 확대`
+    });
+    this.musicOffButton.on("pointerout", () => {
+      this.musicOffButton.setScale(0.8); // 마우스 아웃 시 버튼 원래 크기로
+    });
+
+    // 음악끄는 버튼 추가
+    this.musicOnButton = this.add
+      .image(this.cameras.main.width - 70, 50, "music_off")
+      .setInteractive()
+      .setDepth(100)
+      .setScrollFactor(0)
+      .setScale(0.8)
+      .on("pointerdown", async () => {
+        this.setSoundMute(true);
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.musicOnButton.on("pointerover", () => {
+      this.musicOnButton.setScale(0.9); // 마우스 오버 시 버튼 확대
+    });
+    this.musicOnButton.on("pointerout", () => {
+      this.musicOnButton.setScale(0.8); // 마우스 아웃 시 버튼 원래 크기로
+    });
+    const isSoundMute: boolean = JSON.parse(localStorage.getItem("isSoundMute") ?? "true");
+    this.setSoundMute(isSoundMute);
+
+    // 게임 정보 모달을 여는 버튼 추가
+    this.infoButton = this.add
+      .image(this.cameras.main.width - 150, 50, "info")
+      .setInteractive()
+      .setDepth(100)
+      .setScrollFactor(0)
+      .setScale(0.8)
+      .on("pointerdown", async () => {
+        EventBus.emit("open-info-modal");
+      });
+
+    // 버튼에 마우스 오버/아웃 효과
+    this.infoButton.on("pointerover", () => {
+      this.infoButton.setScale(0.9); // 마우스 오버 시 버튼 확대
+    });
+    this.infoButton.on("pointerout", () => {
+      this.infoButton.setScale(0.8); // 마우스 아웃 시 버튼 원래 크기로
+    });
 
     this.miniMap = this.add
       .image(this.cameras.main.width, this.cameras.main.height, "mini_map")
@@ -595,5 +658,17 @@ export class Game extends Scene {
       sprite.clearTint(); // 원래 색상으로 복원
       sprite.setAlpha(1);
     });
+  }
+
+  setSoundMute(value: boolean): void {
+    localStorage.setItem("isSoundMute", JSON.stringify(value));
+    this.sound.mute = !value;
+    if (value) {
+      this.musicOffButton.setActive(true).setVisible(true);
+      this.musicOnButton.setActive(false).setVisible(false);
+    } else {
+      this.musicOffButton.setActive(false).setVisible(false);
+      this.musicOnButton.setActive(true).setVisible(true);
+    }
   }
 }
