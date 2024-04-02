@@ -258,7 +258,7 @@ export const speciesMap: Map<SpeciesId, Species> = new Map<SpeciesId, Species>([
       spritesheetUrl: "assets/sprites/HammerheadShark.png",
       baseSpriteUrl: "assets/sprites/base/HammerheadShark.png",
       frameStart: 0,
-      frameEnd: 1,
+      frameEnd: 3,
       englishName: "Scalloped Hammerhead",
       IUCNGrade: IUCN_GRADE.EN,
       info: "가리비귀상어는 다른 귀상어과의 상어들과 마찬가지로 망치 모양의 머리를 가진 것이 특징이다.가리비귀상어는 학교의 넓은 군영을 이루어 집단 생활을 하는 어종 중에 하나이며 밤, 낮, 아침에 모두 거대한 무리를 지은 가리비귀상어의 모습을 관찰할 수가 있다.",
