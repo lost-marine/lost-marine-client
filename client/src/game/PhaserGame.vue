@@ -11,6 +11,7 @@ import PlayerStatus from "./components/PlayerStatus.vue";
 import type { SceneType } from "./types/scene";
 import RankingPanel from "./components/RankingPanel.vue";
 import DashPanel from "./components/dashPanel.vue";
+import EvolutionList from "./components/EvolutionList.vue";
 
 // Save the current scene instance
 const scene = ref();
@@ -52,6 +53,7 @@ defineExpose({ scene, game });
     <ChatPanel v-show="showGamePanel" />
     <RankingPanel v-show="showGamePanel" />
     <PlayerStatus v-if="showGamePanel" />
-    <DashPanel v-show="showGamePanel" />
+    <DashPanel v-if="showGamePanel" />
+    <EvolutionList v-if="showGamePanel" />
   </div>
 </template>

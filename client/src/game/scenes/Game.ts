@@ -24,6 +24,9 @@ import { ItemSprite } from "../services/item/classes";
 import { itemList } from "../constants/item";
 import { onTriggerItemEat } from "../services/item/feat/eat";
 import type { ItemInfo } from "../services/player/types/item";
+import type { PlayerCrashResult } from "../services/player/types/crash";
+import type { OthersEvolutionInfo } from "../services/player/types/evolution";
+import type { SpeciesId } from "../types/species";
 
 export class Game extends Scene {
   player: PlayerSprite;
@@ -40,7 +43,7 @@ export class Game extends Scene {
   ready: boolean;
   itemList: ItemSprite[];
   mapStartPosition: { x: number; y: number };
-
+  colors: Record<string, number>;
   constructor() {
     super("Game");
   }
@@ -63,15 +66,6 @@ export class Game extends Scene {
           frameWidth: value.width,
           frameHeight: value.height
         });
-        this.anims.create({
-          key: value.key,
-          frames: this.anims.generateFrameNumbers(value.key, {
-            start: value.frameStart,
-            end: value.frameEnd
-          }),
-          frameRate: 3,
-          repeat: -1
-        });
       } catch (e) {
         console.error(e);
       }
@@ -89,6 +83,11 @@ export class Game extends Scene {
         console.error(e);
       }
     });
+
+    this.colors = {
+      red: 0xff0000,
+      crimson: 0xff9ea6
+    };
   }
 
   async create(): Promise<void> {
@@ -118,7 +117,7 @@ export class Game extends Scene {
     };
 
     this.mapPoint = this.add
-      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, 0xff0000)
+      .circle(this.mapStartPosition.x, this.mapStartPosition.y, 20, this.colors.red)
       .setDepth(5)
       .setScale(0.3)
       .setAlpha(0.5)
@@ -282,8 +281,8 @@ export class Game extends Scene {
     }
 
     // 캐릭터의 닉네임 위치를 관리합니다.
-    const playerBody = this.player.body as MatterJS.BodyType;
-    if (!playerBody.isSleeping) {
+    // const playerBody = this.player.body as MatterJS.BodyType;
+    if (this.isMoving) {
       this.player.updateNicknamePosition();
     }
 
@@ -361,6 +360,16 @@ export class Game extends Scene {
         // 아이템 싱크
         case "item-sync":
           this.onReceivedItemSync(event.data as ItemInfo);
+          break;
+        // 플레이어간의 충돌
+        case "player-crash":
+          this.onReceivedPlayerCrash(event.data as PlayerCrashResult);
+          break;
+        case "player-evolution":
+          this.onReceivedPlayerEvolution(event.data as SpeciesId);
+          break;
+        case "others-evolution-sync":
+          this.onReceivedOthersEvolution(event.data as OthersEvolutionInfo);
           break;
       }
     }
@@ -486,8 +495,14 @@ export class Game extends Scene {
             g.myInfo.microplasticCount = response.microplasticCount;
             g.myInfo.health = response.playerStatusInfo.health;
             g.myInfo.nowExp = response.playerStatusInfo.nowExp;
+
+            // 글로벌 상태를 업데이트 한 후 진화 요청 프로세스로 넘어갑니다.
+            const currentSpeciesInfo = speciesMap.get(g.myInfo.speciesId);
+            if (currentSpeciesInfo !== undefined && g.myInfo.nowExp >= currentSpeciesInfo.requirementPoint) {
+              EventBus.emit("player-evolution-required");
+            }
           }
-          EventBus.emit("player-status-sync", response.playerStatusInfo);
+          EventBus.emit("player-eat-plankton", response.playerStatusInfo);
         }
       }
     );
@@ -506,8 +521,20 @@ export class Game extends Scene {
     });
   }
 
-  changeScene(target: SceneType): void {
-    this.scene.start(target);
+  onReceivedPlayerEvolution(selectedSpeciesId: SpeciesId): void {
+    if (g.myInfo !== null) {
+      g.myInfo.speciesId = selectedSpeciesId;
+      this.player.evolve(selectedSpeciesId);
+    } else {
+      throw new Error("내 정보가 없습니다.");
+    }
+  }
+
+  onReceivedOthersEvolution({ playerId, speciesId }: OthersEvolutionInfo): void {
+    if (this.playerList.has(playerId)) {
+      const targetPlayer = this.playerList.get(playerId);
+      targetPlayer?.evolve(speciesId);
+    }
   }
 
   disableCursors(): void {
@@ -532,6 +559,7 @@ export class Game extends Scene {
     if (this.itemList[itemId]?.visible) {
       socket.emit("item-eat", {
         playerId,
+        itemType: this.itemList[itemId]?.itemType,
         itemId
       });
       this.itemList[itemId]?.setVisible(false);
@@ -540,5 +568,40 @@ export class Game extends Scene {
 
   onReceivedItemSync(item: ItemInfo): void {
     this.itemList[item.itemId]?.setVisible(item.isActive);
+  }
+
+  onReceivedPlayerCrash(playerCrashResult: PlayerCrashResult): void {
+    const playerId = playerCrashResult.playerId;
+    const damageAmount = playerCrashResult.damage;
+    const targetPlayer = this.playerList.get(playerId);
+    if (targetPlayer !== undefined) {
+      this.spriteFlashRed(targetPlayer);
+      const damageText = this.add.text(targetPlayer.x, targetPlayer.y, "" + damageAmount, {
+        fontSize: "22px",
+        color: "red"
+      });
+      this.tweens.add({
+        targets: damageText,
+        y: targetPlayer.y - 15,
+        alpha: 0.8,
+        duration: 800,
+        onComplete: () => {
+          damageText.destroy();
+        }
+      });
+    }
+  }
+
+  changeScene(target: SceneType): void {
+    this.scene.start(target);
+  }
+
+  spriteFlashRed(sprite: PlayerSprite): void {
+    sprite.setTint(this.colors.crimson); // 붉은색으로 변경
+    sprite.setAlpha(0.8);
+    this.time.delayedCall(200, () => {
+      sprite.clearTint(); // 원래 색상으로 복원
+      sprite.setAlpha(1);
+    });
   }
 }
