@@ -30,8 +30,8 @@ const g: GlobalStore = {
   chatList: ref<Chat[]>([]),
   chatInputFocused: false,
   dashInfo: {
-    delayTime: 10,
-    durationTime: 1,
+    delayTime: 5,
+    durationTime: 0.5,
     dashing: false,
     dashable: true,
     speedUpMultiple: 3

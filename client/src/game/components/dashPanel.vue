@@ -1,45 +1,67 @@
 <script setup lang="ts">
 import dash from "@/assets/dash/dash.svg";
-import { ref, type Ref } from "vue";
+import { onMounted, ref, type Ref } from "vue";
 import g from "../utils/global";
 
 const dashBackgroundRef: Ref<HTMLDivElement | undefined> = ref();
+const dashBorderRef: Ref<HTMLDivElement | undefined> = ref();
 
-addEventListener("keydown", (event: KeyboardEvent) => {
-  if (event.key === " " && !g.chatInputFocused && g.dashInfo.dashable) {
-    if (dashBackgroundRef.value !== undefined && dashBackgroundRef.value !== null) {
+async function delay(seconds: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
+async function handleSpaceKeyPress(): Promise<void> {
+  if (g.dashInfo.dashable) {
+    g.dashInfo.dashing = true;
+    g.dashInfo.dashable = false;
+    if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
       dashBackgroundRef.value.style.visibility = "visible";
       dashBackgroundRef.value.style.setProperty("--dash-delay", `${g.dashInfo.delayTime}s`);
       dashBackgroundRef.value.style.setProperty("--dash-duration", `${g.dashInfo.durationTime}s`);
       dashBackgroundRef.value.style.height = "0%";
-      g.dashInfo.dashing = true;
-      g.dashInfo.dashable = false;
+    }
+    if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
+      dashBorderRef.value.style.border = "1px solid black";
     }
 
-    setTimeout(() => {
-      g.dashInfo.dashing = false;
-    }, g.dashInfo.durationTime * 1000);
+    await delay(g.dashInfo.durationTime);
+    g.dashInfo.dashing = false;
 
-    setTimeout(() => {
-      if (dashBackgroundRef.value !== undefined && dashBackgroundRef.value !== null) {
-        dashBackgroundRef.value.style.visibility = "hidden";
-        dashBackgroundRef.value.style.setProperty("--active-dash-delay", `0s`);
-        dashBackgroundRef.value.style.height = "100%";
-        g.dashInfo.dashable = true;
-      }
-    }, g.dashInfo.delayTime * 1000);
+    await delay(g.dashInfo.delayTime);
+    g.dashInfo.dashable = true;
+    if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
+      dashBackgroundRef.value.style.visibility = "hidden";
+      dashBackgroundRef.value.style.setProperty("--dash-delay", `0s`);
+      dashBackgroundRef.value.style.setProperty("--dash-duration", `0s`);
+      dashBackgroundRef.value.style.height = "100%";
+    }
+    if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
+      dashBorderRef.value.style.border = "1px solid antiquewhite";
+    }
   }
+}
+
+onMounted(() => {
+  addEventListener("keydown", (event: KeyboardEvent): void => {
+    if (event.key === " " && !g.chatInputFocused) {
+      try {
+        void handleSpaceKeyPress();
+      } catch (event) {
+        console.debug(event);
+      }
+    }
+  });
 });
 </script>
 
 <template>
   <div class="container">
-    <div class="dash-container">
+    <div class="dash-container" ref="dashBorderRef">
       <div class="dash-flex-items">
         <img :src="dash" alt="" />
         <div>SPACE</div>
       </div>
-      <div id="dash-background" class="dash-background" ref="dashBackgroundRef"></div>
+      <div class="dash-background" ref="dashBackgroundRef"></div>
     </div>
   </div>
 </template>
@@ -50,6 +72,7 @@ addEventListener("keydown", (event: KeyboardEvent) => {
   bottom: 2rem;
   left: calc(50% + 14rem);
   $dark-black: rgba(0, 0, 0, 0.5);
+  $semi-transparent-white: rgba(255, 255, 255, 0.7);
 
   .dash-container {
     width: 50px;
@@ -57,10 +80,11 @@ addEventListener("keydown", (event: KeyboardEvent) => {
     border-radius: 10%;
     background-color: var(--transparent-white);
     overflow: hidden;
+    border: 1px solid antiquewhite;
 
     .dash-flex-items {
       position: absolute;
-      height: 100%;
+      height: 90%;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -68,8 +92,8 @@ addEventListener("keydown", (event: KeyboardEvent) => {
       justify-content: space-between;
 
       img {
-        width: 90%;
-        height: 90%;
+        width: 80%;
+        height: 80%;
       }
 
       div {

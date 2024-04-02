@@ -1,6 +1,5 @@
 import type { Player } from "@/game/types/player";
 import { speciesMap } from "@/game/constants/species";
-import g from "@/game/utils/global";
 
 export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
@@ -45,6 +44,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
 
   move(directionX: number, directionY: number): void {
     this.setAwake(); // 잠자는 상태일 때 객체를 깨워줍니다.
+    console.log(this.moveSpeed);
+    console.log(directionX, directionY);
     this.setVelocity(this.moveSpeed * directionX, this.moveSpeed * directionY);
   }
 
@@ -84,12 +85,12 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     super.destroy(true);
   }
 
-  dash(): void {
-    const backup = this.moveSpeed;
-    this.moveSpeed = backup * 2;
+  // dash(): void {
+  //   const backup = this.moveSpeed;
+  //   this.moveSpeed = backup * 2;
 
-    setTimeout(() => {
-      this.moveSpeed = backup;
-    }, g.dashInfo.duration * 1000);
-  }
+  //   setTimeout(() => {
+  //     this.moveSpeed = backup;
+  //   }, g.dashInfo.duration * 1000);
+  // }
 }
