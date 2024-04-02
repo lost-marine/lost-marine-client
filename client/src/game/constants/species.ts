@@ -12,19 +12,12 @@ const IUCN_GRADE = {
   NE: "미평가 (NE, Not Evaluated)"
 };
 
-const requiredPointToEvolve: RequiredPointToEvolve = import.meta.env.DEV
-  ? {
-      tier1: 10,
-      tier2: 20,
-      tier3: 30,
-      tier4: Number.POSITIVE_INFINITY
-    }
-  : {
-      tier1: 30,
-      tier2: 50,
-      tier3: 100,
-      tier4: Number.POSITIVE_INFINITY
-    };
+const requiredPointToEvolve: RequiredPointToEvolve = {
+  tier1: 30,
+  tier2: 50,
+  tier3: 100,
+  tier4: Number.POSITIVE_INFINITY
+};
 
 export const speciesMap: Map<SpeciesId, Species> = new Map<SpeciesId, Species>([
   [
