@@ -234,21 +234,39 @@ export class Game extends Scene {
       this.player.setAngle(angle);
     }
 
+    // 대시 스피드를 적용합니다.
+    if (g.dashInfo.dashing) {
+      this.player.moveSpeed = this.player.originSpeed * g.dashInfo.speedUpMultiple;
+    } else {
+      this.player.moveSpeed = this.player.originSpeed;
+    }
+
     const isArrowKeyPressed =
       this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown;
+
     // 플레이어가 움직일 때만 움직임 결과를 처리합니다.
     if (
       isArrowKeyPressed ||
       this.isMoving ||
       (g.myInfo != null && this.player.x !== g.myInfo.centerX) ||
-      (g.myInfo != null && this.player.y !== g.myInfo.centerY)
+      (g.myInfo != null && this.player.y !== g.myInfo.centerY) ||
+      g.dashInfo.dashing
     ) {
       if (g.myInfo != null) {
         g.myInfo.centerX = this.player.x;
         g.myInfo.centerY = this.player.y;
       }
       this.checkPortal();
-      this.player.move(directionX, directionY);
+      // 플레이어가 움직이지 않을 때도 대시를 할 수 있습니다.
+      if (g.dashInfo.dashing && !this.isMoving) {
+        if (this.player.flipX) {
+          this.player.move(-1, 0);
+        } else {
+          this.player.move(1, 0);
+        }
+      } else {
+        this.player.move(directionX, directionY);
+      }
       this.sendSyncPosition();
       this.mapPoint.setPosition(
         this.mapStartPosition.x + (this.player.x / 8) * 0.3,
@@ -266,6 +284,13 @@ export class Game extends Scene {
     // const playerBody = this.player.body as MatterJS.BodyType;
     if (this.isMoving) {
       this.player.updateNicknamePosition();
+    }
+
+    // 채팅 입력필드에 포커스되면 커서를 비활성화합니다.
+    if (g.chatInputFocused) {
+      this.disableCursors();
+    } else {
+      this.enableCursors();
     }
   }
 
@@ -502,6 +527,24 @@ export class Game extends Scene {
       const targetPlayer = this.playerList.get(playerId);
       targetPlayer?.evolve(speciesId);
     }
+  }
+
+  disableCursors(): void {
+    this.cursors.up.enabled = false;
+    this.cursors.down.enabled = false;
+    this.cursors.left.enabled = false;
+    this.cursors.right.enabled = false;
+    this.cursors.space.enabled = false;
+    this.cursors.shift.enabled = false;
+  }
+
+  enableCursors(): void {
+    this.cursors.up.enabled = true;
+    this.cursors.down.enabled = true;
+    this.cursors.left.enabled = true;
+    this.cursors.right.enabled = true;
+    this.cursors.space.enabled = true;
+    this.cursors.shift.enabled = true;
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {

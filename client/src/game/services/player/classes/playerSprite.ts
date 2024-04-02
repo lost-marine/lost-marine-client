@@ -6,6 +6,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
   playerId: number;
   nicknameSprite: Phaser.GameObjects.Text | null;
   moveSpeed: number;
+  originSpeed: number;
   shape: any;
   shapes: {
     default: Phaser.Types.Physics.Matter.MatterSetBodyConfig;
@@ -39,6 +40,8 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     scene.add.existing(this);
     this.setPosition(player.centerX, player.centerY);
     this.updateNicknamePosition();
+
+    this.originSpeed = this.moveSpeed;
   }
 
   move(directionX: number, directionY: number): void {
