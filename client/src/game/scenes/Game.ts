@@ -256,7 +256,6 @@ export class Game extends Scene {
         g.myInfo.centerX = this.player.x;
         g.myInfo.centerY = this.player.y;
       }
-      console.log(this.player.x, this.player.y);
       this.checkPortal();
       // 플레이어가 움직이지 않을 때도 대시를 할 수 있습니다.
       if (g.dashInfo.dashing && !this.isMoving) {
