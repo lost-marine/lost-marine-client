@@ -32,6 +32,10 @@ onUpdated(() => {
     }
   });
 });
+
+const formatTotalExp = (totalExp: number): string | number => {
+  return totalExp >= 1000000 ? `${Math.floor(totalExp / 100000) / 10}m` : totalExp;
+};
 </script>
 
 <template>
@@ -60,7 +64,7 @@ onUpdated(() => {
             <td class="overflow-hidden">
               <div ref="textEllipsisRef" class="ranking-speciesname">{{ ranking.speciesname }}</div>
             </td>
-            <td class="ranking-total-exp">{{ ranking.totalExp }}</td>
+            <td class="ranking-total-exp">{{ formatTotalExp(ranking.totalExp) }}</td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +78,7 @@ onUpdated(() => {
   width: 100%;
   background-color: var(--transparent-black);
   position: absolute;
-  right: 1rem;
+  left: 1rem;
   top: 1rem;
   padding: 10px;
   border-radius: 10px;
