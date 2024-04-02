@@ -118,27 +118,23 @@ export class GameOver extends Scene {
       this.add.text(250, 200, `${this.gameOverResult.planktonCount}`, baseTextStyle);
       this.add.text(380, 170, "미세 플라스틱", baseTextStyle);
       this.add.text(380, 200, `${this.gameOverResult.microplasticCount}`, baseTextStyle);
-      this.add.image(150, 330, this.mySpeciesInfo.key);
+      this.add.image(100, 330, this.mySpeciesInfo.key).setOrigin(0, 0.5);
       this.add.text(90, 420, `${this.mySpeciesInfo.name} (${this.mySpeciesInfo.englishName})`, baseTextStyle);
       this.add.text(90, 450, `멸종위기 등급 : ${this.mySpeciesInfo.IUCNGrade}`, baseTextStyle);
       this.add.text(90, 500, `${this.mySpeciesInfo.info}`, { wordWrap: { width: 400 }, ...baseTextStyle, align: "left" });
 
       // 오른쪽 아래 게임 시작 부분
+
+      this.add.image(this.camera.width - 50, this.camera.height - 70, this.attackerSpeciesInfo.key).setOrigin(1, 1);
+
       this.add
-        .text(this.camera.width - 200, this.camera.height - 140, `${this.gameOverResult.attackerNickname}`, {
-          ...baseTextStyle,
-          align: "right"
-        })
-        .setOrigin(1, 0.5);
-      this.add
-        .text(this.camera.width - 200, this.camera.height - 100, `${this.gameOverResult.message}`, {
+        .text(this.camera.width - 200, this.camera.height - 50, `${this.gameOverResult.message}`, {
           ...baseTextStyle,
           ...titleTextStyle,
           align: "right",
           color: COLORS.RED
         })
         .setOrigin(1, 0.5);
-      this.add.image(this.camera.width - 100, this.camera.height - 120, this.attackerSpeciesInfo.key);
 
       // 게임시작 버튼 추가
       this.newGameButton = this.add
