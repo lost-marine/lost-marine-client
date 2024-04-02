@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
 import { checkPortal } from "../utils/portal";
 import { ItemSprite } from "../services/item/classes";
-import { itemList } from "../constants/item";
+import { ITEM_STATUS, itemList } from "../constants/item";
 import type { ItemInfo } from "../services/player/types/item";
 import type { PlayerCrashResult } from "../services/player/types/crash";
 import type { OthersEvolutionInfo } from "../services/player/types/evolution";
@@ -548,14 +548,17 @@ export class Game extends Scene {
   }
 
   onReceivedItemEat(itemId: number, playerId: number): void {
-    if (this.itemList[itemId]?.visible && (this.itemList[itemId]?.changeType === 0 || this.itemList[itemId]?.changeType === 1)) {
+    if (
+      this.itemList[itemId]?.visible &&
+      (this.itemList[itemId]?.changeType === ITEM_STATUS.STATIC || this.itemList[itemId]?.changeType === ITEM_STATUS.OPEN)
+    ) {
       socket.emit("item-eat", {
         playerId,
         itemType: this.itemList[itemId]?.itemType,
         itemId
       });
 
-      if (this.itemList[itemId]?.changeType === 1) {
+      if (this.itemList[itemId]?.changeType === ITEM_STATUS.OPEN) {
         this.itemList[itemId + 1]?.setVisible(true);
       }
       this.itemList[itemId]?.setVisible(false);
@@ -564,7 +567,7 @@ export class Game extends Scene {
 
   onReceivedItemSync(item: ItemInfo): void {
     this.itemList[item.itemId]?.setVisible(item.isActive);
-    if (this.itemList[item.itemId]?.changeType === 1) {
+    if (this.itemList[item.itemId]?.changeType === ITEM_STATUS.OPEN) {
       this.itemList[item.itemId + 1]?.setVisible(!item.isActive);
     }
   }

@@ -1,5 +1,11 @@
 import type { Item } from "../types/item";
 
+export const ITEM_STATUS = {
+  STATIC: 0,
+  OPEN: 1,
+  CLOSE: 2
+} as const;
+
 export const itemList: Item[] = [
   {
     key: "starfish",
@@ -11,7 +17,7 @@ export const itemList: Item[] = [
     width: 75,
     height: 72,
     spritesheetUrl: "assets/items/Starfish.png",
-    changeType: 0
+    changeType: ITEM_STATUS.STATIC
   },
   {
     key: "starfish",
@@ -23,7 +29,7 @@ export const itemList: Item[] = [
     width: 75,
     height: 72,
     spritesheetUrl: "assets/items/Starfish.png",
-    changeType: 0
+    changeType: ITEM_STATUS.STATIC
   },
   {
     key: "starfish",
@@ -35,7 +41,7 @@ export const itemList: Item[] = [
     width: 75,
     height: 72,
     spritesheetUrl: "assets/items/Starfish.png",
-    changeType: 0
+    changeType: ITEM_STATUS.STATIC
   },
   {
     key: "oyster_open",
@@ -47,7 +53,7 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Oyster_open.png",
-    changeType: 1
+    changeType: ITEM_STATUS.OPEN
   },
   {
     key: "oyster_close",
@@ -59,7 +65,7 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Oyster_close.png",
-    changeType: 2
+    changeType: ITEM_STATUS.CLOSE
   },
   {
     key: "oyster_open",
@@ -71,7 +77,7 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Oyster_open.png",
-    changeType: 1
+    changeType: ITEM_STATUS.OPEN
   },
   {
     key: "oyster_close",
@@ -83,7 +89,7 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Oyster_close.png",
-    changeType: 2
+    changeType: ITEM_STATUS.CLOSE
   },
   {
     key: "chest_open",
@@ -95,7 +101,7 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Chest_open.png",
-    changeType: 1
+    changeType: ITEM_STATUS.OPEN
   },
   {
     key: "chest_close",
@@ -107,6 +113,6 @@ export const itemList: Item[] = [
     width: 150,
     height: 120,
     spritesheetUrl: "assets/items/Chest_close.png",
-    changeType: 2
+    changeType: ITEM_STATUS.CLOSE
   }
 ];
