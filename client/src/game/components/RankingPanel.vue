@@ -3,6 +3,7 @@ import { onMounted, ref, type Ref, onUpdated } from "vue";
 import { socket } from "../utils/socket";
 import fold from "@/assets/ranking/fold.svg";
 import unfold from "@/assets/ranking/unfold.svg";
+import g from "../utils/global";
 
 type Ranking = {
   playerId: number;
@@ -15,10 +16,12 @@ const rankingList: Ref<Ranking[]> = ref([]);
 const toggleRankingPanel: Ref<boolean> = ref(true);
 const textEllipsisRef: Ref<HTMLDivElement[]> = ref([]);
 const rankingPlaces = ["🥇", "🥈", "🥉", "#4", "#5", "#6", "#7", "#8", "#9", "#10"];
+let playerCount: number = g.playerMap.size;
 
 onMounted(() => {
   socket.on("ranking-receive", (rankingResponse: Ranking[]) => {
     rankingList.value = rankingResponse;
+    playerCount = g.playerMap.size;
   });
 });
 
@@ -32,14 +35,21 @@ onUpdated(() => {
     }
   });
 });
+
+const formatTotalExp = (totalExp: number): string | number => {
+  return totalExp >= 1000000 ? `${Math.floor(totalExp / 100000) / 10}m` : totalExp;
+};
 </script>
 
 <template>
   <div class="container" @click="toggleRankingPanel = !toggleRankingPanel">
     <div class="ranking-title">
       <div class="font-bold">랭킹</div>
-      <img v-if="toggleRankingPanel" class="ranking-toggle" :src="unfold" alt="" />
-      <img v-else class="ranking-toggle" :src="fold" alt="" />
+      <div class="ranking-title-right">
+        <div class="player-count">총 {{ playerCount }}마리</div>
+        <img v-show="toggleRankingPanel" class="ranking-toggle" :src="unfold" alt="" />
+        <img v-show="!toggleRankingPanel" class="ranking-toggle" :src="fold" alt="" />
+      </div>
     </div>
     <div class="ranking-container" v-show="toggleRankingPanel">
       <table>
@@ -60,7 +70,7 @@ onUpdated(() => {
             <td class="overflow-hidden">
               <div ref="textEllipsisRef" class="ranking-speciesname">{{ ranking.speciesname }}</div>
             </td>
-            <td class="ranking-total-exp">{{ ranking.totalExp }}</td>
+            <td class="ranking-total-exp">{{ formatTotalExp(ranking.totalExp) }}</td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +84,7 @@ onUpdated(() => {
   width: 100%;
   background-color: var(--transparent-black);
   position: absolute;
-  right: 1rem;
+  left: 1rem;
   top: 1rem;
   padding: 10px;
   border-radius: 10px;
@@ -95,8 +105,18 @@ onUpdated(() => {
     align-items: center;
     justify-content: space-between;
 
-    .ranking-toggle {
-      height: 0.5rem;
+    .ranking-title-right {
+      display: flex;
+      align-items: center;
+
+      .player-count {
+        font-size: 0.7rem;
+        padding-right: 0.5rem;
+      }
+
+      .ranking-toggle {
+        height: 0.5rem;
+      }
     }
   }
 
