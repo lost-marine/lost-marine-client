@@ -6,46 +6,55 @@ import g from "../utils/global";
 const dashBackgroundRef: Ref<HTMLDivElement | undefined> = ref();
 const dashBorderRef: Ref<HTMLDivElement | undefined> = ref();
 
+async function handleSpaceKeyDown(): Promise<void> {
+  // 플레이어가 duration time동안 대시합니다.
+  g.dashInfo.dashing = true;
+  g.dashInfo.dashable = false;
+  darkDashBackground();
+  await delay(g.dashInfo.durationTime);
+
+  // 대시 후 딜레이가 있습니다.
+  g.dashInfo.dashing = false;
+  await delay(g.dashInfo.delayTime);
+
+  // 딜레이가 끝났습니다.
+  g.dashInfo.dashable = true;
+  lightDashBackground();
+}
+
 async function delay(seconds: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }
 
-async function handleSpaceKeyPress(): Promise<void> {
-  if (g.dashInfo.dashable) {
-    g.dashInfo.dashing = true;
-    g.dashInfo.dashable = false;
-    if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
-      dashBackgroundRef.value.style.visibility = "visible";
-      dashBackgroundRef.value.style.setProperty("--dash-delay", `${g.dashInfo.delayTime}s`);
-      dashBackgroundRef.value.style.setProperty("--dash-duration", `${g.dashInfo.durationTime}s`);
-      dashBackgroundRef.value.style.height = "0%";
-    }
-    if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
-      dashBorderRef.value.style.border = "1px solid black";
-    }
-
-    await delay(g.dashInfo.durationTime);
-    g.dashInfo.dashing = false;
-
-    await delay(g.dashInfo.delayTime);
-    g.dashInfo.dashable = true;
-    if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
-      dashBackgroundRef.value.style.visibility = "hidden";
-      dashBackgroundRef.value.style.setProperty("--dash-delay", `0s`);
-      dashBackgroundRef.value.style.setProperty("--dash-duration", `0s`);
-      dashBackgroundRef.value.style.height = "100%";
-    }
-    if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
-      dashBorderRef.value.style.border = "1px solid antiquewhite";
-    }
+const darkDashBackground = function (): void {
+  if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
+    dashBackgroundRef.value.style.visibility = "visible";
+    dashBackgroundRef.value.style.setProperty("--dash-delay", `${g.dashInfo.delayTime}s`);
+    dashBackgroundRef.value.style.setProperty("--dash-duration", `${g.dashInfo.durationTime}s`);
+    dashBackgroundRef.value.style.height = "0%";
   }
-}
+  if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
+    dashBorderRef.value.style.border = "1px solid black";
+  }
+};
+
+const lightDashBackground = function (): void {
+  if (dashBackgroundRef.value !== null && dashBackgroundRef.value !== undefined) {
+    dashBackgroundRef.value.style.visibility = "hidden";
+    dashBackgroundRef.value.style.setProperty("--dash-delay", `0s`);
+    dashBackgroundRef.value.style.setProperty("--dash-duration", `0s`);
+    dashBackgroundRef.value.style.height = "100%";
+  }
+  if (dashBorderRef.value !== null && dashBorderRef.value !== undefined) {
+    dashBorderRef.value.style.border = "1px solid antiquewhite";
+  }
+};
 
 onMounted(() => {
   addEventListener("keydown", (event: KeyboardEvent): void => {
-    if (event.key === " " && !g.chatInputFocused) {
+    if (event.key === " " && !g.chatInputFocused && g.dashInfo.dashable) {
       try {
-        void handleSpaceKeyPress();
+        void handleSpaceKeyDown();
       } catch (event) {
         console.debug(event);
       }

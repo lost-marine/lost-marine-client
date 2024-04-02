@@ -294,14 +294,6 @@ export class Game extends Scene {
     }
   }
 
-  // bash = _.throttle(
-  //   (player: PlayerSprite) => {
-  //     console.log("기쁘다 dash 오셨네");
-  //     this.player.dash();
-  //   },
-  //   (g.dashInfo.delay + g.dashInfo.duration) * 1000
-  // );
-
   // 플레이어 추가
   addPlayer(playerInfo: Player): PlayerSprite {
     const newPlayer = new PlayerSprite(
