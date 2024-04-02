@@ -8,4 +8,5 @@ export type Item = {
   width: number;
   height: number;
   spritesheetUrl: string;
+  changeType: number;
 };
