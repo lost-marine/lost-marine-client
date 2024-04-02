@@ -108,7 +108,7 @@ export class Game extends Scene {
 
     // 음악켜는 버튼 추가
     this.musicOffButton = this.add
-      .image(this.cameras.main.width - 70, 100, "music_on")
+      .image(this.cameras.main.width - 70, 50, "music_on")
       .setInteractive()
       .setOrigin(0.5)
       .setDepth(100)
@@ -128,7 +128,7 @@ export class Game extends Scene {
 
     // 음악끄는 버튼 추가
     this.musicOnButton = this.add
-      .image(this.cameras.main.width - 70, 100, "music_off")
+      .image(this.cameras.main.width - 70, 50, "music_off")
       .setInteractive()
       .setDepth(100)
       .setScrollFactor(0)
@@ -149,7 +149,7 @@ export class Game extends Scene {
 
     // 게임 정보 모달을 여는 버튼 추가
     this.infoButton = this.add
-      .image(this.cameras.main.width - 150, 100, "info")
+      .image(this.cameras.main.width - 150, 50, "info")
       .setInteractive()
       .setDepth(100)
       .setScrollFactor(0)
