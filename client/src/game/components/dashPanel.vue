@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import dash from "@/assets/dash/dash.svg";
+import dash from "@public/assets/components/dash/dash.png";
 import { onMounted, ref, type Ref } from "vue";
 import g from "../utils/global";
 
@@ -101,8 +101,9 @@ onMounted(() => {
       justify-content: space-between;
 
       img {
+        padding-top: 3px;
         width: 80%;
-        height: 80%;
+        height: 70%;
       }
 
       div {
