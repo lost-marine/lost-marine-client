@@ -26,8 +26,6 @@ const sendPlayerEvolution = async (selectedSpeciesId: SpeciesId): Promise<boolea
 
 const handleMouseEvolution = async (e: MouseEvent, selectedSpeciesId: SpeciesId): Promise<void> => {
   const isEvolutionSuccess: boolean = await sendPlayerEvolution(selectedSpeciesId);
-  // TODO: 콘솔 삭제 필요
-  console.log("요청 후 isEvolutionSuccess: ", isEvolutionSuccess);
   if (isEvolutionSuccess) {
     currentSpeciesId.value = selectedSpeciesId;
     show.value = false;
@@ -52,8 +50,6 @@ const handleKeyboardEvolution = (e: KeyboardEvent): void => {
         if (idx in evolutionList) {
           const selectedSpeciesId: SpeciesId = evolutionList[idx];
           const isEvolutionSuccess: boolean | Error = await sendPlayerEvolution(selectedSpeciesId);
-          // TODO: 콘솔 삭제 필요
-          console.log("요청 후 isEvolutionSuccess: ", isEvolutionSuccess);
           if (isEvolutionSuccess) {
             currentSpeciesId.value = selectedSpeciesId;
             show.value = false;
