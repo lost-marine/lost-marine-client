@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import infoImage1 from "@/../public/assets/images/info1.png";
-import infoImage2 from "@/../public/assets/images/info2.png";
-import leftArrow from "@/../public/assets/components/icons/LeftArrow.png";
-import rightArrow from "@/../public/assets/components/icons/RightArrow.png";
-import closeIcon from "@/../public/assets/components/icons/Close.png";
+import infoImage1 from "@public/assets/images/info1.png";
+import infoImage2 from "@public/assets/images/info2.png";
+import leftArrow from "@public/assets/components/icons/LeftArrow.png";
+import rightArrow from "@public/assets/components/icons/RightArrow.png";
+import closeIcon from "@public/assets/components/icons/Close.png";
 
 import { ref } from "vue";
 const emit = defineEmits(["modal-close"]);
