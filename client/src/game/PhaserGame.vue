@@ -61,7 +61,7 @@ defineExpose({ scene, game });
     <ChatPanel v-show="showGamePanel" />
     <RankingPanel v-show="showGamePanel" />
     <PlayerStatus v-if="showGamePanel" />
-    <DashPanel v-if="showGamePanel" />
+    <DashPanel v-show="showGamePanel" />
     <EvolutionList v-if="showGamePanel" />
     <InfoModal v-show="isOpenInfoModal" @modal-close="closeModal" />
   </div>
