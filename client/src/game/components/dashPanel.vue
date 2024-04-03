@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import dash from "@/assets/dash/dash.svg";
+import dash from "@public/assets/components/dash/dash.svg";
 import { onMounted, ref, type Ref } from "vue";
 import g from "../utils/global";
 
