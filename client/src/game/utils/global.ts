@@ -31,10 +31,10 @@ const g: GlobalStore = {
   chatInputFocused: false,
   dashInfo: {
     delayTime: 5,
-    durationTime: 0.5,
+    durationTime: 0.3,
     dashing: false,
     dashable: true,
-    speedUpMultiple: 3
+    speedUpMultiple: 2.5
   },
   gameOverResult: null,
   clear: () => {
