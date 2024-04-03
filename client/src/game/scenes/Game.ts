@@ -489,7 +489,7 @@ export class Game extends Scene {
 
   createTilemap(): boolean {
     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: "map" });
-    const tilesetDeepWater: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("DeepWater", "tile_deep_water", 128, 128, 0, 0);
+    const tilesetDeepWater: Phaser.Tilemaps.Tileset | null = map.addTilesetImage("DeepWater", "tile_deep_water", 128, 128, 1, 2);
     const tilesetDeepWaterObject: Phaser.Tilemaps.Tileset | null = map.addTilesetImage(
       "DeepWater_Object",
       "tile_deep_water_object",
@@ -503,8 +503,8 @@ export class Game extends Scene {
       "tile_deep_water_green",
       128,
       128,
-      0,
-      0
+      1,
+      2
     );
 
     let createBackgroundLayer: Phaser.Tilemaps.TilemapLayer | null = null;
