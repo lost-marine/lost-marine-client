@@ -31,6 +31,7 @@ export default defineConfig({
   },
   logLevel: "warning",
   build: {
+    assetsInlineLimit: 1000000,
     rollupOptions: {
       output: {
         manualChunks: {
