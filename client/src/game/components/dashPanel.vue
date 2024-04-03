@@ -51,6 +51,8 @@ const lightDashBackground = function (): void {
 };
 
 onMounted(() => {
+  lightDashBackground();
+
   addEventListener("keydown", (event: KeyboardEvent): void => {
     if (event.key === " " && !g.chatInputFocused && g.dashInfo.dashable) {
       try {
