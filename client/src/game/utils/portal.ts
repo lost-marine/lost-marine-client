@@ -3,6 +3,8 @@ export type Portal = {
   connectedPortalId: number;
   xRange: [number, number];
   yRange: [number, number];
+  xPortalCenter: number;
+  yPortalCenter: number;
   exitPosition: [number, number];
 };
 export const portalList: Portal[] = [
@@ -11,6 +13,12 @@ export const portalList: Portal[] = [
     connectedPortalId: 1,
     xRange: [2644, 2849],
     yRange: [1611, 1780],
+    get xPortalCenter() {
+      return (this.xRange[0] + this.xRange[1]) / 2 + 10;
+    },
+    get yPortalCenter() {
+      return (this.yRange[0] + this.yRange[1]) / 2 + 40;
+    },
     exitPosition: [2500, 1443]
   },
   {
@@ -18,13 +26,25 @@ export const portalList: Portal[] = [
     connectedPortalId: 0,
     xRange: [4966, 5184],
     yRange: [4585, 4754],
+    get xPortalCenter() {
+      return (this.xRange[0] + this.xRange[1]) / 2 - 10;
+    },
+    get yPortalCenter() {
+      return (this.yRange[0] + this.yRange[1]) / 2 + 15;
+    },
     exitPosition: [5586, 4525]
   },
   {
     portalId: 2,
     connectedPortalId: 3,
-    xRange: [512, 740],
-    yRange: [4289, 4457],
+    xRange: [532, 760],
+    yRange: [4299, 4467],
+    get xPortalCenter() {
+      return (this.xRange[0] + this.xRange[1]) / 2 + 70;
+    },
+    get yPortalCenter() {
+      return (this.yRange[0] + this.yRange[1]) / 2 + 50;
+    },
     exitPosition: [700, 4150]
   },
   {
@@ -32,6 +52,12 @@ export const portalList: Portal[] = [
     connectedPortalId: 2,
     xRange: [4900, 5186],
     yRange: [333, 482],
+    get xPortalCenter() {
+      return (this.xRange[0] + this.xRange[1]) / 2 + 20;
+    },
+    get yPortalCenter() {
+      return (this.yRange[0] + this.yRange[1]) / 2 + 50;
+    },
     exitPosition: [5037, 120]
   }
 ];
