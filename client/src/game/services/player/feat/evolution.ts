@@ -19,8 +19,6 @@ const evolutionService: EvolutionService = {
           ({ isSuccess, msg, nowExp }: PlayerEvolutionResponse) => {
             if (isSuccess) {
               if (g.myInfo !== null) {
-                // TODO: 콘솔 삭제 필요
-                console.log("evolve Promise 내부: isSuccess true & g.myInfo not null");
                 g.myInfo.speciesId = speciesId;
                 g.myInfo.nowExp = nowExp;
                 const newHealth: number | undefined = speciesMap.get(speciesId)?.health;
@@ -38,9 +36,6 @@ const evolutionService: EvolutionService = {
               g.eventQueue.append({ key: "player-evolution", data: speciesId });
               resolve(true);
             } else {
-              // TODO: 콘솔 삭제 필요
-              console.log("evolve Promise 내부: isSuccess false, nowExp: ", nowExp);
-              console.log("서버 단 오류 메시지: ", msg);
               // 실패 시
               resolve(false);
             }

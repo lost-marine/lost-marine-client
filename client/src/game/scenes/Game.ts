@@ -19,7 +19,7 @@ import crashService from "../services/player/feat/crash";
 import { SCENE } from "../constants/scene";
 import Swal from "sweetalert2";
 import type { SceneType } from "../types/scene";
-import { checkPortal } from "../utils/portal";
+import { checkPortal, portalList, type Portal } from "../utils/portal";
 import { ItemSprite } from "../services/item/classes";
 import { ITEM_STATUS, itemList } from "../constants/item";
 import type { ItemInfo } from "../services/player/types/item";
@@ -61,6 +61,7 @@ export class Game extends Scene {
     this.load.tilemapTiledJSON("map", "assets/tilemap/map.json");
     this.load.json("shapes", "assets/shapes/shapes.json");
     this.load.image("mini_map", "assets/tilemap/miniMap.png");
+    this.load.image("spark", "assets/components/elec3.png");
 
     speciesMap.forEach((value) => {
       try {
@@ -185,6 +186,28 @@ export class Game extends Scene {
       .setScale(0.3)
       .setAlpha(0.5)
       .setScrollFactor(0);
+
+    portalList.forEach((portal: Portal) => {
+      const emitter = this.add.particles(0, 0, "spark", {
+        scale: 0.5,
+        lifespan: 10000,
+        gravityY: -50,
+        frequency: 20,
+        maxVelocityX: 200,
+        maxVelocityY: 200,
+        blendMode: "ADD"
+      });
+
+      const bottomShape = new Phaser.Geom.Rectangle(portal.xRange[0], portal.yRange[1], portal.xRange[1] - portal.xRange[0], 10);
+      emitter.addEmitZone({ type: "random", source: bottomShape, quantity: 10 });
+      emitter.createGravityWell({
+        x: portal.xPortalCenter,
+        y: portal.yPortalCenter,
+        power: 4.2,
+        epsilon: 270,
+        gravity: 100
+      });
+    });
 
     // 모든 개체의 애니메이션 전부 등록
     speciesMap.forEach((value) => {
