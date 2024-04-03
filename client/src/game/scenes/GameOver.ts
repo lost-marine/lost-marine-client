@@ -78,11 +78,15 @@ export class GameOver extends Scene {
     this.camera = this.cameras.main;
     this.camera.setBackgroundColor(COLORS.BLACK);
 
-    this.background = this.add.image(512, 384, "background");
-    const scaleX = this.background.width / this.cameras.main.width;
-    const scaleY = this.background.height / this.cameras.main.height;
-    this.background.setAlpha(0.4);
-    this.background.setScale(scaleX, scaleY);
+    this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
+
+    // 이미지의 스케일을 게임의 크기에 맞추기
+    // 가로 및 세로 방향으로 필요한 스케일 비율을 계산
+    const scaleX = this.cameras.main.width / this.background.width;
+    const scaleY = this.cameras.main.height / this.background.height;
+    const scale = Math.max(scaleX, scaleY);
+    // 계산된 스케일로 이미지 스케일 설정
+    this.background.setScale(scale).setScrollFactor(0);
 
     const baseTextStyle = {
       fontFamily: "Arial Black",
