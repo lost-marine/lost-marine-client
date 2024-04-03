@@ -198,7 +198,7 @@ export const speciesMap: Map<SpeciesId, Species> = new Map<SpeciesId, Species>([
       height: 192,
       power: 50,
       health: 300,
-      evolutionList: [10],
+      evolutionList: [10, 11],
       tierCode: 3,
       spritesheetUrl: "assets/sprites/Stingray.png",
       baseSpriteUrl: "assets/sprites/base/Stingray.png",
