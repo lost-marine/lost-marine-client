@@ -24,7 +24,7 @@ export class PlayerSprite extends Phaser.Physics.Matter.Sprite {
     };
     this.playerId = player.playerId;
     this.name = player.nickname;
-    this.moveSpeed = 10;
+    this.moveSpeed = 8;
 
     // 현재 개체에 맞는 애니메이션 재생
     this.anims.play(speciesKey + "_anims");
