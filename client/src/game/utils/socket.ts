@@ -35,6 +35,9 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
   state.connected = false;
+  void Swal.fire("오류", "서버에 문제가 생겼습니다. ", "error").then(() => {
+    EventBus.emit("change-scene", SCENE.MAIN_MENU); // 서버가 터질시 메인메뉴로 이동
+  });
 });
 
 socket.on("game-start", async (response: EnterResponse) => {
